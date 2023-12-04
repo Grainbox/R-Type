@@ -1,11 +1,11 @@
 ##
 ## EPITECH PROJECT, 2023
-## R-Type server
+## raytracer
 ## File description:
-## Makefile for R-Type server
+## Makefile for raytracer
 ##
 
-NAME 		=  	Projet
+NAME 		=  	server
 
 UNAME_S := $(shell uname -s)
 ifeq ($(UNAME_S),Darwin)
@@ -16,15 +16,17 @@ else
     $(error "Système d'exploitation non supporté")
 endif
 
-SRC 		=	src/main.cpp						\
+SRC 		=	src/main.cpp			\
 
 OBJ			=	$(SRC:.cpp=.o)
 
-INCLUDE		=	-I ./includes/ -I ./includes/**/
+INCLUDE		=	-I ./include/ -I ./include/**/ -I ./include/ECS/**/
 
-CXX_FLAGS 	= 	-Wall -Wextra
+CXX_FLAGS 	= 	-Wall -Wextra -std=c++17
 
-LIBS		=\
+SFML		=	-lsfml-graphics -lsfml-audio -lsfml-window -lsfml-system
+
+LIBS		=	\
 
 TOTAL_FILES = 	$(words $(SRC))
 
@@ -39,7 +41,7 @@ CLEAN_TEXT:
 			@$(ECHO) $(BOLD) $(BLUE)"CLEANING 🧹"
 
 $(NAME): 	$(OBJ)
-			@$(COMPILER) -o $(NAME) $(OBJ) $(CXX_FLAGS) $(INCLUDE) $(LIBS)
+			@$(COMPILER) -o $(NAME) $(OBJ) $(CXX_FLAGS) $(INCLUDE) $(LIBS) $(SFML)
 			@make -s COMPLETE_TEXT
 
 %.o: %.cpp
