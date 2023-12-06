@@ -27,7 +27,7 @@ Pour ajouter un composant à une entité :
 
 ```cpp
 Transform transform = {0.0f, 0.0f, 0.0f};
-registry.addComponent(newEntity, transform);
+registry.addComponent<Transform>(newEntity, transform);
 ```
 
 ## Retirer un Composant d'une Entité
@@ -43,7 +43,7 @@ registry.removeComponent<Transform>(newEntity);
 Pour récupérer tous les composants d'un certain type :
 
 ```cpp
-auto components = registry.getComponents<Transform>();
+auto &components = registry.getComponents<Transform>();
 ```
 
 ## Modifier la Valeur des Composants
@@ -51,8 +51,17 @@ auto components = registry.getComponents<Transform>();
 Pour modifier la valeur d'un composant spécifique :
 
 ```cpp
-for (auto& component : components) {
-    component.get().x = 1.0f;  // Modifie la position x du composant Transform
+auto &velocity = this->r.getComponents<Velocity>();
+
+for (size_t i = 0; i < velocity.size(); ++i)
+{
+    auto &vel = velocity[i];
+
+    if (!vel)
+        continue;
+
+    vel.value().vx = 0;
+    vel.value().vy = 0;
 }
 ```
 
@@ -95,49 +104,3 @@ void killEntity(Entity const &ent) {
 
 - Assurez-vous de gérer les exceptions potentielles, en particulier lorsque vous travaillez avec `getComponents`.
 - Les modifications apportées aux composants sont directement réfléchies dans le `Registry`, car les composants sont référencés.
-
-## Usage Exemples
-
-```cpp
-void logging_system(Registry *r)
-{
-    auto const &position = r->getComponents<Position>();
-    auto const &velocity = r->getComponents<Velocity>();
-
-    for (size_t i = 0; i < position.size() && i < velocity.size(); ++i)
-    {
-        auto const &pos = position[i];
-        auto const &vel = velocity[i];
-
-        std::cout << i << ": Position = { " << pos.get().x << ", " << pos.get().y
-                  << " }, Velocity = { " << vel.get().vx << ", " << vel.get().vy
-                  << " }" << std::endl;
-    }
-}
-
-int main()
-{
-    try
-    {
-        Registry r;
-
-        Entity player = r.spawnEntity();
-
-        Position pos = {50, 100};
-        Velocity vel = {100, 0};
-
-        r.addComponent<Position>(player, pos);
-        r.addComponent<Velocity>(player, vel);
-
-        logging_system(&r);
-
-        r.killEntity(player);
-    }
-    catch (std::exception &e)
-    {
-        std::cerr << "Error: " << e.what() << std::endl;
-    }
-
-    return 0;
-}
-```

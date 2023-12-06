@@ -5,7 +5,7 @@
 ## Makefile for raytracer
 ##
 
-NAME 		=  	server
+NAME 		=  	test
 
 UNAME_S := $(shell uname -s)
 ifeq ($(UNAME_S),Darwin)
@@ -17,6 +17,8 @@ else
 endif
 
 SRC 		=	src/main.cpp			\
+				src/Game.cpp			\
+				src/System.cpp			\
 
 OBJ			=	$(SRC:.cpp=.o)
 

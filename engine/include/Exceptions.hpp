@@ -11,6 +11,19 @@
 #include <exception>
 #include <string>
 
+class ComponentTypeNotFoundException : public std::exception {
+public:
+    explicit ComponentTypeNotFoundException(const std::string& message)
+        : msg_(message) {}
+
+    virtual const char* what() const noexcept override {
+        return msg_.c_str();
+    }
+
+private:
+    std::string msg_;
+};
+
 class ComponentNotFoundException : public std::exception {
 public:
     explicit ComponentNotFoundException(const std::string& message)
