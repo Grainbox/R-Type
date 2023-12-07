@@ -51,9 +51,9 @@
    ```
 3. Configurez le projet avec CMake en spécifiant le fichier de configuration vcpkg :
    ```bash
-   cmake -S .. -B . -DCMAKE_TOOLCHAIN_FILE=../vcpkg/scripts/buildsystems/vcpkg.cmake
+   cmake -S .. -B . -DCMAKE_TOOLCHAIN_FILE=../vcpkg/scripts/buildsystems/vcpkg.cmake -DCMAKE_BUILD_TYPE=Release
    ```
 4. Construisez le projet :
    ```bash
-   cmake --build .
+   cmake --build . --config Release
    ```

@@ -25,6 +25,10 @@ list(REMOVE_ITEM SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp")
 add_library(libengine SHARED ${SOURCES})
 target_link_libraries(libengine sfml-graphics sfml-audio sfml-window sfml-system)
 
+if (WIN32)
+    file(COPY ${CMAKE_SOURCE_DIR}/../vcpkg/installed/x64-windows/bin/* DESTINATION ${CMAKE_BINARY_DIR}/build/Release)
+endif()
+
 if (CMAKE_COMPILER_IS_GNUCXX)
     target_compile_options(engine PRIVATE -Wall -Wextra)
 elseif (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
