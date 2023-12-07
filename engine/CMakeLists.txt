@@ -15,7 +15,11 @@ find_package(SFML COMPONENTS system window graphics CONFIG REQUIRED)
 
 include_directories(${CMAKE_SOURCE_DIR}/include)
 
-file(COPY ${CMAKE_SOURCE_DIR}/assets DESTINATION ${CMAKE_BINARY_DIR})
+if (WIN32)
+    file(COPY ${CMAKE_SOURCE_DIR}/assets DESTINATION ${CMAKE_BINARY_DIR}/Release)
+elseif (UNIX)
+    file(COPY ${CMAKE_SOURCE_DIR}/assets DESTINATION ${CMAKE_BINARY_DIR})
+endif()
 
 file(GLOB_RECURSE SOURCES "src/*.cpp")
 add_executable(engine ${SOURCES})
