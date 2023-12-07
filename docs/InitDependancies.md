@@ -1,31 +1,31 @@
-# Mise en Place du Projet avec vcpkg
+# Project Setup with vcpkg
 
-## Clonage du Projet
+## Cloning the Project
 
-1. Clonez le projet :
+1. Clone the project:
    ```bash
    git clone https://github.com/EpitechPromo2026/B-CPP-500-REN-5-2-rtype-tom.daniel
    ```
-2. Naviguez dans le répertoire du projet cloné :
+2. Navigate to the cloned project directory:
    ```bash
    cd B-CPP-500-REN-5-2-rtype-tom.daniel
    ```
 
-## Configuration des Sous-modules (vcpkg)
+## Configuring Submodules (vcpkg)
 
-1. Initialisez et mettez à jour les sous-modules :
+1. Initialize and update the submodules:
    ```bash
    git submodule init
    git submodule update
    ```
 
-## Installation des Dépendances avec vcpkg
+## Installing Dependencies with vcpkg
 
-1. Naviguez dans le sous-module vcpkg :
+1. Navigate to the vcpkg submodule:
    ```bash
    cd vcpkg
    ```
-2. Configurez le binaire vcpkg :
+2. Configure the vcpkg binary:
    Windows:
    ```bash
    ./bootstrap-vcpkg.bat
@@ -34,26 +34,26 @@
    ```bash
    ./bootstrap-vcpkg.sh
    ```
-3. Installez les dépendances nécessaires (par exemple, SFML) :
+3. Install the required dependencies (for example, SFML):
    ```bash
    ./vcpkg install sfml
    ```
 
-## Configuration et Construction avec CMake
+## Configuration and Building with CMake
 
-1. Naviguez dans le répertoire que vous voulez build (Exemple: engine):
+1. Navigate to the directory you want to build (Example: engine):
    ```bash
    cd engine
    ```
-2. Créez un répertoire de build et naviguez dedans :
+2. Create a build directory and navigate into it:
    ```bash
    mkdir build && cd build
    ```
-3. Configurez le projet avec CMake en spécifiant le fichier de configuration vcpkg :
+3. Configure the project with CMake by specifying the vcpkg configuration file:
    ```bash
    cmake -S .. -B .
    ```
-4. Construisez le projet :
+4. Build the project:
    ```bash
    cmake --build . --config Release
    ```

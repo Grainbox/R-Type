@@ -1,34 +1,34 @@
-# Initialisation des Scènes pour votre jeu
+# Scene Initialization for Your Game
 
-Pour initialiser les scènes dans un jeu, il est nécessaire de suivre plusieurs étapes clés. Ce guide fournit une explication détaillée de chaque étape.
+To initialize scenes in a game, it's necessary to follow several key steps. This guide provides a detailed explanation of each step.
 
-## Étape 1: Création de l'Objet `Registry`
+## Step 1: Creating the `Registry` Object
 
-Tout d'abord, il faut créer un objet de la classe `Registry`. Cet objet sert de conteneur pour toutes les entités et composants de chaque scène.
+First, create an object of the `Registry` class. This object serves as a container for all entities and components in each scene.
 
 ```cpp
 Registry r("mainMenu");
 ```
 
-Dans cet exemple, la scène de base (ou la première scène du jeu) est nommée `"mainMenu"`.
+In this example, the base scene (or the first scene of the game) is named `"mainMenu"`.
 
-## Étape 2: Ajout des Entités et Composants
+## Step 2: Adding Entities and Components
 
-Une fois l'objet `Registry` créé, il faut ajouter les entités et les composants pour chaque scène.
+Once the `Registry` object is created, you need to add entities and components for each scene.
 
-### Création et Ajout d'Entités
+### Creating and Adding Entities
 
-Pour chaque entité, utilisez la méthode `spawnEntity()` de l'objet `Registry` :
+For each entity, use the `spawnEntity()` method of the `Registry` object:
 
 ```cpp
 Entity player = r.spawnEntity();
 Entity button = r.spawnEntity();
-// et ainsi de suite pour d'autres entités
+// and so on for other entities
 ```
 
-### Ajout de Composants aux Entités
+### Adding Components to Entities
 
-Pour chaque entité, ajoutez les composants nécessaires. Par exemple, pour ajouter une position, un élément graphique (drawable), une capacité de contrôle et une vélocité à l'entité `player` dans la scène `"mainMenu"` :
+For each entity, add the necessary components. For example, to add a position, a graphic element (drawable), control capability, and velocity to the `player` entity in the `"mainMenu"` scene:
 
 ```cpp
 Position pos(100, 0);
@@ -42,41 +42,41 @@ r.addComponent<Controllable>(player, control, "mainMenu");
 r.addComponent<Velocity>(player, vel, "mainMenu");
 ```
 
-Répétez ce processus pour toutes les entités et tous les composants nécessaires.
+Repeat this process for all the necessary entities and components.
 
-## Étape 3: Lancement du Jeu avec l'Objet `Registry`
+## Step 3: Launching the Game with the `Registry` Object
 
-Enfin, passez l'objet `Registry` à la classe `Game` pour démarrer le jeu avec la configuration définie :
+Finally, pass the `Registry` object to the `Game` class to start the game with the defined configuration:
 
 ```cpp
 Game game(&r);
 game.run();
 ```
 
-Dans cet exemple, l'objet `Game` est initialisé avec l'adresse de l'objet `Registry`, et la méthode `run()` est appelée pour lancer le jeu.
+In this example, the `Game` object is initialized with the address of the `Registry` object, and the `run()` method is called to launch the game.
 
-## Exemple Complet
+## Complete Example
 
-Voici un exemple complet montrant la définition de deux scènes (`mainMenu` et `game`) et le lancement du jeu avec cette configuration :
+Here is a complete example showing the definition of two scenes (`mainMenu` and `game`) and launching the game with this configuration:
 
 ```cpp
-// Initialisation de l'objet Registry avec la première scène
+// Initialization of the Registry object with the first scene
 Registry r("mainMenu");
 
-// Ajout des entités et composants pour la scène "mainMenu"
+// Adding entities and components for the "mainMenu" scene
 Entity player = r.spawnEntity();
-// ...ajout des composants pour player...
+// ...adding components for player...
 
 Entity button = r.spawnEntity();
-// ...ajout des composants pour button...
+// ...adding components for button...
 
-// Ajout des entités et composants pour la scène "game"
+// Adding entities and components for the "game" scene
 Entity player2 = r.spawnEntity();
-// ...ajout des composants pour player2...
+// ...adding components for player2...
 
-// Initialisation et lancement du jeu
+// Initializing and launching the game
 Game game(&r);
 game.run();
 ```
 
-En suivant ces étapes, vous pouvez initialiser et configurer les scènes de votre jeu en C++.
+By following these steps, you can initialize and configure the scenes for your game in C++.

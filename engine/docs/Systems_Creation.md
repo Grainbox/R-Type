@@ -1,51 +1,51 @@
-# Création et Ajout de Systèmes Personnalisés dans l'Engine
+# Creating and Adding Custom Systems in the Engine
 
-## Étapes pour Créer un Nouveau Système
+## Steps to Create a New System
 
-### Étape 1: Définir la Fonction du Système
+### Step 1: Define the System's Function
 
-Commencez par définir clairement la fonction de votre système. Par exemple, un système de `health` pourrait gérer la santé des personnages du jeu.
+Begin by clearly defining the function of your system. For example, a `health` system might manage the health of game characters.
 
-### Étape 2: Accéder aux Composants Nécessaires
+### Step 2: Access Necessary Components
 
-Utilisez la classe `Registry` pour accéder aux composants dont votre système a besoin. Par exemple, si votre système gère la santé, il pourrait nécessiter l'accès à un composant `Health`.
+Use the `Registry` class to access the components your system needs. For example, if your system manages health, it might need access to a `Health` component.
 
 ```cpp
 Sparse_Array<Health> &healthComponents = r.getComponents<Health>(scene);
 ```
 
-### Étape 3: Implémenter la Logique du Système
+### Step 3: Implement the System Logic
 
-Implémentez la logique du système en fonction des composants accessibles. Par exemple, un système de santé peut réduire la santé d'un personnage lorsqu'il subit des dégâts.
+Implement the logic of the system based on the accessible components. For example, a health system may reduce a character's health when they take damage.
 
 ```cpp
 void health_system(Registry &r) {
     std::string scene = r.getCurrentScene();
     Sparse_Array<Health> &healthComponents = r.getComponents<Health>(scene);
 
-    // Logique du système
+    // System logic
     for (size_t i = 0; i < healthComponents.size(); ++i) {
         auto &health = healthComponents[i];
 
         if (!health)
             continue;
 
-        // Modifier la santé en fonction de la logique du jeu
-        // Exemple : health.value().hp -= damage;
+        // Modify health based on game logic
+        // Example: health.value().hp -= damage;
     }
 }
 ```
 
-## Conseils pour la Création de Systèmes
+## Tips for Creating Systems
 
-- **Modularité :** Chaque système doit être responsable d'une seule tâche ou aspect du jeu.
-- **Accès aux Composants :** Utilisez la classe `Registry` pour accéder aux composants nécessaires à votre système.
-- **Performance :** Optimisez la performance en évitant des boucles ou des calculs inutiles.
-- **Scalabilité :** Assurez-vous que votre système peut facilement être étendu ou modifié.
+- **Modularity:** Each system should be responsible for a single task or aspect of the game.
+- **Component Access:** Use the `Registry` class to access the components necessary for your system.
+- **Performance:** Optimize performance by avoiding unnecessary loops or computations.
+- **Scalability:** Ensure your system can be easily extended or modified.
 
-## Intégration du Système dans le Jeu
+## Integrating the System into the Game
 
-Une fois votre système implémenté, intégrez-le dans la boucle principale du jeu. Par exemple, si vous avez un système de `health`, vous pourriez l'appeler à chaque mise à jour de la frame.
+Once your system is implemented, integrate it into the main game loop. For example, if you have a `health` system, you might call it at each frame update.
 
 ```cpp
 while (game.isRunning()) {
@@ -55,4 +55,4 @@ while (game.isRunning()) {
 }
 ```
 
-En suivant ces étapes et en vous inspirant des exemples existants, vous pouvez créer et intégrer efficacement votre propre système personnalisé dans un jeu.
+By following these steps and drawing inspiration from existing examples, you can effectively create and integrate your own custom system into a game.
