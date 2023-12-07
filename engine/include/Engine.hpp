@@ -10,8 +10,8 @@
 
 #include <SFML/Graphics.hpp>
 
-#include "System.hpp"
-#include "Registry.hpp"
+#include "ECS/System.hpp"
+#include "ECS/Registry.hpp"
 
 class Engine {
     public:

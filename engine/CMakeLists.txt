@@ -1,0 +1,28 @@
+cmake_minimum_required(VERSION 3.10)
+
+project(engine)
+
+set(CMAKE_TOOLCHAIN_FILE ../vcpkg/scripts/buildsystems/vcpkg.cmake)
+
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED True)
+
+find_package(SFML COMPONENTS system window graphics CONFIG REQUIRED)
+
+include_directories(${CMAKE_SOURCE_DIR}/include)
+
+file(COPY ${CMAKE_SOURCE_DIR}/assets DESTINATION ${CMAKE_BINARY_DIR})
+
+file(GLOB_RECURSE SOURCES "src/*.cpp")
+add_executable(engine ${SOURCES})
+target_link_libraries(engine PRIVATE sfml-system sfml-network sfml-graphics sfml-window)
+
+list(REMOVE_ITEM SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp")
+add_library(libengine SHARED ${SOURCES})
+target_link_libraries(libengine sfml-graphics sfml-audio sfml-window sfml-system)
+
+if (CMAKE_COMPILER_IS_GNUCXX)
+    target_compile_options(engine PRIVATE -Wall -Wextra)
+elseif (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+    target_compile_options(engine PRIVATE -Wall -Wextra)
+endif()
