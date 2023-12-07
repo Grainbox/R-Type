@@ -1,5 +1,3 @@
 .vscode
 *.o
-engine
-shared_libs
 build
