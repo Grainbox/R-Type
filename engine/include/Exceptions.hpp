@@ -37,9 +37,9 @@ private:
     std::string msg_;
 };
 
-class EntityNotFoundException : public std::exception {
+class SceneNotFoundException : public std::exception {
 public:
-    explicit EntityNotFoundException(const std::string& message)
+    explicit SceneNotFoundException(const std::string& message)
         : msg_(message) {}
 
     virtual const char* what() const noexcept override {

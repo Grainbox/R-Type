@@ -2,35 +2,28 @@
 ** EPITECH PROJECT, 2023
 ** B-CPP-500-REN-5-2-bsrtype-tom.daniel
 ** File description:
-** Game
+** Engine
 */
 
-#ifndef GAME_HPP_
-#define GAME_HPP_
+#ifndef ENGINE_HPP_
+#define ENGINE_HPP_
 
 #include <SFML/Graphics.hpp>
-
-#include "components/Controllable.hpp"
-#include "components/Drawable.hpp"
-#include "components/Velocity.hpp"
-#include "components/Position.hpp"
 
 #include "System.hpp"
 #include "Registry.hpp"
 
-class Game {
+class Engine {
     public:
-        Game();
+        Engine(Registry *r);
 
         void run();
 
     protected:
     private:
         sf::RenderWindow window;
-        Registry r;
+        Registry *r;
         System system;
-
-        void initialize();
 
         void processEvents();
 
@@ -40,4 +33,4 @@ class Game {
 
 };
 
-#endif /* !GAME_HPP_ */
+#endif /* !ENGINE_HPP_ */

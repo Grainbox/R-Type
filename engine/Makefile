@@ -17,8 +17,7 @@ else
 endif
 
 SRC 		=	src/main.cpp			\
-				src/Game.cpp			\
-				src/System.cpp			\
+				src/Engine.cpp			\
 
 OBJ			=	$(SRC:.cpp=.o)
 
