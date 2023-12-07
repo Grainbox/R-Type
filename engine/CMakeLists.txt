@@ -26,7 +26,8 @@ add_library(libengine SHARED ${SOURCES})
 target_link_libraries(libengine sfml-graphics sfml-audio sfml-window sfml-system)
 
 if (WIN32)
-    file(COPY ${CMAKE_SOURCE_DIR}/../vcpkg/installed/x64-windows/bin/* DESTINATION ${CMAKE_BINARY_DIR}/build/Release)
+    file(GLOB_RECURSE DLL_FILES "${CMAKE_SOURCE_DIR}/../vcpkg/installed/x64-windows/bin/*.dll")
+    file(COPY ${DLL_FILES} DESTINATION ${CMAKE_BINARY_DIR}/Release)
 endif()
 
 if (CMAKE_COMPILER_IS_GNUCXX)
