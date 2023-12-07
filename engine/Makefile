@@ -5,7 +5,9 @@
 ## Makefile for raytracer
 ##
 
-NAME 		=  	test
+NAME 		=  	engine
+
+LIB_NAME	=	libengine
 
 UNAME_S := $(shell uname -s)
 ifeq ($(UNAME_S),Darwin)
@@ -16,8 +18,13 @@ else
     $(error "Système d'exploitation non supporté")
 endif
 
-SRC 		=	src/main.cpp			\
-				src/Engine.cpp			\
+SRC_MAIN	=	src/main.cpp
+
+SRC			=	src/Engine.cpp          \
+
+LIB_OUT_DIR =	./shared_libs
+
+OBJ_MAIN    =   $(SRC_MAIN:.cpp=.o)
 
 OBJ			=	$(SRC:.cpp=.o)
 
@@ -41,21 +48,28 @@ COMPLETE_TEXT:
 CLEAN_TEXT:
 			@$(ECHO) $(BOLD) $(BLUE)"CLEANING 🧹"
 
-$(NAME): 	$(OBJ)
-			@$(COMPILER) -o $(NAME) $(OBJ) $(CXX_FLAGS) $(INCLUDE) $(LIBS) $(SFML)
+$(NAME): 	$(OBJ)	$(OBJ_MAIN)
+			@$(COMPILER) -o $(NAME) $(OBJ) $(OBJ_MAIN) $(CXX_FLAGS) $(INCLUDE) $(LIBS) $(SFML)
 			@make -s COMPLETE_TEXT
+
+shared_lib: $(OBJ)
+		@mkdir -p $(LIB_OUT_DIR)
+		@$(COMPILER) -fPIC -shared -o $(LIB_OUT_DIR)/$(LIB_NAME).so $(OBJ) $(CXX_FLAGS) $(INCLUDE) $(SFML)
+		@$(COMPILER) -shared -o $(LIB_OUT_DIR)/$(LIB_NAME).dll $(OBJ) $(CXX_FLAGS) $(INCLUDE) $(SFML)
 
 %.o: %.cpp
 			$(eval counter=$(shell echo $$(($(counter)+1))))
 			$(eval percentage=$(shell echo $$((($(counter) * 100) /\
-			$(TOTAL_FILES)))))
+            $(TOTAL_FILES)))))
 			@printf "$(PYELLOW)$(PBOLD)↦🔹[%s] ($(percentage)%%)$(PRESET)" "$(subst $(shell pwd)/,,$<)"
-			@$(COMPILER) -c $(CXX_FLAGS) $(INCLUDE) $< -o $@
+			@$(COMPILER) -fPIC -c $(CXX_FLAGS) $(INCLUDE) $< -o $@
 			@printf "\r$(PGREEN)$(PBOLD)↦🔹[%s] ($(percentage)%%)$(PRESET)\n" "$(subst $(shell pwd)/,,$<)"
 
 clean:
 			@make -s CLEAN_TEXT
 			@rm -f $(OBJ)
+			@rm -f $(OBJ_MAIN)
+			@rm -f $(LIB_OUT_DIR)/$(LIB_NAME).*
 
 fclean:		clean
 			@rm -f $(NAME)
