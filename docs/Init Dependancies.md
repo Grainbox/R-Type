@@ -25,7 +25,16 @@
    ```bash
    cd vcpkg
    ```
-2. Installez les dépendances nécessaires (par exemple, SFML) :
+2. Configurez le binaire vcpkg :
+   Windows:
+   ```bash
+   ./bootstrap-vcpkg.bat
+   ```
+   Linux:
+   ```bash
+   ./bootstrap-vcpkg.sh
+   ```
+3. Installez les dépendances nécessaires (par exemple, SFML) :
    ```bash
    ./vcpkg install sfml
    ```
