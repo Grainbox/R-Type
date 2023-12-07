@@ -50,13 +50,8 @@
    mkdir build && cd build
    ```
 3. Configurez le projet avec CMake en spécifiant le fichier de configuration vcpkg :
-   - windows:
    ```bash
    cmake -S .. -B .
-   ```
-   - Linux:
-   ```bash
-   cmake -S .. -B . -DCMAKE_TOOLCHAIN_FILE=../vcpkg/scripts/buildsystems/vcpkg.cmake
    ```
 4. Construisez le projet :
    ```bash
