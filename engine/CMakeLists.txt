@@ -29,6 +29,11 @@ target_link_libraries(engine PRIVATE sfml-system sfml-network sfml-graphics sfml
 
 list(REMOVE_ITEM SOURCES "${R_TYPE_ROOT}/engine/src/main.cpp")
 add_library(libengine SHARED ${SOURCES})
+set_target_properties(libengine PROPERTIES
+    ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib"
+    LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib"
+    RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin"
+)
 target_link_libraries(libengine sfml-graphics sfml-audio sfml-window sfml-system)
 
 if (WIN32)
