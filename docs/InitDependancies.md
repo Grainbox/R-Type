@@ -38,5 +38,6 @@
    ```bash
    ./vcpkg install sfml
    ```
+4. Ajouter le path des dll à windows -- à documenter
 ## Next Step:
 - [Build With CMake](BuildWithCMake.md)

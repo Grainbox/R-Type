@@ -8,6 +8,16 @@
 #ifndef ENGINE_HPP_
 #define ENGINE_HPP_
 
+#ifdef _WIN32
+#ifdef ENGINE_EXPORTS
+#define ENGINE_API __declspec(dllexport)
+#else
+#define ENGINE_API __declspec(dllimport)
+#endif
+#else
+#define ENGINE_API
+#endif
+
 #include <SFML/Graphics.hpp>
 
 #include "ECS/System.hpp"
@@ -18,9 +28,10 @@ struct EngineConfig {
     Registry *r;
 };
 
-class Engine {
+class ENGINE_API Engine {
     public:
         Engine(EngineConfig config);
+        ~Engine();
 
         void run();
 
