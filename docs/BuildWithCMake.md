@@ -21,7 +21,8 @@
         - Open the Start Search, type in "env", and choose "Edit the system environment variables".
         - In the System Properties window, click on the "Environment Variables..." button.
         - In the Environment Variables window, under "System variables" or "User variables", click "New..." to create a new variable.
-        - Enter R_TYPE_ROOT for the variable name and %cd% for the variable value.
+        - Enter R_TYPE_ROOT for the variable name and your project path with '/' instead of '\' for the variable value.
+          - Value Exemple: "C:/Users/tagem/Documents/B-CPP-500-REN-5-2-rtype-tom.daniel"
         - Click OK and apply the changes. You might need to restart your computer or log out and back in for the changes to take effect.
 
 2. Navigate to the directory you want to build (Example: engine):
