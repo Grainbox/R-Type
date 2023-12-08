@@ -44,12 +44,28 @@ r.addComponent<Velocity>(player, vel, "mainMenu");
 
 Repeat this process for all the necessary entities and components.
 
-## Step 3: Launching the Game with the `Registry` Object
+## Step 3: Setup the Engine Config:
 
-Finally, pass the `Registry` object to the `Game` class to start the game with the defined configuration:
+Here is the EngineConfig class:
+```cpp
+struct EngineConfig {
+    bool isServer;
+    Registry *r;
+};
+```
+
+You should setup an object of it with your configuration: is the engine running as a server or as a client, a pointer to your registry, etc...
 
 ```cpp
-Game game(&r);
+EngineConfig config = {true, &r};
+```
+
+## Step 3: Launching the Game with the `Registry` Object
+
+Finally, pass the `EngineConfig` object to the `Game` class to start the game with the defined configuration:
+
+```cpp
+Game game(config);
 game.run();
 ```
 

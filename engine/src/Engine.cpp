@@ -7,9 +7,9 @@
 
 #include "Engine.hpp"
 
-Engine::Engine(Registry *r)
+Engine::Engine(EngineConfig config)
 {
-    this->r = r;
+    this->r = config.r;
     window.create(sf::VideoMode(800, 600), "My Engine");
 }
 

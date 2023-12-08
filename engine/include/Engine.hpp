@@ -13,9 +13,14 @@
 #include "ECS/System.hpp"
 #include "ECS/Registry.hpp"
 
+struct EngineConfig {
+    bool isServer;
+    Registry *r;
+};
+
 class Engine {
     public:
-        Engine(Registry *r);
+        Engine(EngineConfig config);
 
         void run();
 
