@@ -9,3 +9,4 @@ project(R-Type)
 
 # Ajouter les sous-répertoires
 add_subdirectory(engine)
+add_subdirectory(client)
