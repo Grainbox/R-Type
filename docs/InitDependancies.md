@@ -38,3 +38,5 @@
    ```bash
    ./vcpkg install sfml
    ```
+## Next Step:
+- [Build With CMake](BuildWithCMake.md)

@@ -42,3 +42,6 @@ After installation:
    - Follow the [VS Code documentation for C++](https://code.visualstudio.com/docs/cpp/config-msvc).
 
 This documentation provides the basics to start C++ development on Windows with Visual Studio Build Tools and VS Code. Follow project-specific instructions for additional configurations or dependencies.
+
+## Next Step:
+- [Setup Project](InitDependancies.md)

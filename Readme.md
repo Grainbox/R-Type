@@ -29,3 +29,11 @@ R-Type is an advanced C++ project focused on developing a multithreaded server a
 
 ## Documentation
 - Emphasis on proper, continuous documentation throughout the project.
+
+## Getting Started
+
+### Windows:
+- [Setup Environment](docs/WindowsInitialSetup.md)
+
+### Linux:
+- [Setup Project](docs/InitDependancies.md)
