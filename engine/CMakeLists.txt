@@ -11,7 +11,7 @@ project(engine)
 set(CMAKE_TOOLCHAIN_FILE ${R_TYPE_ROOT}/vcpkg/scripts/buildsystems/vcpkg.cmake)
 
 if (WIN32)
-    set(CMAKE_PREFIX_PATH "${R_TYPE_ROOT}/vcpkg/installed/x64-windows/lib/sfml")
+    set(CMAKE_PREFIX_PATH "${R_TYPE_ROOT}/vcpkg/installed/x64-windows/share/sfml")
 endif()
 
 set(CMAKE_CXX_STANDARD 17)
@@ -21,11 +21,7 @@ find_package(SFML COMPONENTS system window graphics CONFIG REQUIRED)
 
 include_directories(${R_TYPE_ROOT}/engine/include)
 
-if (WIN32)
-    file(COPY ${R_TYPE_ROOT}/engine/assets DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/Release)
-elseif (UNIX)
-    file(COPY ${R_TYPE_ROOT}/engine/assets DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
-endif()
+file(COPY ${R_TYPE_ROOT}/engine/assets DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 
 file(GLOB_RECURSE SOURCES "${R_TYPE_ROOT}/engine/src/*.cpp")
 add_executable(engine ${SOURCES})
@@ -37,5 +33,5 @@ target_link_libraries(libengine sfml-graphics sfml-audio sfml-window sfml-system
 
 if (WIN32)
     file(GLOB_RECURSE DLL_FILES "${R_TYPE_ROOT}/vcpkg/installed/x64-windows/bin/*.dll")
-    file(COPY ${DLL_FILES} DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/Release)
+    file(COPY ${DLL_FILES} DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 endif()
