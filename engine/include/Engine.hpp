@@ -31,7 +31,7 @@ struct EngineConfig {
 class ENGINE_API Engine {
     public:
         Engine(EngineConfig config);
-        ~Engine() {};
+        ~Engine();
 
         void run();
 

@@ -13,6 +13,10 @@ Engine::Engine(EngineConfig config)
     window.create(sf::VideoMode(800, 600), "My Engine");
 }
 
+Engine::~Engine()
+{
+}
+
 void Engine::run()
 {
     while (this->window.isOpen()) {
