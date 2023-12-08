@@ -16,10 +16,10 @@ Sparse_Array<Health> &healthComponents = r.getComponents<Health>(scene);
 
 ### Step 3: Implement the System Logic
 
-Implement the logic of the system based on the accessible components. For example, a health system may reduce a character's health when they take damage.
+Implement the logic of the system based on the accessible components in the System class. For example, a health system may reduce a character's health when they take damage.
 
 ```cpp
-void health_system(Registry &r) {
+void System::health_system(Registry &r) {
     std::string scene = r.getCurrentScene();
     Sparse_Array<Health> &healthComponents = r.getComponents<Health>(scene);
 
@@ -50,7 +50,7 @@ Once your system is implemented, integrate it into the main game loop. For examp
 ```cpp
 while (game.isRunning()) {
     // ...
-    health_system(registry);
+    system.health_system(registry);
     // ...
 }
 ```
