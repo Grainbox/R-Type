@@ -9,7 +9,7 @@ set(R_TYPE_ROOT $ENV{R_TYPE_ROOT})
 project(client)
 
 if (WIN32)
-    set(CMAKE_PREFIX_PATH "${R_TYPE_ROOT}/vcpkg/installed/x64-windows/share/sfml")
+    set(CMAKE_PREFIX_PATH "${R_TYPE_ROOT}/vcpkg/installed/x64-windows/lib/sfml")
 endif()
 
 set(CMAKE_CXX_STANDARD 17)
