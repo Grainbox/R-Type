@@ -35,10 +35,15 @@
    mkdir build && cd build
    ```
 4. Configure the project with CMake by specifying the vcpkg configuration file:
+   linux:
    ```bash
-   cmake -S .. -B .
+   cmake ..
+   ```
+   windows:
+   ```bash
+   cmake .. -DCMAKE_PREFIX_PATH="C:\Users\tagem\Documents\B-CPP-500-REN-5-2-rtype-tom.daniel\vcpkg\installed\x64-windows\share\sfml"
    ```
 5. Build the project:
    ```bash
-   cmake --build . --config Release
+   cmake --build .
    ```
