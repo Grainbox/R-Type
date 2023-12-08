@@ -8,12 +8,16 @@ set(R_TYPE_ROOT $ENV{R_TYPE_ROOT})
 
 project(client)
 
+set(CMAKE_TOOLCHAIN_FILE ${R_TYPE_ROOT}/vcpkg/scripts/buildsystems/vcpkg.cmake)
+
 if (WIN32)
     set(CMAKE_PREFIX_PATH "${R_TYPE_ROOT}/vcpkg/installed/x64-windows/lib/sfml")
 endif()
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
+
+find_package(SFML COMPONENTS system window graphics CONFIG REQUIRED)
 
 include_directories(${R_TYPE_ROOT}/client/include)
 
