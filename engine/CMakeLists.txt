@@ -1,11 +1,17 @@
 cmake_minimum_required(VERSION 3.10)
 
+if(NOT DEFINED ENV{R_TYPE_ROOT})
+    message(FATAL_ERROR "La variable d'environnement R_TYPE_ROOT n'est pas définie")
+endif()
+
+set(R_TYPE_ROOT $ENV{R_TYPE_ROOT})
+
 project(engine)
 
-set(CMAKE_TOOLCHAIN_FILE ../vcpkg/scripts/buildsystems/vcpkg.cmake)
+set(CMAKE_TOOLCHAIN_FILE ${R_TYPE_ROOT}/vcpkg/scripts/buildsystems/vcpkg.cmake)
 
 if (WIN32)
-    set(CMAKE_PREFIX_PATH "${CMAKE_SOURCE_DIR}/../vcpkg/installed/x64-windows/share/sfml")
+    set(CMAKE_PREFIX_PATH "${R_TYPE_ROOT}/vcpkg/installed/x64-windows/share/sfml")
 endif()
 
 set(CMAKE_CXX_STANDARD 17)
@@ -13,29 +19,19 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 find_package(SFML COMPONENTS system window graphics CONFIG REQUIRED)
 
-include_directories(${CMAKE_SOURCE_DIR}/include)
+include_directories(${R_TYPE_ROOT}/engine/include)
 
-if (WIN32)
-    file(COPY ${CMAKE_SOURCE_DIR}/assets DESTINATION ${CMAKE_BINARY_DIR}/Release)
-elseif (UNIX)
-    file(COPY ${CMAKE_SOURCE_DIR}/assets DESTINATION ${CMAKE_BINARY_DIR})
-endif()
+file(COPY ${R_TYPE_ROOT}/engine/assets DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 
-file(GLOB_RECURSE SOURCES "src/*.cpp")
+file(GLOB_RECURSE SOURCES "${R_TYPE_ROOT}/engine/src/*.cpp")
 add_executable(engine ${SOURCES})
 target_link_libraries(engine PRIVATE sfml-system sfml-network sfml-graphics sfml-window)
 
-list(REMOVE_ITEM SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp")
+list(REMOVE_ITEM SOURCES "${R_TYPE_ROOT}/engine/src/main.cpp")
 add_library(libengine SHARED ${SOURCES})
 target_link_libraries(libengine sfml-graphics sfml-audio sfml-window sfml-system)
 
 if (WIN32)
-    file(GLOB_RECURSE DLL_FILES "${CMAKE_SOURCE_DIR}/../vcpkg/installed/x64-windows/bin/*.dll")
-    file(COPY ${DLL_FILES} DESTINATION ${CMAKE_BINARY_DIR}/Release)
-endif()
-
-if (CMAKE_COMPILER_IS_GNUCXX)
-    target_compile_options(engine PRIVATE -Wall -Wextra)
-elseif (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-    target_compile_options(engine PRIVATE -Wall -Wextra)
+    file(GLOB_RECURSE DLL_FILES "${R_TYPE_ROOT}/vcpkg/installed/x64-windows/bin/*.dll")
+    file(COPY ${DLL_FILES} DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 endif()
