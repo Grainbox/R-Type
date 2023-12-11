@@ -1,10 +1,14 @@
 add_library(engine SHARED
     src/Engine.cpp
+    src/ClientEngine.cpp
+    src/ServerEngine.cpp
     include/Engine.hpp
 )
 
 add_executable(engine_debug
     src/Engine.cpp
+    src/ClientEngine.cpp
+    src/ServerEngine.cpp
     src/main.cpp
     include/Engine.hpp
 )

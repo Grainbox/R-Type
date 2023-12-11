@@ -48,11 +48,9 @@ int main()
 
         setupRegistry(r);
 
-        EngineConfig config = {true, &r};
+        EngineConfig config = {false, &r};
 
         Engine engine(config);
-
-        engine.run();
     }
     catch (std::exception &e)
     {

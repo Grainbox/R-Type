@@ -2,14 +2,14 @@
 ** EPITECH PROJECT, 2023
 ** B-CPP-500-REN-5-2-bsrtype-tom.daniel
 ** File description:
-** System
+** ClientSystem
 */
 
-#ifndef SYSTEM_HPP_
-#define SYSTEM_HPP_
+#ifndef CLIENTSYSTEM_HPP_
+#define CLIENTSYSTEM_HPP_
 
-#include "Registry.hpp"
-#include "Sparse_Array.hpp"
+#include "ECS/Registry.hpp"
+#include "ECS/Sparse_Array.hpp"
 #include "components/Controllable.hpp"
 #include "components/Drawable.hpp"
 #include "components/Velocity.hpp"
@@ -17,7 +17,7 @@
 
 #include <SFML/Graphics.hpp>
 
-class System {
+class ClientSystem {
     public:
         void control_system(Registry &r, sf::Event event) {
                 std::string scene = r.getCurrentScene();
@@ -87,4 +87,4 @@ class System {
 
 };
 
-#endif /* !SYSTEM_HPP_ */
+#endif /* !CLIENTSYSTEM_HPP_ */

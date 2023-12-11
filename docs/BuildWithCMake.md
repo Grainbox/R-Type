@@ -11,9 +11,10 @@
    ```
    windows: (put you actual repo url)
    ```bash
-   cmake .. -DCMAKE_PREFIX_PATH="C:\Users\tagem\Documents\B-CPP-500-REN-5-2-rtype-tom.daniel\vcpkg\installed\x64-windows\share\sfml"
+   cmake .. -DCMAKE_PREFIX_PATH="repo_url\vcpkg\installed\x64-windows\share\sfml"
    ```
 3. Build the project:
    ```bash
    cmake --build .  --config Release
    ```
+4. Almost done, the binaries are located in (engine or client or server).
