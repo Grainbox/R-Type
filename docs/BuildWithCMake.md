@@ -1,5 +1,8 @@
 # Configuration and Building with CMake
 
+## Requirements:
+- CMake 3.27.2
+
 1. Create a build directory and navigate into it:
    ```bash
    mkdir build && cd build
