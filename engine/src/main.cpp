@@ -48,7 +48,7 @@ int main()
 
         setupRegistry(r);
 
-        EngineConfig config = {false, &r};
+        EngineConfig config = {true, &r};
 
         Engine engine(config);
     }

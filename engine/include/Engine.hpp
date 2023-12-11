@@ -18,6 +18,8 @@
 #define ENGINE_API
 #endif
 
+#define SERVER_PORT 1024
+
 #include "ECS/Registry.hpp"
 #include "client/ClientEngine.hpp"
 #include "server/ServerEngine.hpp"

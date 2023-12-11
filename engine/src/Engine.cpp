@@ -12,7 +12,8 @@ Engine::Engine(EngineConfig config)
     if (!config.isServer) {
         ClientEngine engine(config.r);
     } else {
-        ServerEngine engine(config.r);
+        ServerEngine engine(config.r, SERVER_PORT);
+        engine.run();
     }
 }
 

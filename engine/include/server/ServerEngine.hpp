@@ -10,17 +10,36 @@
 
 #include "ECS/Registry.hpp"
 #include "ServerSystem.hpp"
-#include <asio.hpp>
+#include <boost/asio.hpp>
+#include <boost/bind.hpp>
+
+using boost::asio::ip::udp;
 
 class ServerEngine {
     public:
-        ServerEngine(Registry *r);
+        ServerEngine(Registry *r, short port);
+
+        void run() {
+            io_service.run();
+        }
 
     protected:
     private:
         Registry *r;
 
-        void run();
+        boost::asio::io_service io_service;
+        udp::socket _socket;
+        std::array<char, 1024> _recvBuffer;
+        udp::endpoint _remoteEndpoint;
+
+        void startReceive();
+
+        void handle_client(const boost::system::error_code& error,
+            std::size_t bytes_transferred);
+
+        void handle_send(std::shared_ptr<std::string> message,
+            const boost::system::error_code& ec,
+            std::size_t bytes_transferred);
 };
 
 #endif /* !SERVERENGINE_HPP_ */
