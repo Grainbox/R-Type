@@ -12,6 +12,13 @@
 
 class Controllable {
     public:
+        void setKeyboardKey(sf::Keyboard::Key *moveKey, sf::Keyboard::Key newKey) {
+            *moveKey = newKey;
+        }
+        sf::Keyboard::Key Up = sf::Keyboard::Unknown;
+        sf::Keyboard::Key Down = sf::Keyboard::Unknown;
+        sf::Keyboard::Key Left = sf::Keyboard::Unknown;
+        sf::Keyboard::Key Right = sf::Keyboard::Unknown;
     protected:
     private:
 };
