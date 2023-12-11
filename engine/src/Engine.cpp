@@ -9,43 +9,13 @@
 
 Engine::Engine(EngineConfig config)
 {
-    this->r = config.r;
-    window.create(sf::VideoMode(800, 600), "My Engine");
+    if (!config.isServer) {
+        ClientEngine engine(config.r);
+    } else {
+        ServerEngine engine(config.r);
+    }
 }
 
 Engine::~Engine()
 {
-}
-
-void Engine::run()
-{
-    while (this->window.isOpen()) {
-        this->processEvents();
-        this->update();
-        this->render();
-    }
-}
-
-void Engine::processEvents()
-{
-    sf::Event event;
-    while (window.pollEvent(event)) {
-        if (event.type == sf::Event::Closed)
-            window.close();
-        system.control_system(*r, event);
-    }
-}
-
-void Engine::update()
-{
-    system.position_system(*r);
-}
-
-void Engine::render()
-{
-    window.clear();
-
-    system.draw_system(*r, window);
-
-    window.display();
 }
