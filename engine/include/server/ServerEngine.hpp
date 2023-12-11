@@ -10,6 +10,7 @@
 
 #include "ECS/Registry.hpp"
 #include "ServerSystem.hpp"
+#include <asio.hpp>
 
 class ServerEngine {
     public:
