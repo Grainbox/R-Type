@@ -1,16 +1,16 @@
 # Initial Setup for C++ Development on Windows
 
-This documentation guides you through the steps to set up a C++ development environment on Windows, using Visual Studio Build Tools and Visual Studio Code.
+This documentation guides you through the steps to set up a C++ development environment on Windows, using Visual Studio Build Tools 2022 and Visual Studio Code.
 
 ## Installing Visual Studio Build Tools
 
-Visual Studio Build Tools provide a C++ development environment for Windows, including the C++ compiler, standard libraries, and other utilities.
+Visual Studio Build Tools 2022 provides a C++ development environment for Windows, including the C++ compiler, standard libraries, and other utilities.
 
 ### Download and Installation
 
 1. **Download the Build Tools:**
-   - Go to the Visual Studio downloads page: [Visual Studio Downloads](https://visualstudio.microsoft.com/en/downloads/).
-   - Find "Build Tools for Visual Studio" and download the installer.
+   - Go to the [Visual Studio downloads page](https://visualstudio.microsoft.com/en/downloads/).
+   - Find "Build Tools for Visual Studio 2022" and download the installer.
 
 2. **Install the Tools:**
    - Run the downloaded installer.
@@ -23,25 +23,25 @@ After installation:
 
 1. **Open Developer PowerShell:**
    - Go to "All Programs" > "Visual Studio 2022" > "Visual Studio Tools".
-   - Launch "Developer PowerShell for VS".
+   - Launch "Developer PowerShell for VS" to set up your development environment.
 
 2. **Follow Additional Documentation:**
-   - Refer to `InitDependancies.md` for project dependencies.
+   - For project dependencies and repository setup, refer to [`InitDependencies.md`](InitDependancies.md), which explains how to clone the repository and install dependencies using the provided vcpkg module.
 
 ## OPTIONAL: Configuring Visual Studio Code for C++
 
 1. **Install Visual Studio Code:**
-   - Download VS Code from [the official website](https://code.visualstudio.com/).
+   - Download VS Code from the [official website](https://code.visualstudio.com/).
 
 2. **Install Extensions:**
    - Open VS Code.
-   - Install the "C/C++" and "CMake Tools" extensions.
+   - Install the "C/C++" extension for language support and the "CMake Tools" extension for build and debug capabilities.
 
 3. **Configure the Workspace:**
    - Open the project folder in VS Code.
-   - Follow the [VS Code documentation for C++](https://code.visualstudio.com/docs/cpp/config-msvc).
+   - Follow the [VS Code documentation for C++](https://code.visualstudio.com/docs/cpp/config-msvc) to configure your workspace.
 
-This documentation provides the basics to start C++ development on Windows with Visual Studio Build Tools and VS Code. Follow project-specific instructions for additional configurations or dependencies.
+This documentation provides the basics to start C++ development on Windows with Visual Studio Build Tools 2022 and VS Code. Once the setup is complete, you can start working on your C++ projects.
 
 ## Next Step:
-- [Setup Project](InitDependancies.md)
+- For setting up your project, follow the instructions in [`InitDependencies.md`](InitDependancies.md).

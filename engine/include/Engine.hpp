@@ -18,35 +18,38 @@
 #define ENGINE_API
 #endif
 
-#include <SFML/Graphics.hpp>
+#define SERVER_PORT 1024
 
-#include "ECS/System.hpp"
 #include "ECS/Registry.hpp"
+#include "client/ClientEngine.hpp"
+#include "server/ServerEngine.hpp"
 
-struct EngineConfig {
+/*!
+ \struct EngineConfig
+ \brief Struct containing engine configuration.
+
+ This struct allows you to add config for the engine.
+*/
+struct EngineConfig
+{
     bool isServer;
     Registry *r;
 };
 
-class ENGINE_API Engine {
-    public:
-        Engine(EngineConfig config);
-        ~Engine();
+/*!
+ \class Engine
+ \brief Class managing the engine.
 
-        void run();
+ This class is exposed for shared library and is dispatching client / server engines.
+*/
+class ENGINE_API Engine
+{
+public:
+    Engine(EngineConfig config);
+    ~Engine();
 
-    protected:
-    private:
-        sf::RenderWindow window;
-        Registry *r;
-        System system;
-
-        void processEvents();
-
-        void update();
-
-        void render();
-
+protected:
+private:
 };
 
 #endif /* !ENGINE_HPP_ */

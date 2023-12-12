@@ -1,16 +1,21 @@
-add_library(engine SHARED
+set(ENGINE_COMMON_SOURCES
     src/Engine.cpp
+    src/ClientEngine.cpp
+    src/ServerEngine.cpp
     include/Engine.hpp
 )
 
-add_executable(engine_debug
-    src/Engine.cpp
-    src/main.cpp
-    include/Engine.hpp
-)
+add_library(engine SHARED ${ENGINE_COMMON_SOURCES})
 
-# Configuration commune pour les deux cibles
+add_executable(engine_debug ${ENGINE_COMMON_SOURCES} src/main.cpp)
+
 foreach(target engine engine_debug)
+    if(UNIX)
+        target_include_directories(${target} PUBLIC "${CMAKE_SOURCE_DIR}/vcpkg/installed/x64-linux/include")
+    elseif(WIN32)
+        target_include_directories(${target} PUBLIC "${CMAKE_SOURCE_DIR}/vcpkg/installed/x64-windows/include")
+    endif()
+
     target_include_directories(${target} PUBLIC include)
 
     find_package(SFML COMPONENTS system window graphics network audio REQUIRED)
@@ -20,3 +25,4 @@ foreach(target engine engine_debug)
         COMMAND ${CMAKE_COMMAND} -E copy_directory
         ${CMAKE_SOURCE_DIR}/engine/assets $<TARGET_FILE_DIR:${target}>/assets)
 endforeach()
+

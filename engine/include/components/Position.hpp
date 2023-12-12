@@ -8,6 +8,10 @@
 #ifndef POSITION_HPP_
 #define POSITION_HPP_
 
+/*!
+ \class Position
+ \brief Component that is used on entities that has a position.
+*/
 class Position {
     public:
         Position(int x, int y) : x(x), y(y) {};
