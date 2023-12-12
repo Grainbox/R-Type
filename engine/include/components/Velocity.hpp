@@ -8,6 +8,10 @@
 #ifndef VELOCITY_HPP_
 #define VELOCITY_HPP_
 
+/*!
+ \class Velocity
+ \brief Component that is used on entities that has a velocity.
+*/
 class Velocity {
     public:
         Velocity(int vx, int vy) : vx(vx), vy(vy) {};

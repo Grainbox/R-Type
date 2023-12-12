@@ -10,6 +10,10 @@
 
 #include <SFML/Graphics.hpp>
 
+/*!
+ \class Controllable
+ \brief Component that is used on entities that can be controlled by user.
+*/
 class Controllable {
     public:
         void setKeyboardKey(sf::Keyboard::Key *moveKey, sf::Keyboard::Key newKey) {

@@ -10,56 +10,42 @@
 
 #include "ECS/Registry.hpp"
 #include "ServerSystem.hpp"
-#include <asio.hpp>
-#include <iostream>
+#include <boost/asio.hpp>
+#include <boost/bind.hpp>
 
-class ServerEngine
-{
-public:
-    ServerEngine(Registry *r);
+using boost::asio::ip::udp;
 
-protected:
-private:
-    Registry *r;
-    asio::io_service _io_service;
-    asio::ip::udp::socket _socket;
-    char recv_buffer_[1024];
-    asio::ip::udp::endpoint _remote_endpoint;
+/*!
+ \class ServerEngine
+ \brief Class managing the server engine.
 
-    void run();
+ This class implements the server functionalities, including receiving and sending messages to clients.
+*/
+class ServerEngine {
+    public:
+        ServerEngine(Registry *r, short port);
 
-    void do_receive()
-    {
-        int debug = 0;
-        _socket.async_receive_from(
-            asio::buffer(recv_buffer_), _remote_endpoint,
-            [this](std::error_code ec, std::size_t bytes_recvd)
-            {
-                if (!ec && bytes_recvd > 0)
-                {
-                    handle_receive(std::string(recv_buffer_, bytes_recvd), _remote_endpoint);
-                    do_receive();
-                }
-            });
-    }
-
-    void handle_receive(const std::string &data, const asio::ip::udp::endpoint &endpoint)
-    {
-        std::cout << "Received packet: " << data << " from " << endpoint << std::endl;
-
-        if (data == "new_connection" || data == "hello")
-        {
-            send_to("welcome", endpoint);
+        void run() {
+            io_service.run();
         }
-    }
 
-    void send_to(const std::string &message, const asio::ip::udp::endpoint &target_endpoint)
-    {
-        _socket.async_send_to(asio::buffer(message), target_endpoint,
-                              [](std::error_code, std::size_t) {
-                              });
-        std::cout << "Sent packet: " << message << " to " << target_endpoint << std::endl;
-    }
+    protected:
+    private:
+        Registry *r;
+
+        boost::asio::io_service io_service;
+        udp::socket _socket;
+        std::array<char, 1024> _recvBuffer;
+        udp::endpoint _remoteEndpoint;
+
+        void startReceive();
+
+        void handle_client(const boost::system::error_code& error,
+            std::size_t bytes_transferred);
+
+        void handle_send(std::shared_ptr<std::string> message,
+            const boost::system::error_code& ec,
+            std::size_t bytes_transferred);
 };
 
 #endif /* !SERVERENGINE_HPP_ */

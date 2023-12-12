@@ -14,10 +14,16 @@
 
 #include <SFML/Graphics.hpp>
 
+/*!
+ \class ClientEngine
+ \brief Class managing the clients engines.
+
+ This class implements the client functionalities, including receiving and sending messages to server.
+*/
 class ClientEngine
 {
 public:
-    ClientEngine(Registry *r);
+    ClientEngine(Registry *r, short server_port);
 
 protected:
 private:

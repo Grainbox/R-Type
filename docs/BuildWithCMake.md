@@ -21,3 +21,6 @@
    cmake --build .  --config Release
    ```
 4. Almost done, the binaries are located in (engine or client or server).
+
+## Next Step:
+- Once you have built your project, proceed with generating the project's documentation. Follow the instructions in [Generate Doxygen Documentation](GenerateDoxygenDocs.md).
