@@ -22,17 +22,20 @@
 #include "client/ClientEngine.hpp"
 #include "server/ServerEngine.hpp"
 
-struct EngineConfig {
+struct EngineConfig
+{
     bool isServer;
     Registry *r;
 };
 
-class ENGINE_API Engine {
-    public:
-        Engine(EngineConfig config);
-        ~Engine();
-    protected:
-    private:
+class ENGINE_API Engine
+{
+public:
+    Engine(EngineConfig config);
+    ~Engine();
+
+protected:
+private:
 };
 
 #endif /* !ENGINE_HPP_ */

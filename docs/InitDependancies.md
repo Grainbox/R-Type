@@ -45,6 +45,10 @@ This guide provides instructions on setting up the project using vcpkg to manage
    ```bash
    ./vcpkg install sfml
    ```
+   Also install Asio Library:
+   ```bash
+   ./vcpkg install asio
+   ```
 4. **Add SFML DLL Path to Windows Environment Variable:**
    To ensure the SFML libraries are correctly found, add the DLL directory to your PATH environment variable. Replace 'repo_url' with your actual repository path:
    ```plaintext
