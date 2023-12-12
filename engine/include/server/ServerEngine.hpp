@@ -11,9 +11,10 @@
 #include "ECS/Registry.hpp"
 #include "ServerSystem.hpp"
 #include <boost/asio.hpp>
-#include <boost/bind.hpp>
+#include <boost/bind/bind.hpp>
 
 using boost::asio::ip::udp;
+using namespace boost::placeholders;
 
 /*!
  \class ServerEngine

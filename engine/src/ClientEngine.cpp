@@ -88,6 +88,7 @@ void ClientEngine::processEvents()
         if (event.type == sf::Event::Closed)
             window.close();
         system.control_system(*r, event);
+        system.click_system(*r, event, window);
     }
 }
 
@@ -107,6 +108,7 @@ void ClientEngine::render()
     window.clear();
 
     system.draw_system(*r, window);
+    system.draw_hitbox_system(*r, window);
 
     window.display();
 }
