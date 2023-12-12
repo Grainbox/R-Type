@@ -3,7 +3,7 @@
 VCPKG_DIR="./vcpkg"
 
 # Check if vcpkg is installed
-if [ ! -d "$VCPKG_DIR" ]; then
+if [ ! -d "$VCPKG_DIR" ] || [ ! -f "$VCPKG_DIR/vcpkg" ]; then
     echo "vcpkg not found in $VCPKG_DIR"
     git submodule init
     git submodule update
