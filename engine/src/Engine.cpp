@@ -7,6 +7,11 @@
 
 #include "Engine.hpp"
 
+/*!
+ \brief Constructor of Engine.
+
+ \param config Pointer to a EngineConfig object.
+*/
 Engine::Engine(EngineConfig config)
 {
     if (!config.isServer) {
@@ -17,6 +22,9 @@ Engine::Engine(EngineConfig config)
     }
 }
 
+/*!
+ \brief Destructor of ServerEngine.
+*/
 Engine::~Engine()
 {
 }

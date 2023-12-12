@@ -7,6 +7,12 @@
 
 #include "server/ServerEngine.hpp"
 
+/*!
+ \brief Constructor of ServerEngine.
+
+ \param r Pointer to a Registry object.
+ \param port Port number on which the server is listening.
+*/
 ServerEngine::ServerEngine(Registry *r, short port) :
     _socket(io_service, udp::endpoint(udp::v4(), port))
 {
@@ -17,6 +23,9 @@ ServerEngine::ServerEngine(Registry *r, short port) :
     this->startReceive();
 }
 
+/*!
+ \brief Starts receiving data from the network.
+*/
 void ServerEngine::startReceive()
 {
     _socket.async_receive_from(
@@ -27,6 +36,12 @@ void ServerEngine::startReceive()
     );
 }
 
+/*!
+ \brief Handles data received from a client.
+
+ \param error Boost ASIO error code, if any.
+ \param bytes_transferred Number of bytes received.
+*/
 void ServerEngine::handle_client(const boost::system::error_code& error,
     std::size_t bytes_transferred)
 {
@@ -41,6 +56,13 @@ void ServerEngine::handle_client(const boost::system::error_code& error,
     }
 }
 
+/*!
+ \brief Handles sending data to a client.
+
+ \param message Message to send.
+ \param ec Boost ASIO error code, if any.
+ \param bytes_transferred Number of bytes sent.
+*/
 void ServerEngine::handle_send(std::shared_ptr<std::string> message,
     const boost::system::error_code& ec,
     std::size_t bytes_transferred)
