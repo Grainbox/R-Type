@@ -21,20 +21,11 @@
 #define SERVER_PORT 1024
 
 #include "ECS/Registry.hpp"
-#include "client/ClientEngine.hpp"
-#include "server/ServerEngine.hpp"
+#include "client/ClientSystem.hpp"
+#include "server/ServerSystem.hpp"
 
-/*!
- \struct EngineConfig
- \brief Struct containing engine configuration.
-
- This struct allows you to add config for the engine.
-*/
-struct EngineConfig
-{
-    bool isServer;
-    Registry *r;
-};
+#include <bitset>
+#include <sstream>
 
 /*!
  \class Engine
@@ -44,12 +35,16 @@ struct EngineConfig
 */
 class ENGINE_API Engine
 {
-public:
-    Engine(EngineConfig config);
-    ~Engine();
+    public:
+        Engine();
+        ~Engine();
 
-protected:
-private:
+    protected:
+
+        std::string stringToBinary(const std::string &s);
+        std::string binaryToString(const std::string &binary);
+
+    private:
 };
 
 #endif /* !ENGINE_HPP_ */
