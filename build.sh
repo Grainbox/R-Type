@@ -3,14 +3,14 @@
 VCPKG_DIR="./vcpkg"
 
 # Check if vcpkg is installed
-if [ ! -d "$VCPKG_DIR" ]; then
+if [ ! -d "$VCPKG_DIR" ] || [ ! -d "$VCPKG_DIR/vcpkg" ]; then
     echo "vcpkg not found in $VCPKG_DIR"
-    git submodules init
-    git submodules update
+    git submodule init
+    git submodule update
 fi
 
 # Check if vcpkg is initialized
-if [ ! "$VCPKG_DIR/vcpkg" ]; then
+if [ ! -f "$VCPKG_DIR/vcpkg" ]; then
     echo "vcpkg not initialized in $VCPKG_DIR"
     "$VCPKG_DIR/bootstrap-vcpkg.sh"
 fi

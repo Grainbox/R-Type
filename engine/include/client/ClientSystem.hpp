@@ -24,6 +24,7 @@
 #include "components/Position.hpp"
 #include "components/Clickable.hpp"
 #include "components/Hitbox.hpp"
+#include "components/KeyboardInput.hpp"
 
 #include <SFML/Graphics.hpp>
 
@@ -37,6 +38,75 @@
  */
 class ClientSystem {
     public:
+
+        /**
+         * @brief Gère la saisie de text
+         *
+         * Ce système detecte chaque touche du clavier et l'ajoute à la variable text.
+         *
+         * @param r Référence à l'objet Registry contenant les entités et composants.
+         * @param event Événement SFML capturé.
+         * @param window Fenêtre SFML pour la capture de la position de la souris.
+        */
+        void keyboard_system(Registry &r, sf::Event event, sf::RenderWindow &window) {
+            std::string scene = r.getCurrentScene();
+            Sparse_Array<KeyboardInput> &keyboards = r.getComponents<KeyboardInput>(scene);
+
+            for (size_t i = 0; i < keyboards.size(); ++i) {
+                auto &key = keyboards[i];
+
+                if (!key) continue;
+                if (event.type == sf::Event::KeyPressed) {
+                    switch (event.key.code) {
+                        case sf::Keyboard::A: key.value().text += "A"; break;
+                        case sf::Keyboard::B: key.value().text += "B"; break;
+                        case sf::Keyboard::C: key.value().text += "C"; break;
+                        case sf::Keyboard::D: key.value().text += "D"; break;
+                        case sf::Keyboard::E: key.value().text += "E"; break;
+                        case sf::Keyboard::F: key.value().text += "F"; break;
+                        case sf::Keyboard::G: key.value().text += "G"; break;
+                        case sf::Keyboard::H: key.value().text += "H"; break;
+                        case sf::Keyboard::I: key.value().text += "I"; break;
+                        case sf::Keyboard::J: key.value().text += "J"; break;
+                        case sf::Keyboard::K: key.value().text += "K"; break;
+                        case sf::Keyboard::L: key.value().text += "L"; break;
+                        case sf::Keyboard::M: key.value().text += "M"; break;
+                        case sf::Keyboard::N: key.value().text += "N"; break;
+                        case sf::Keyboard::O: key.value().text += "O"; break;
+                        case sf::Keyboard::P: key.value().text += "P"; break;
+                        case sf::Keyboard::Q: key.value().text += "Q"; break;
+                        case sf::Keyboard::R: key.value().text += "R"; break;
+                        case sf::Keyboard::S: key.value().text += "S"; break;
+                        case sf::Keyboard::T: key.value().text += "T"; break;
+                        case sf::Keyboard::U: key.value().text += "U"; break;
+                        case sf::Keyboard::V: key.value().text += "V"; break;
+                        case sf::Keyboard::W: key.value().text += "W"; break;
+                        case sf::Keyboard::X: key.value().text += "X"; break;
+                        case sf::Keyboard::Y: key.value().text += "Y"; break;
+                        case sf::Keyboard::Z: key.value().text += "Z"; break;
+                        case sf::Keyboard::Num0: key.value().text += "0"; break;
+                        case sf::Keyboard::Num1: key.value().text += "1"; break;
+                        case sf::Keyboard::Num2: key.value().text += "2"; break;
+                        case sf::Keyboard::Num3: key.value().text += "3"; break;
+                        case sf::Keyboard::Num4: key.value().text += "4"; break;
+                        case sf::Keyboard::Num5: key.value().text += "5"; break;
+                        case sf::Keyboard::Num6: key.value().text += "6"; break;
+                        case sf::Keyboard::Num7: key.value().text += "7"; break;
+                        case sf::Keyboard::Num8: key.value().text += "8"; break;
+                        case sf::Keyboard::Num9: key.value().text += "9"; break;
+
+                        case sf::Keyboard::Space: key.value().text += " "; break;
+                        case sf::Keyboard::BackSpace:
+                            if (!key.value().text.empty()) {
+                                key.value().text.pop_back();
+                            }
+                            break;
+
+                        default: break; // Pour les touches non gérées
+                    }
+                }
+            }
+        }
 
         /**
          * @brief Gère les clics de l'utilisateur.
@@ -63,7 +133,7 @@ class ClientSystem {
                     sf::Vector2i mouse = sf::Mouse::getPosition(window);
                     if (mouse.x < position.value().x || mouse.x > (position.value().x + hitbox.value().width)) continue;
                     if (mouse.y < position.value().y || mouse.y > (position.value().y + hitbox.value().height)) continue;
-                    click.value().proc();
+                    click.value().proc(r);
                 }
             }
         }

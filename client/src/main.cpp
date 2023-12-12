@@ -10,32 +10,33 @@
 
 #include "Engine.hpp"
 
-void debug()
+void debug(Registry &r)
 {
-    std::cout << "hello world" << std::endl;
+    // auto inputOpt = r.getEntityComponent<KeyboardInput>(ent, r.getCurrentScene());
+
+    // if (inputOpt.has_value()) {
+    //     auto &input = inputOpt.value();
+    //     std::cout << input.text << std::endl;
+    // } else {
+    //     std::cout << "Aucun composant KeyboardInput trouvé pour l'entité." << std::endl;
+    // }
 }
 
 void setupRegistry(Registry &r)
 {
-    Entity player = r.spawnEntity();
+    Entity textbox = r.spawnEntity();
 
-    Position pos(100, 0);
-    Drawable draw("assets/entity_1.png");
-    Controllable control;
-    control.setKeyboardKey(&control.Up, sf::Keyboard::Up);
-    control.setKeyboardKey(&control.Down, sf::Keyboard::Down);
-    control.setKeyboardKey(&control.Left, sf::Keyboard::Left);
-    control.setKeyboardKey(&control.Right, sf::Keyboard::Right);
-    Hitbox box(300, 300, true);
+    std::string message = "";
+
+    Position pos(100, 100);
+    Hitbox box(100, 30, true);
     Clickable click(debug);
-    Velocity vel(0, 0);
+    KeyboardInput keyboard;
 
-    r.addComponent<Position>(player, pos, "mainMenu");
-    r.addComponent<Drawable>(player, draw, "mainMenu");
-    r.addComponent<Controllable>(player, control, "mainMenu");
-    r.addComponent<Hitbox>(player, box, "mainMenu");
-    r.addComponent<Clickable>(player, click, "mainMenu");
-    r.addComponent<Velocity>(player, vel, "mainMenu");
+    r.addComponent<Position>(textbox, pos, "mainMenu");
+    r.addComponent<Hitbox>(textbox, box, "mainMenu");
+    r.addComponent<Clickable>(textbox, click, "mainMenu");
+    r.addComponent<KeyboardInput>(textbox, keyboard, "mainMneu");
 }
 
 int main()
