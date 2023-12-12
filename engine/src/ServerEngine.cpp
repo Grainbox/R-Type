@@ -8,12 +8,13 @@
 #include "server/ServerEngine.hpp"
 
 ServerEngine::ServerEngine(Registry *r)
+    : r(r), _io_service(), _socket(_io_service, asio::ip::udp::endpoint(asio::ip::udp::v4(), 4242))
 {
-    this->r = r;
-    this->run();
+    run();
 }
 
 void ServerEngine::run()
 {
-    while (1);
+    do_receive();
+    _io_service.run();
 }
