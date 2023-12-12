@@ -10,7 +10,7 @@ if [ ! -d "$VCPKG_DIR" ]; then
 fi
 
 # Check if vcpkg is initialized
-if [ ! "$VCPKG_DIR/vcpkg" ]; then
+if [ ! -f "$VCPKG_DIR/vcpkg" ]; then
     echo "vcpkg not initialized in $VCPKG_DIR"
     "$VCPKG_DIR/bootstrap-vcpkg.sh"
 fi
