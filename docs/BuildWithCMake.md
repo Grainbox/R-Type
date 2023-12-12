@@ -3,6 +3,11 @@
 ## Requirements:
 - CMake 3.27.2
 
+### Automated:
+Run the `build.sh` script at the root of the repository.
+
+### Manually:
+
 1. Create a build directory and navigate into it:
    ```bash
    mkdir build && cd build
