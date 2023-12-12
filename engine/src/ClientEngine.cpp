@@ -7,6 +7,12 @@
 
 #include "client/ClientEngine.hpp"
 
+/*!
+ \brief Constructor of ClientEngine.
+
+ \param r Pointer to a Registry object.
+ \param port Port number on which the client is connecting.
+*/
 ClientEngine::ClientEngine(Registry *r, short server_port)
     : r(r), window(sf::VideoMode(800, 600), "My Engine"), _udp_socket(io_context_)
 {
@@ -18,12 +24,18 @@ ClientEngine::ClientEngine(Registry *r, short server_port)
     run();
 }
 
+/*!
+ \brief Exemple function that sends a "hello" message to the server.
+*/
 void ClientEngine::send_hello()
 {
     std::string message = "hello";
     _udp_socket.send_to(asio::buffer(message), _server_endpoint);
 }
 
+/*!
+ \brief Listen for the server messages asynchronously.
+*/
 void ClientEngine::start_receive()
 {
     _udp_socket.async_receive_from(
@@ -34,6 +46,12 @@ void ClientEngine::start_receive()
         });
 }
 
+/*!
+ \brief Handles data received from the server.
+
+ \param error Boost ASIO error code, if any.
+ \param bytes_transferred Number of bytes received.
+*/
 void ClientEngine::handle_receive(const std::error_code &error, std::size_t bytes_transferred)
 {
     if (!error)
@@ -44,6 +62,9 @@ void ClientEngine::handle_receive(const std::error_code &error, std::size_t byte
     start_receive();
 }
 
+/*!
+ \brief Runs the game loop and call the ECS.
+*/
 void ClientEngine::run()
 {
     while (this->window.isOpen())
@@ -56,6 +77,9 @@ void ClientEngine::run()
     }
 }
 
+/*!
+ \brief Process the SFML events and dispatch it on event related systems.
+*/
 void ClientEngine::processEvents()
 {
     sf::Event event;
@@ -67,11 +91,17 @@ void ClientEngine::processEvents()
     }
 }
 
+/*!
+ \brief Updates the window state by calling systems.
+*/
 void ClientEngine::update()
 {
     system.position_system(*r);
 }
 
+/*!
+ \brief Render entities on the window by calling related systems.
+*/
 void ClientEngine::render()
 {
     window.clear();

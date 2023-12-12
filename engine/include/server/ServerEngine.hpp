@@ -15,6 +15,12 @@
 
 using boost::asio::ip::udp;
 
+/*!
+ \class ServerEngine
+ \brief Class managing the server engine.
+
+ This class implements the server functionalities, including receiving and sending messages to clients.
+*/
 class ServerEngine {
     public:
         ServerEngine(Registry *r, short port);

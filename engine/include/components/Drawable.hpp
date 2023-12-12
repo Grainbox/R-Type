@@ -13,6 +13,10 @@
 
 #include "Exceptions.hpp"
 
+/*!
+ \class Drawable
+ \brief Component that is used on entities that can be rendered on the window.
+*/
 class Drawable {
     public:
         Drawable(std::string spritePath) {

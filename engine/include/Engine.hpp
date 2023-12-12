@@ -24,12 +24,24 @@
 #include "client/ClientEngine.hpp"
 #include "server/ServerEngine.hpp"
 
+/*!
+ \struct EngineConfig
+ \brief Struct containing engine configuration.
+
+ This struct allows you to add config for the engine.
+*/
 struct EngineConfig
 {
     bool isServer;
     Registry *r;
 };
 
+/*!
+ \class Engine
+ \brief Class managing the engine.
+
+ This class is exposed for shared library and is dispatching client / server engines.
+*/
 class ENGINE_API Engine
 {
 public:
