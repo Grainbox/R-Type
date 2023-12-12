@@ -5,8 +5,8 @@ VCPKG_DIR="./vcpkg"
 # Check if vcpkg is installed
 if [ ! -d "$VCPKG_DIR" ]; then
     echo "vcpkg not found in $VCPKG_DIR"
-    git submodules init
-    git submodules update
+    git submodule init
+    git submodule update
 fi
 
 # Check if vcpkg is initialized
@@ -17,6 +17,7 @@ fi
 
 # Install necessary libraries using vcpkg
 "$VCPKG_DIR/vcpkg" install asio
+"$VCPKG_DIR/vcpkg" install boost-asio
 "$VCPKG_DIR/vcpkg" install sfml
 
 mkdir -p build
