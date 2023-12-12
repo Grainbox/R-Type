@@ -10,10 +10,13 @@
 
 #include "ECS/Registry.hpp"
 #include "ServerSystem.hpp"
+#include "Engine.hpp"
+
 #include <boost/asio.hpp>
-#include <boost/bind.hpp>
+#include <boost/bind/bind.hpp>
 
 using boost::asio::ip::udp;
+using namespace boost::placeholders;
 
 /*!
  \class ServerEngine
@@ -21,13 +24,11 @@ using boost::asio::ip::udp;
 
  This class implements the server functionalities, including receiving and sending messages to clients.
 */
-class ServerEngine {
+class ServerEngine : public Engine {
     public:
         ServerEngine(Registry *r, short port);
 
-        void run() {
-            io_service.run();
-        }
+        void run();
 
     protected:
     private:

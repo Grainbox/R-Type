@@ -8,7 +8,7 @@
 #include <iostream>
 #include <ostream>
 
-#include "Engine.hpp"
+#include "server/ServerEngine.hpp"
 
 void setupRegistry(Registry &r)
 {
@@ -41,9 +41,7 @@ int main()
 
         setupRegistry(r);
 
-        EngineConfig config = {true, &r};
-
-        Engine engine(config);
+        ServerEngine engine(&r, SERVER_PORT);
     }
     catch (std::exception &e)
     {
