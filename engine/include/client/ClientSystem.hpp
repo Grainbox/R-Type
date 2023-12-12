@@ -5,6 +5,14 @@
 ** ClientSystem
 */
 
+/**
+ * @file ClientSystem.hpp
+ * @brief Contient la déclaration de la classe ClientSystem.
+ *
+ * Ce fichier décrit les interfaces et les interactions des systèmes clients
+ * utilisés dans le projet B-CPP-500-REN-5-2-bsrtype-tom.daniel.
+ */
+
 #ifndef CLIENTSYSTEM_HPP_
 #define CLIENTSYSTEM_HPP_
 
@@ -19,9 +27,27 @@
 
 #include <SFML/Graphics.hpp>
 
+/**
+ * @class ClientSystem
+ * @brief Gère les interactions client dans le jeu.
+ *
+ * La classe ClientSystem offre plusieurs systèmes pour gérer les interactions
+ * client, comme la gestion des clics, le contrôle des entités, l'affichage
+ * et la mise à jour des positions.
+ */
 class ClientSystem {
     public:
 
+        /**
+         * @brief Gère les clics de l'utilisateur.
+         *
+         * Ce système détecte les clics de souris et déclenche des actions
+         * si un objet cliquable est touché.
+         *
+         * @param r Référence à l'objet Registry contenant les entités et composants.
+         * @param event Événement SFML capturé.
+         * @param window Fenêtre SFML pour la capture de la position de la souris.
+         */
         void click_system(Registry &r, sf::Event event, sf::RenderWindow &window) {
             std::string scene = r.getCurrentScene();
             Sparse_Array<Clickable> &clickables = r.getComponents<Clickable>(scene);

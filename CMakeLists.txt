@@ -3,6 +3,10 @@ project(R-Type)
 
 set(CMAKE_TOOLCHAIN_FILE "vcpkg/scripts/buildsystems/vcpkg.cmake" CACHE STRING "Vcpkg toolchain file")
 
+if(APPLE)
+    set(CMAKE_PREFIX_PATH "vcpkg/installed/arm64-osx")
+endif()
+
 find_package(asio CONFIG REQUIRED)
 find_package(SFML COMPONENTS system window graphics network audio CONFIG REQUIRED)
 
