@@ -18,35 +18,26 @@
 #define ENGINE_API
 #endif
 
-#include <SFML/Graphics.hpp>
+#define SERVER_PORT 1024
 
-#include "ECS/System.hpp"
 #include "ECS/Registry.hpp"
+#include "client/ClientEngine.hpp"
+#include "server/ServerEngine.hpp"
 
-struct EngineConfig {
+struct EngineConfig
+{
     bool isServer;
     Registry *r;
 };
 
-class ENGINE_API Engine {
-    public:
-        Engine(EngineConfig config);
-        ~Engine();
+class ENGINE_API Engine
+{
+public:
+    Engine(EngineConfig config);
+    ~Engine();
 
-        void run();
-
-    protected:
-    private:
-        sf::RenderWindow window;
-        Registry *r;
-        System system;
-
-        void processEvents();
-
-        void update();
-
-        void render();
-
+protected:
+private:
 };
 
 #endif /* !ENGINE_HPP_ */

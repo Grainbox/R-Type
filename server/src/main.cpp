@@ -31,13 +31,6 @@ void setupRegistry(Registry &r)
 
     r.addComponent<Position>(button, pos2, "mainMenu");
     r.addComponent<Drawable>(button, draw2, "mainMenu");
-
-    Entity player2 = r.spawnEntity();
-
-    r.addComponent<Position>(player2, pos, "game");
-    r.addComponent<Drawable>(player2, draw, "game");
-    r.addComponent<Controllable>(player2, control, "game");
-    r.addComponent<Velocity>(player2, vel, "game");
 }
 
 int main()
@@ -48,11 +41,9 @@ int main()
 
         setupRegistry(r);
 
-        EngineConfig config = {false, &r};
+        EngineConfig config = {true, &r};
 
         Engine engine(config);
-
-        engine.run();
     }
     catch (std::exception &e)
     {

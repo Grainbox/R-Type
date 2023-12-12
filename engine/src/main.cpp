@@ -51,8 +51,6 @@ int main()
         EngineConfig config = {true, &r};
 
         Engine engine(config);
-
-        engine.run();
     }
     catch (std::exception &e)
     {
