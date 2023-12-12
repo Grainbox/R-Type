@@ -68,6 +68,15 @@ class ClientSystem {
             }
         }
 
+        /**
+        * @brief Gère les contrôles utilisateur pour les entités.
+        *
+        * Ce système permet de gérer les entrées du clavier pour déplacer les entités
+        * ayant une composante `Controllable`.
+        *
+        * @param r Référence à l'objet Registry contenant les entités et composants.
+        * @param event Événement SFML capturé, représentant une touche pressée.
+        */
         void control_system(Registry &r, sf::Event event) {
             std::string scene = r.getCurrentScene();
             Sparse_Array<Controllable> &controllables = r.getComponents<Controllable>(scene);
@@ -96,6 +105,15 @@ class ClientSystem {
             }
         }
 
+        /**
+         * @brief Dessine les hitboxes des entités.
+         *
+         * Ce système est utilisé pour le débogage, il dessine les hitboxes des entités
+         * sur la fenêtre de rendu.
+         *
+         * @param r Référence à l'objet Registry contenant les entités et composants.
+         * @param window Fenêtre SFML dans laquelle les hitboxes sont dessinées.
+         */
         void draw_hitbox_system(Registry &r, sf::RenderWindow &window) {
             std::string scene = r.getCurrentScene();
             Sparse_Array<Hitbox> &hitboxs = r.getComponents<Hitbox>(scene);
@@ -129,6 +147,15 @@ class ClientSystem {
             }
         }
 
+        /**
+         * @brief Dessine les entités sur la fenêtre de rendu.
+         *
+         * Ce système parcourt toutes les entités disposant de composantes `Drawable`
+         * et `Position` et les dessine dans la fenêtre SFML.
+         *
+         * @param r Référence à l'objet Registry contenant les entités et composants.
+         * @param window Fenêtre SFML dans laquelle les entités sont dessinées.
+         */
         void draw_system(Registry &r, sf::RenderWindow &window) {
             std::string scene = r.getCurrentScene();
             Sparse_Array<Position> &positions = r.getComponents<Position>(scene);
@@ -148,6 +175,14 @@ class ClientSystem {
             }
         }
 
+        /**
+         * @brief Met à jour la position des entités en fonction de leur vitesse.
+         *
+         * Ce système met à jour la position des entités qui ont des composantes
+         * `Position` et `Velocity` en fonction de leur vitesse actuelle.
+         *
+         * @param r Référence à l'objet Registry contenant les entités et composants.
+         */
         void position_system(Registry &r) {
             std::string scene = r.getCurrentScene();
             Sparse_Array<Position> &positions = r.getComponents<Position>(scene);
