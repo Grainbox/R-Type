@@ -8,14 +8,16 @@
 #ifndef CLICKABLE_HPP_
 #define CLICKABLE_HPP_
 
+#include "ECS/Registry.hpp"
+
 #include <SFML/Graphics.hpp>
 
 class Clickable {
     public:
-        Clickable(const std::function<void()>& func) {
+        Clickable(const std::function<void(Registry &)>& func) {
             proc = func;
         }
-        std::function<void()> proc;
+        std::function<void(Registry &)> proc;
     protected:
     private:
 };

@@ -10,8 +10,9 @@
 
 #include "ClientSystem.hpp"
 #include "ECS/Registry.hpp"
-#include <asio.hpp>
+#include "Engine.hpp"
 
+#include <asio.hpp>
 #include <SFML/Graphics.hpp>
 
 /*!
@@ -20,33 +21,32 @@
 
  This class implements the client functionalities, including receiving and sending messages to server.
 */
-class ClientEngine
-{
-public:
-    ClientEngine(Registry *r, short server_port);
+class ClientEngine : public Engine {
+    public:
+        ClientEngine(Registry *r, short server_port);
 
-protected:
-private:
-    sf::RenderWindow window;
-    Registry *r;
-    ClientSystem system;
+    protected:
+    private:
+        sf::RenderWindow window;
+        Registry *r;
+        ClientSystem system;
 
-    asio::io_context io_context_;
-    asio::ip::udp::socket _udp_socket;
-    asio::ip::udp::endpoint _server_endpoint;
-    char recv_buffer_[1024];
+        asio::io_context io_context_;
+        asio::ip::udp::socket _udp_socket;
+        asio::ip::udp::endpoint _server_endpoint;
+        char recv_buffer_[1024];
 
-    void start_receive();
-    void handle_receive(const std::error_code &error, std::size_t bytes_transferred);
-    void send_hello();
+        void start_receive();
+        void handle_receive(const std::error_code &error, std::size_t bytes_transferred);
+        void send_hello();
 
-    void run();
+        void run();
 
-    void processEvents();
+        void processEvents();
 
-    void update();
+        void update();
 
-    void render();
+        void render();
 };
 
 #endif /* !CLIENTENGINE_HPP_ */

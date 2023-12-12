@@ -63,7 +63,7 @@ class ClientSystem {
                     sf::Vector2i mouse = sf::Mouse::getPosition(window);
                     if (mouse.x < position.value().x || mouse.x > (position.value().x + hitbox.value().width)) continue;
                     if (mouse.y < position.value().y || mouse.y > (position.value().y + hitbox.value().height)) continue;
-                    click.value().proc();
+                    click.value().proc(r);
                 }
             }
         }

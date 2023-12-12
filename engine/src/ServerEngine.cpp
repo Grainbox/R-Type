@@ -21,6 +21,14 @@ ServerEngine::ServerEngine(Registry *r, short port) :
     std::cout << "Server listening on port: " << port << std::endl;
 
     this->startReceive();
+    this->run();
+}
+
+void ServerEngine::run()
+{
+    io_service.run();
+
+    while (1);
 }
 
 /*!
@@ -46,8 +54,9 @@ void ServerEngine::handle_client(const boost::system::error_code& error,
     std::size_t bytes_transferred)
 {
     if (!error || error == boost::asio::error::message_size) {
+        auto message = std::make_shared<std::string>(_recvBuffer.data(), bytes_transferred);
 
-        auto message = std::make_shared<std::string>("Hello, World\n");
+        std::cout << "Received: " << *message << std::endl;
 
         _socket.async_send_to(boost::asio::buffer(*message), _remoteEndpoint,
             boost::bind(&ServerEngine::handle_send, this, message,
