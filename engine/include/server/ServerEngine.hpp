@@ -37,9 +37,7 @@ using namespace boost::placeholders;
 class ENGINE_API ServerEngine : public Engine {
     public:
         ServerEngine(Registry *r, short port);
-
-        void run();
-
+        ~ServerEngine();
     protected:
     private:
         Registry *r;
@@ -48,6 +46,8 @@ class ENGINE_API ServerEngine : public Engine {
         udp::socket _socket;
         std::array<char, 1024> _recvBuffer;
         udp::endpoint _remoteEndpoint;
+
+        void run();
 
         void startReceive();
 

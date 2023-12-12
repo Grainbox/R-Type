@@ -34,6 +34,7 @@
 class ENGINE_API ClientEngine : public Engine {
     public:
         ClientEngine(Registry *r, short server_port);
+        ~ClientEngine();
 
     protected:
     private:
