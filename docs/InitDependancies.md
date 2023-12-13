@@ -2,6 +2,35 @@
 
 This guide provides instructions on setting up the project using vcpkg to manage dependencies, specifically for C++ projects using SFML.
 
+## Requirements
+
+### Sur Ubuntu
+
+Pour installer les dépendances requises sur Ubuntu, utilisez le gestionnaire de paquets `apt`. Ouvrez un terminal et exécutez les commandes suivantes :
+
+```bash
+sudo apt update
+sudo apt install git libx11-dev libxrandr-dev libxcursor-dev libxi-dev libudev-dev libgl1-mesa-dev pkg-config autoconf automake libtool build-essential libssl-dev
+```
+
+Ces commandes mettront à jour la liste des paquets et installeront les paquets nécessaires pour votre environnement de build.
+
+### Sur Arch Linux
+
+Sur Arch Linux, utilisez le gestionnaire de paquets `pacman` pour installer les dépendances. Ouvrez un terminal et exécutez les commandes suivantes :
+
+```bash
+sudo pacman -Syu
+sudo pacman -S git base-devel libx11 libxrandr libxcursor libxi libudev mesa pkg-config openssl
+```
+
+Ces commandes mettront à jour votre système et installeront les paquets requis. Notez que les noms de certains paquets peuvent différer de ceux d'Ubuntu.
+
+---
+
+Assurez-vous de vérifier la compatibilité des versions de paquets avec votre projet, car les versions peuvent varier entre les différentes distributions Linux.
+
+
 ## Cloning the Project
 
 1. **Clone the project:**
