@@ -9,7 +9,7 @@ def send_to_discord(webhook_url, tasks, username):
     date_str = datetime.now().strftime("%d %B %Y")
     message = f"{date_str}:\n"
     for task in tasks:
-        message += f"- [ ] {task}\n"
+        message += f"- [] {task}\n"
 
     payload = {
         "content": message,
