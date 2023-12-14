@@ -37,6 +37,8 @@ class ServerSystem {
                 auto message = std::make_shared<std::string>(_recvBuffer.data(), bytes_transferred);
                 std::istringstream archive_stream(*message);
 
+                std::string returnMessage;
+
                 boost::archive::text_iarchive archive(archive_stream);
                 MessageHeader header;
                 archive >> header;
@@ -44,23 +46,21 @@ class ServerSystem {
                 switch (header.type) {
                     case MessageType::First_Con: {
                         FirstConMessage msg;
-                        std::istringstream archive_stream(*message);  // serialized_str est la chaîne sérialisée
+                        std::istringstream archive_stream(*message);
                         boost::archive::text_iarchive archive(archive_stream);
 
-                        archive >> msg;  // Désérialisation
-                        std::cout << "Received: " << msg.test << std::endl;
+                        archive >> msg;
+                        returnMessage = msg.test;
                         break;
                     }
                     default:
                         std::cerr << "Type de message inconnu reçu!" << std::endl;
                 }
 
-                // std::cout << "Received: " << *message << std::endl;
-
-                // _socket.async_send_to(boost::asio::buffer(*message), _remoteEndpoint,
-                //     boost::bind(&ServerSystem::handle_send, this, message,
-                //         boost::asio::placeholders::error,
-                //         boost::asio::placeholders::bytes_transferred));
+                _socket.async_send_to(boost::asio::buffer(returnMessage), _remoteEndpoint,
+                    boost::bind(&ServerSystem::handle_send, this, message,
+                        boost::asio::placeholders::error,
+                        boost::asio::placeholders::bytes_transferred));
             }
         }
 
