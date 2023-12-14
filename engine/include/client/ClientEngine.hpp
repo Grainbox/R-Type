@@ -8,6 +8,16 @@
 #ifndef CLIENTENGINE_HPP_
 #define CLIENTENGINE_HPP_
 
+#ifdef _WIN32
+#ifdef ENGINE_EXPORTS
+#define ENGINE_API __declspec(dllexport)
+#else
+#define ENGINE_API __declspec(dllimport)
+#endif
+#else
+#define ENGINE_API
+#endif
+
 #include "ClientSystem.hpp"
 #include "ECS/Registry.hpp"
 #include "Engine.hpp"
@@ -21,9 +31,10 @@
 
  This class implements the client functionalities, including receiving and sending messages to server.
 */
-class ClientEngine : public Engine {
+class ENGINE_API ClientEngine : public Engine {
     public:
         ClientEngine(Registry *r, short server_port);
+        ~ClientEngine();
 
     protected:
     private:

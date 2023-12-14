@@ -25,6 +25,13 @@ ClientEngine::ClientEngine(Registry *r, short server_port)
 }
 
 /*!
+ \brief Destructor of ClientEngine.
+*/
+ClientEngine::~ClientEngine()
+{
+}
+
+/*!
  \brief Exemple function that sends a "hello" message to the server.
 */
 void ClientEngine::send_hello()

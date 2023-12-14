@@ -23,6 +23,13 @@ ServerEngine::ServerEngine(Registry *r, short port) :
     this->run();
 }
 
+/*!
+ \brief Destructor of ServerEngine.
+*/
+ServerEngine::~ServerEngine()
+{
+}
+
 void ServerEngine::run()
 {
     io_service.run();

@@ -5,6 +5,10 @@ set(CMAKE_TOOLCHAIN_FILE "vcpkg/scripts/buildsystems/vcpkg.cmake" CACHE STRING "
 
 if(APPLE)
     set(CMAKE_PREFIX_PATH "vcpkg/installed/arm64-osx")
+elseif(UNIX)
+    set(CMAKE_PREFIX_PATH "vcpkg/installed/x64-linux")
+elseif(WIN32)
+    set(CMAKE_PREFIX_PATH "vcpkg/installed/x64-windows")
 endif()
 
 find_package(asio CONFIG REQUIRED)
