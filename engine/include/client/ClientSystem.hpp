@@ -25,6 +25,7 @@
 #include "components/Clickable.hpp"
 #include "components/Hitbox.hpp"
 
+#include <asio.hpp>
 #include <SFML/Graphics.hpp>
 
 /**
@@ -37,6 +38,51 @@
  */
 class ClientSystem {
     public:
+        ClientSystem(Registry &r, short server_port) : _udp_socket(io_context_), r(r), window(sf::VideoMode(800, 600), "My Engine")
+        {
+            _udp_socket.open(asio::ip::udp::v4());
+            _server_endpoint = asio::ip::udp::endpoint(asio::ip::address::from_string("127.0.0.1"), server_port);
+
+            start_receive();
+        }
+
+        /*!
+        \brief Exemple function that sends a "hello" message to the server.
+        */
+        void send_hello()
+        {
+            std::string message = "hello";
+            _udp_socket.send_to(asio::buffer(message), _server_endpoint);
+        }
+
+        /*!
+        \brief Listen for the server messages asynchronously.
+        */
+        void start_receive()
+        {
+            _udp_socket.async_receive_from(
+                asio::buffer(recv_buffer_), _server_endpoint,
+                [this](std::error_code ec, std::size_t bytes_recvd)
+                {
+                    handle_receive_system(ec, bytes_recvd);
+                });
+        }
+
+        /*!
+        \brief Handles data received from the server.
+
+        \param error Boost ASIO error code, if any.
+        \param bytes_transferred Number of bytes received.
+        */
+        void handle_receive_system(const std::error_code &error, std::size_t bytes_transferred)
+        {
+            if (!error)
+            {
+                std::string received_message(recv_buffer_, bytes_transferred);
+                std::cout << "Received: " << received_message << std::endl;
+            }
+            start_receive();
+        }
 
         /**
          * @brief Gère les clics de l'utilisateur.
@@ -48,7 +94,7 @@ class ClientSystem {
          * @param event Événement SFML capturé.
          * @param window Fenêtre SFML pour la capture de la position de la souris.
          */
-        void click_system(Registry &r, sf::Event event, sf::RenderWindow &window) {
+        void click_system(sf::Event event) {
             std::string scene = r.getCurrentScene();
             Sparse_Array<Clickable> &clickables = r.getComponents<Clickable>(scene);
             Sparse_Array<Hitbox> &hitboxs = r.getComponents<Hitbox>(scene);
@@ -68,7 +114,7 @@ class ClientSystem {
             }
         }
 
-        void control_system(Registry &r, sf::Event event) {
+        void control_system(sf::Event event) {
             std::string scene = r.getCurrentScene();
             Sparse_Array<Controllable> &controllables = r.getComponents<Controllable>(scene);
             Sparse_Array<Velocity> &velocities = r.getComponents<Velocity>(scene);
@@ -96,7 +142,7 @@ class ClientSystem {
             }
         }
 
-        void draw_hitbox_system(Registry &r, sf::RenderWindow &window) {
+        void draw_hitbox_system() {
             std::string scene = r.getCurrentScene();
             Sparse_Array<Hitbox> &hitboxs = r.getComponents<Hitbox>(scene);
             Sparse_Array<Position> &positions = r.getComponents<Position>(scene);
@@ -129,7 +175,7 @@ class ClientSystem {
             }
         }
 
-        void draw_system(Registry &r, sf::RenderWindow &window) {
+        void draw_system() {
             std::string scene = r.getCurrentScene();
             Sparse_Array<Position> &positions = r.getComponents<Position>(scene);
             Sparse_Array<Drawable> &drawables = r.getComponents<Drawable>(scene);
@@ -148,7 +194,7 @@ class ClientSystem {
             }
         }
 
-        void position_system(Registry &r) {
+        void position_system() {
             std::string scene = r.getCurrentScene();
             Sparse_Array<Position> &positions = r.getComponents<Position>(scene);
             Sparse_Array<Velocity> &velocities = r.getComponents<Velocity>(scene);
@@ -165,8 +211,16 @@ class ClientSystem {
                 pos.value().y += vel.value().vy;
             }
         }
+
+        asio::io_context io_context_;
+        sf::RenderWindow window;
     protected:
     private:
+        asio::ip::udp::socket _udp_socket;
+        asio::ip::udp::endpoint _server_endpoint;
+        char recv_buffer_[1024];
+
+        Registry &r;
 
 };
 
