@@ -40,6 +40,9 @@ int main()
     {
         Registry r("mainMenu");
 
+        InitWindow(800, 600, "My Engine");
+        SetTargetFPS(60);
+
         setupRegistry(&r);
 
         ClientEngine engine(&r, SERVER_PORT);

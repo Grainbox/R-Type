@@ -3,10 +3,10 @@ target_sources(server PRIVATE
     src/main.cpp
 )
 
-find_package(SFML COMPONENTS system window graphics network audio REQUIRED)
+set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -g")
 
 target_include_directories(server PUBLIC include)
-target_link_libraries(server PRIVATE engine sfml-system sfml-window sfml-graphics sfml-network sfml-audio)
+target_link_libraries(server PRIVATE engine raylib)
 
 add_custom_command(TARGET server POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_directory

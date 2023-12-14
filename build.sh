@@ -18,12 +18,12 @@ fi
 # Install necessary libraries using vcpkg
 "$VCPKG_DIR/vcpkg" install asio
 "$VCPKG_DIR/vcpkg" install boost-asio
-"$VCPKG_DIR/vcpkg" install sfml
+"$VCPKG_DIR/vcpkg" install raylib
 
 mkdir -p build
 cd build
 
-cmake -DCMAKE_BUILD_TYPE=Debug ..
+cmake ..
 cmake --build .
 
 cd ..

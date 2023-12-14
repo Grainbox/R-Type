@@ -22,8 +22,6 @@
 #include "ECS/Registry.hpp"
 #include "Engine.hpp"
 
-#include <SFML/Graphics.hpp>
-
 /*!
  \class ClientEngine
  \brief Class managing the clients engines.
