@@ -19,7 +19,7 @@ using namespace boost::placeholders;
 
 class ServerSystem {
     public:
-        ServerSystem(Registry &r, short port) : _socket(io_service, udp::endpoint(udp::v4(), port)), r(r) {
+        ServerSystem(Registry *r, short port) : _socket(io_service, udp::endpoint(udp::v4(), port)), r(r) {
             startReceive();
         }
 
@@ -29,7 +29,7 @@ class ServerSystem {
         \param error Boost ASIO error code, if any.
         \param bytes_transferred Number of bytes received.
         */
-        void handle_client(Registry &r, const boost::system::error_code& error,
+        void handle_client(Registry *r, const boost::system::error_code& error,
             std::size_t bytes_transferred)
         {
             if (!error || error == boost::asio::error::message_size) {
@@ -79,7 +79,7 @@ class ServerSystem {
         std::array<char, 1024> _recvBuffer;
         udp::endpoint _remoteEndpoint;
 
-        Registry &r;
+        Registry *r;
 };
 
 #endif /* !SERVERSYSTEM_HPP_ */

@@ -19,12 +19,14 @@
 */
 class Drawable {
     public:
-        Drawable(std::string spritePath) {
+        Drawable(std::string spritePath) : spritePath(spritePath) {
             if (!this->texture.loadFromFile(spritePath)) {
                 throw LoadAssetException("Failed to load asset: " + spritePath);
             }
+            sprite.setTexture(texture);
         };
 
+        std::string spritePath;
         sf::Texture texture;
         sf::Sprite sprite;
     protected:

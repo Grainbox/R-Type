@@ -14,7 +14,7 @@
  \param port Port number on which the client is connecting.
 */
 ClientEngine::ClientEngine(Registry *r, short server_port)
-    : r(r), system(*r, server_port)
+    : r(r), system(r, server_port)
 {
     system.send_hello();
     run();
@@ -72,8 +72,8 @@ void ClientEngine::render()
 {
     this->system.window.clear();
 
-    system.draw_system();
     system.draw_hitbox_system();
+    system.draw_system();
 
     this->system.window.display();
 }
