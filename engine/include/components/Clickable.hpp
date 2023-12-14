@@ -10,8 +10,6 @@
 
 #include "ECS/Registry.hpp"
 
-#include <SFML/Graphics.hpp>
-
 class Clickable {
     public:
         Clickable(const std::function<void(Registry *)>& func) {

@@ -32,7 +32,7 @@ ClientEngine::~ClientEngine()
 */
 void ClientEngine::run()
 {
-    while (this->system.window.isOpen())
+    while (!WindowShouldClose())
     {
         this->processEvents();
         this->update();
@@ -47,14 +47,8 @@ void ClientEngine::run()
 */
 void ClientEngine::processEvents()
 {
-    sf::Event event;
-    while (this->system.window.pollEvent(event))
-    {
-        if (event.type == sf::Event::Closed)
-            this->system.window.close();
-        system.control_system(event);
-        system.click_system(event);
-    }
+    system.control_system();
+    system.click_system();
 }
 
 /*!
@@ -70,10 +64,12 @@ void ClientEngine::update()
 */
 void ClientEngine::render()
 {
-    this->system.window.clear();
+    BeginDrawing();
+
+    ClearBackground(BLACK);
 
     system.draw_hitbox_system();
     system.draw_system();
 
-    this->system.window.display();
+    EndDrawing();
 }

@@ -40,17 +40,10 @@ int main()
     {
         Registry r("mainMenu");
 
+        InitWindow(800, 600, "My Engine");
+        SetTargetFPS(60);
+
         setupRegistry(&r);
-
-        auto &comps = r.getComponents<Drawable>(r.getCurrentScene());
-
-        for (size_t i = 0; i < comps.size(); i++) {
-            auto &comp = comps[i];
-
-            if (!comp)
-                continue;
-            std::cout << i << ": " << &comp.value().sprite << std::endl;
-        }
 
         ClientEngine engine(&r, SERVER_PORT);
     }
