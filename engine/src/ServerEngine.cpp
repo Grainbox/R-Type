@@ -20,7 +20,6 @@ ServerEngine::ServerEngine(Registry *r, short port) :
 
     std::cout << "Server listening on port: " << port << std::endl;
 
-    this->startReceive();
     this->run();
 }
 
@@ -28,7 +27,9 @@ void ServerEngine::run()
 {
     io_service.run();
 
-    while (1);
+    while (1) {
+        this->startReceive();
+    }
 }
 
 /*!
