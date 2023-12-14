@@ -50,19 +50,29 @@ class ServerSystem {
                         boost::archive::text_iarchive archive(archive_stream);
 
                         archive >> msg;
-                        returnMessage = msg.test;
+                        clients_entity[_remoteEndpoint] = r->spawnEntity();
                         break;
                     }
                     default:
                         std::cerr << "Type de message inconnu reçu!" << std::endl;
                 }
-
                 _socket.async_send_to(boost::asio::buffer(returnMessage), _remoteEndpoint,
                     boost::bind(&ServerSystem::handle_send, this, message,
                         boost::asio::placeholders::error,
                         boost::asio::placeholders::bytes_transferred));
             }
         }
+
+        boost::asio::io_service io_service;
+    protected:
+    private:
+        udp::socket _socket;
+        std::array<char, 1024> _recvBuffer;
+        udp::endpoint _remoteEndpoint;
+
+        std::unordered_map<udp::endpoint, size_t> clients_entity;
+
+        Registry *r;
 
         /*!
         \brief Starts receiving data from the network.
@@ -91,15 +101,6 @@ class ServerSystem {
         {
             startReceive();
         }
-
-        boost::asio::io_service io_service;
-    protected:
-    private:
-        udp::socket _socket;
-        std::array<char, 1024> _recvBuffer;
-        udp::endpoint _remoteEndpoint;
-
-        Registry *r;
 };
 
 #endif /* !SERVERSYSTEM_HPP_ */

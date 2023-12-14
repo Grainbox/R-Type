@@ -53,7 +53,6 @@ class ClientSystem {
         void send_first_con()
         {
             FirstConMessage msg;
-            msg.test = "hello";
             std::ostringstream archive_stream;
             boost::archive::text_oarchive archive(archive_stream);
 
