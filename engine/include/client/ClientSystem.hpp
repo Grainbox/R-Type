@@ -24,6 +24,7 @@
 #include "components/Position.hpp"
 #include "components/Clickable.hpp"
 #include "components/Hitbox.hpp"
+#include "Communication_Structures.hpp"
 
 #include <asio.hpp>
 #include <raylib.h>
@@ -47,12 +48,20 @@ class ClientSystem {
         }
 
         /*!
-        \brief Exemple function that sends a "hello" message to the server->
+        \brief Send the first connection message to the server
         */
-        void send_hello()
+        void send_first_con()
         {
-            std::string message = "hello";
-            _udp_socket.send_to(asio::buffer(message), _server_endpoint);
+            FirstConMessage msg;
+            msg.test = "hello";
+            std::ostringstream archive_stream;
+            boost::archive::text_oarchive archive(archive_stream);
+
+            archive << msg;
+
+            std::string serialized_str = archive_stream.str();
+
+            _udp_socket.send_to(asio::buffer(serialized_str), _server_endpoint);
         }
 
         /*!

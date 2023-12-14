@@ -108,3 +108,61 @@ if (type == MessageType::Hello) {
     // ... Traitez le message Hello
 }
 ```
+
+
+```cpp
+#include <cstring>
+#include <cstdint>
+
+// Continuez à utiliser l'énumération existante pour les types de messages
+enum class MessageType : uint8_t {
+    Hello = 0,
+    Position = 1,
+    // ... autres types de messages
+};
+
+// Structure de base pour un message
+struct MessageHeader {
+    MessageType type;
+    // Ajouter d'autres champs communs à tous les messages si nécessaire
+};
+
+// Structure pour un message de position
+struct PositionMessage {
+    MessageHeader header; // L'en-tête avec le type de message
+    float x;              // Coordonnée X
+    float y;              // Coordonnée Y
+
+    // Convertit la structure en un buffer pour l'envoi
+    void serialize(char* buffer) const {
+        std::memcpy(buffer, this, sizeof(PositionMessage));
+    }
+
+    // Remplit la structure à partir d'un buffer
+    static PositionMessage deserialize(const char* buffer) {
+        PositionMessage msg;
+        std::memcpy(&msg, buffer, sizeof(PositionMessage));
+        return msg;
+    }
+};
+
+// Exemple d'utilisation pour sérialisation
+PositionMessage posMsg;
+posMsg.header.type = MessageType::Position;
+posMsg.x = 100.0f; // Exemple de coordonnée X
+posMsg.y = 200.0f; // Exemple de coordonnée Y
+
+char buffer[sizeof(PositionMessage)];
+posMsg.serialize(buffer);
+
+// Envoyer buffer via UDP...
+
+// À la réception
+PositionMessage receivedPosMsg = PositionMessage::deserialize(buffer);
+if (receivedPosMsg.header.type == MessageType::Position) {
+    // Traiter le message Position
+    float x = receivedPosMsg.x;
+    float y = receivedPosMsg.y;
+    // Faites quelque chose avec x et y...
+}
+```

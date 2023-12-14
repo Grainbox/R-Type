@@ -16,7 +16,7 @@
 ClientEngine::ClientEngine(Registry *r, short server_port)
     : r(r), system(r, server_port)
 {
-    system.send_hello();
+    system.send_first_con();
     run();
 }
 

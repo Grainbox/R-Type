@@ -12,6 +12,7 @@
 #include <boost/asio.hpp>
 #include <boost/bind/bind.hpp>
 
+#include "Communication_Structures.hpp"
 #include "ECS/Registry.hpp"
 
 using boost::asio::ip::udp;
@@ -34,13 +35,32 @@ class ServerSystem {
         {
             if (!error || error == boost::asio::error::message_size) {
                 auto message = std::make_shared<std::string>(_recvBuffer.data(), bytes_transferred);
+                std::istringstream archive_stream(*message);
 
-                std::cout << "Received: " << *message << std::endl;
+                boost::archive::text_iarchive archive(archive_stream);
+                MessageHeader header;
+                archive >> header;
 
-                _socket.async_send_to(boost::asio::buffer(*message), _remoteEndpoint,
-                    boost::bind(&ServerSystem::handle_send, this, message,
-                        boost::asio::placeholders::error,
-                        boost::asio::placeholders::bytes_transferred));
+                switch (header.type) {
+                    case MessageType::First_Con: {
+                        FirstConMessage msg;
+                        std::istringstream archive_stream(*message);  // serialized_str est la chaîne sérialisée
+                        boost::archive::text_iarchive archive(archive_stream);
+
+                        archive >> msg;  // Désérialisation
+                        std::cout << "Received: " << msg.test << std::endl;
+                        break;
+                    }
+                    default:
+                        std::cerr << "Type de message inconnu reçu!" << std::endl;
+                }
+
+                // std::cout << "Received: " << *message << std::endl;
+
+                // _socket.async_send_to(boost::asio::buffer(*message), _remoteEndpoint,
+                //     boost::bind(&ServerSystem::handle_send, this, message,
+                //         boost::asio::placeholders::error,
+                //         boost::asio::placeholders::bytes_transferred));
             }
         }
 

@@ -24,9 +24,6 @@
 #include "client/ClientSystem.hpp"
 #include "server/ServerSystem.hpp"
 
-#include <bitset>
-#include <sstream>
-
 /*!
  \class Engine
  \brief Class managing the engine.
