@@ -10,32 +10,28 @@
 
 #include "client/ClientEngine.hpp"
 
-void debug(Registry &r)
+void debug (Registry *r)
 {
     std::cout << "hello world" << std::endl;
 }
 
-void setupRegistry(Registry &r)
+void setupRegistry(Registry *r)
 {
-    Entity player = r.spawnEntity();
+    Entity player = r->spawnEntity();
 
     Position pos(100, 0);
     Drawable draw("assets/entity_1.png");
     Controllable control;
-    control.setKeyboardKey(&control.Up, sf::Keyboard::Up);
-    control.setKeyboardKey(&control.Down, sf::Keyboard::Down);
-    control.setKeyboardKey(&control.Left, sf::Keyboard::Left);
-    control.setKeyboardKey(&control.Right, sf::Keyboard::Right);
-    Hitbox box(300, 300, true);
+    Hitbox box(100, 300, true);
     Clickable click(debug);
     Velocity vel(0, 0);
 
-    r.addComponent<Position>(player, pos, "mainMenu");
-    r.addComponent<Drawable>(player, draw, "mainMenu");
-    r.addComponent<Controllable>(player, control, "mainMenu");
-    r.addComponent<Hitbox>(player, box, "mainMenu");
-    r.addComponent<Clickable>(player, click, "mainMenu");
-    r.addComponent<Velocity>(player, vel, "mainMenu");
+    r->addComponent<Position>(player, pos, "mainMenu");
+    r->addComponent<Drawable>(player, draw, "mainMenu");
+    r->addComponent<Controllable>(player, control, "mainMenu");
+    r->addComponent<Hitbox>(player, box, "mainMenu");
+    r->addComponent<Clickable>(player, click, "mainMenu");
+    r->addComponent<Velocity>(player, vel, "mainMenu");
 }
 
 int main()
@@ -44,7 +40,10 @@ int main()
     {
         Registry r("mainMenu");
 
-        setupRegistry(r);
+        InitWindow(800, 600, "My Engine");
+        SetTargetFPS(60);
+
+        setupRegistry(&r);
 
         ClientEngine engine(&r, SERVER_PORT);
     }

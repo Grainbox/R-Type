@@ -22,9 +22,6 @@
 #include "ECS/Registry.hpp"
 #include "Engine.hpp"
 
-#include <asio.hpp>
-#include <SFML/Graphics.hpp>
-
 /*!
  \class ClientEngine
  \brief Class managing the clients engines.
@@ -38,18 +35,8 @@ class ENGINE_API ClientEngine : public Engine {
 
     protected:
     private:
-        sf::RenderWindow window;
         Registry *r;
         ClientSystem system;
-
-        asio::io_context io_context_;
-        asio::ip::udp::socket _udp_socket;
-        asio::ip::udp::endpoint _server_endpoint;
-        char recv_buffer_[1024];
-
-        void start_receive();
-        void handle_receive(const std::error_code &error, std::size_t bytes_transferred);
-        void send_hello();
 
         void run();
 
