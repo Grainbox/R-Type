@@ -10,7 +10,7 @@
 
 #include "client/ClientEngine.hpp"
 
-void debug (Registry *r)
+void debug(Registry *r)
 {
     std::cout << "hello world" << std::endl;
 }
@@ -19,19 +19,37 @@ void setupRegistry(Registry *r)
 {
     Entity player = r->spawnEntity();
 
-    Position pos(100, 0);
-    Drawable draw("assets/entity_1.png");
-    Controllable control;
-    Hitbox box(100, 300, true);
-    Clickable click(debug);
-    Velocity vel(0, 0);
+    Entity playButton = r->spawnEntity();
+    Entity settingsButton = r->spawnEntity();
+    Entity leaveButton = r->spawnEntity();
 
-    r->addComponent<Position>(player, pos, "mainMenu");
-    r->addComponent<Drawable>(player, draw, "mainMenu");
-    r->addComponent<Controllable>(player, control, "mainMenu");
-    r->addComponent<Hitbox>(player, box, "mainMenu");
-    r->addComponent<Clickable>(player, click, "mainMenu");
-    r->addComponent<Velocity>(player, vel, "mainMenu");
+    Position pos(300, 100);
+
+    Position playPos(400, 100);
+    Position settingsPos(400, 250);
+    Position leavePos(400, 400);
+
+    Drawable draw("assets/entity_1.png");
+    // Controllable control;
+    Hitbox box(100, 100, true);
+    Clickable click(debug);
+    // Clickable clickPlay(debugClick("playButton"));
+    // Velocity vel(0, 0);
+
+    // r->addComponent<Position>(player, pos, "mainMenu");
+    // r->addComponent<Drawable>(player, draw, "mainMenu");
+    // // r->addComponent<Controllable>(player, control, "mainMenu");
+    // r->addComponent<Hitbox>(player, box, "mainMenu");
+    // r->addComponent<Clickable>(player, click, "mainMenu");
+    // // r->addComponent<Velocity>(player, vel, "mainMenu");
+
+    r->addComponent<Position>(playButton, playPos, "mainMenu");
+    r->addComponent<Position>(settingsButton, settingsPos, "mainMenu");
+    r->addComponent<Position>(leaveButton, leavePos, "mainMenu");
+
+    r->addComponent<Drawable>(playButton, draw, "mainMenu");
+    r->addComponent<Drawable>(settingsButton, draw, "mainMenu");
+    r->addComponent<Drawable>(leaveButton, draw, "mainMenu");
 }
 
 int main()
