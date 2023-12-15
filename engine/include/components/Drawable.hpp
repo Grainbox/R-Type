@@ -25,6 +25,15 @@ class Drawable {
                 throw LoadAssetException("Failed to load asset: " + spritePath);
             }
         };
+        Drawable(std::string spritePath, int resizeWidth, int resizeHeight) {
+            Image image = LoadImage(spritePath.c_str());
+            ImageResize(&image, resizeWidth, resizeHeight);
+            this->texture = LoadTextureFromImage(image);
+            UnloadImage(image);
+            if (!this->texture.id) {
+                throw LoadAssetException("Failed to load asset: " + spritePath);
+            }
+        };
 
         Texture2D texture;
     protected:
