@@ -16,7 +16,9 @@
 #include <sstream>
 
 enum class MessageType : uint8_t {
-    First_Con = 0
+    First_Con = 0,
+    Disconnect = 1,
+    Create_Game = 2
 };
 
 struct MessageHeader {
@@ -28,14 +30,35 @@ struct MessageHeader {
     }
 };
 
+struct DisconnectMessage {
+    MessageHeader header;
+
+    std::string reason;
+
+    template<class Archive>
+    void serialize(Archive &ar, const unsigned int version) {
+        ar & header;
+        ar & reason;
+    }
+};
+
 struct FirstConMessage {
     MessageHeader header;
-    std::string test;
 
     template<class Archive>
     void serialize(Archive &ar, const unsigned int version) {
         ar & header;
     }
 };
+
+struct CreateGameMessage {
+    MessageHeader header;
+
+    template<class Archive>
+    void serialize(Archive &ar, const unsigned int version) {
+        ar & header;
+    }
+};
+
 
 #endif /* !COMMUNICATION_STRUCTURES_HPP_ */

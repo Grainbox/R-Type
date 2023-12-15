@@ -33,34 +33,55 @@ class ServerSystem {
         void handle_client(Registry *r, const boost::system::error_code& error,
             std::size_t bytes_transferred)
         {
+            std::cout << "-------------------------------------" << std::endl;
+            std::cout << "Bytes received: " << bytes_transferred << std::endl;
+
             if (!error || error == boost::asio::error::message_size) {
                 auto message = std::make_shared<std::string>(_recvBuffer.data(), bytes_transferred);
+
+                std::cout << "Received data: " << *message << std::endl;
+
                 std::istringstream archive_stream(*message);
-
-                std::string returnMessage;
-
                 boost::archive::text_iarchive archive(archive_stream);
-                MessageHeader header;
-                archive >> header;
+                FirstConMessage msg;
+                archive >> msg;
 
-                switch (header.type) {
+                std::cout << "Deserialized message type: " << static_cast<int>(msg.header.type) << std::endl << std::endl;
+
+                switch (msg.header.type) {
                     case MessageType::First_Con: {
-                        FirstConMessage msg;
+                        Entity client = r->spawnEntity();
+                        clients_entity[_remoteEndpoint] = client.getEntityId();
+
+                        std::cout << "Client Connected, assigned on: " << client.getEntityId() << std::endl;
+                        break;
+                    }
+                    case MessageType::Disconnect: {
+                        DisconnectMessage msg;
                         std::istringstream archive_stream(*message);
                         boost::archive::text_iarchive archive(archive_stream);
 
                         archive >> msg;
-                        clients_entity[_remoteEndpoint] = r->spawnEntity();
+
+                        r->killEntity(clients_entity[_remoteEndpoint], r->getCurrentScene());
+                        clients_entity.erase(_remoteEndpoint);
+
+                        std::cout << "Client Disconnected for reason: " << msg.reason << std::endl;
+                        break;
+                    }
+                    case MessageType::Create_Game: {
+                        std::cout << "Create Game" << std::endl;
                         break;
                     }
                     default:
-                        std::cerr << "Type de message inconnu reçu!" << std::endl;
+                        std::cerr << "Unknown message type received!" << std::endl;
                 }
-                _socket.async_send_to(boost::asio::buffer(returnMessage), _remoteEndpoint,
+                _socket.async_send_to(boost::asio::buffer("hello"), _remoteEndpoint,
                     boost::bind(&ServerSystem::handle_send, this, message,
                         boost::asio::placeholders::error,
                         boost::asio::placeholders::bytes_transferred));
             }
+            std::cout << "-------------------------------------" << std::endl;
         }
 
         boost::asio::io_service io_service;
