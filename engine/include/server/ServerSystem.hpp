@@ -11,6 +11,7 @@
 #include <memory>
 #include <boost/asio.hpp>
 #include <boost/bind/bind.hpp>
+#include <map>
 
 #include "Communication_Structures.hpp"
 #include "ECS/Registry.hpp"
@@ -46,37 +47,27 @@ class ServerSystem {
                 FirstConMessage msg;
                 archive >> msg;
 
+                std::string returnMessage = "ERROR";
+
                 std::cout << "Deserialized message type: " << static_cast<int>(msg.header.type) << std::endl << std::endl;
 
                 switch (msg.header.type) {
                     case MessageType::First_Con: {
-                        Entity client = r->spawnEntity();
-                        clients_entity[_remoteEndpoint] = client.getEntityId();
-
-                        std::cout << "Client Connected, assigned on: " << client.getEntityId() << std::endl;
+                        returnMessage = client_connect_handler(msg, archive_stream, archive);
                         break;
                     }
                     case MessageType::Disconnect: {
-                        DisconnectMessage msg;
-                        std::istringstream archive_stream(*message);
-                        boost::archive::text_iarchive archive(archive_stream);
-
-                        archive >> msg;
-
-                        r->killEntity(clients_entity[_remoteEndpoint], r->getCurrentScene());
-                        clients_entity.erase(_remoteEndpoint);
-
-                        std::cout << "Client Disconnected for reason: " << msg.reason << std::endl;
+                        returnMessage = client_disconnect_handler(*message);
                         break;
                     }
                     case MessageType::Create_Game: {
-                        std::cout << "Create Game" << std::endl;
+                        returnMessage = create_game_handler(*message);
                         break;
                     }
                     default:
-                        std::cerr << "Unknown message type received!" << std::endl;
+                        returnMessage = "Unknown message type received!";
                 }
-                _socket.async_send_to(boost::asio::buffer("hello"), _remoteEndpoint,
+                _socket.async_send_to(boost::asio::buffer(returnMessage), _remoteEndpoint,
                     boost::bind(&ServerSystem::handle_send, this, message,
                         boost::asio::placeholders::error,
                         boost::asio::placeholders::bytes_transferred));
@@ -94,6 +85,38 @@ class ServerSystem {
         std::unordered_map<udp::endpoint, size_t> clients_entity;
 
         Registry *r;
+
+        std::string client_connect_handler(FirstConMessage &msg,
+            std::istringstream &archive_stream,
+            boost::archive::text_iarchive &archive)
+        {
+            Entity client = r->spawnEntity();
+            clients_entity[_remoteEndpoint] = client.getEntityId();
+
+            std::cout << "Client Connected, assigned on: " << client.getEntityId() << std::endl;
+            return "Client Connected";
+        }
+
+        std::string client_disconnect_handler(std::string message)
+        {
+            DisconnectMessage msg;
+            std::istringstream archive_stream(message);
+            boost::archive::text_iarchive archive(archive_stream);
+
+            archive >> msg;
+
+            r->killEntity(clients_entity[_remoteEndpoint], r->getCurrentScene());
+            clients_entity.erase(_remoteEndpoint);
+
+            std::cout << "Client Disconnected for reason: " << msg.reason << std::endl;
+            return "Client Disconnected";
+        }
+
+        std::string create_game_handler(std::string message)
+        {
+            std::cout << "Create Game" << std::endl;
+            return "Game Created";
+        }
 
         /*!
         \brief Starts receiving data from the network.
