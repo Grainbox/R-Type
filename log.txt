@@ -1,0 +1,57 @@
+ld: warning: ignoring file '/Users/mathieurio/delivery/Tek/B-CPP-500-REN-5-2-rtype-tom.daniel/vcpkg/installed/arm64-osx/lib/libraylib.a[29](raudio.c.o)': found architecture 'arm64', required architecture 'x86_64'
+ld: warning: ignoring file '/Users/mathieurio/delivery/Tek/B-CPP-500-REN-5-2-rtype-tom.daniel/vcpkg/installed/arm64-osx/lib/libraylib.a[28](utils.c.o)': found architecture 'arm64', required architecture 'x86_64'
+ld: warning: ignoring file '/Users/mathieurio/delivery/Tek/B-CPP-500-REN-5-2-rtype-tom.daniel/vcpkg/installed/arm64-osx/lib/libraylib.a[27](rtextures.c.o)': found architecture 'arm64', required architecture 'x86_64'
+ld: warning: ignoring file '/Users/mathieurio/delivery/Tek/B-CPP-500-REN-5-2-rtype-tom.daniel/vcpkg/installed/arm64-osx/lib/libraylib.a[26](rtext.c.o)': found architecture 'arm64', required architecture 'x86_64'
+ld: warning: ignoring file '/Users/mathieurio/delivery/Tek/B-CPP-500-REN-5-2-rtype-tom.daniel/vcpkg/installed/arm64-osx/lib/libraylib.a[25](rshapes.c.o)': found architecture 'arm64', required architecture 'x86_64'
+ld: warning: ignoring file '/Users/mathieurio/delivery/Tek/B-CPP-500-REN-5-2-rtype-tom.daniel/vcpkg/installed/arm64-osx/lib/libraylib.a[24](rmodels.c.o)': found architecture 'arm64', required architecture 'x86_64'
+ld: warning: ignoring file '/Users/mathieurio/delivery/Tek/B-CPP-500-REN-5-2-rtype-tom.daniel/vcpkg/installed/arm64-osx/lib/libraylib.a[23](rcore.c.o)': found architecture 'arm64', required architecture 'x86_64'
+ld: warning: ignoring file '/Users/mathieurio/delivery/Tek/B-CPP-500-REN-5-2-rtype-tom.daniel/vcpkg/installed/arm64-osx/lib/libraylib.a[22](nsgl_context.m.o)': found architecture 'arm64', required architecture 'x86_64'
+ld: warning: ignoring file '/Users/mathieurio/delivery/Tek/B-CPP-500-REN-5-2-rtype-tom.daniel/vcpkg/installed/arm64-osx/lib/libraylib.a[21](cocoa_window.m.o)': found architecture 'arm64', required architecture 'x86_64'
+ld: warning: ignoring file '/Users/mathieurio/delivery/Tek/B-CPP-500-REN-5-2-rtype-tom.daniel/vcpkg/installed/arm64-osx/lib/libraylib.a[20](cocoa_monitor.m.o)': found architecture 'arm64', required architecture 'x86_64'
+ld: warning: ignoring file '/Users/mathieurio/delivery/Tek/B-CPP-500-REN-5-2-rtype-tom.daniel/vcpkg/installed/arm64-osx/lib/libraylib.a[19](cocoa_joystick.m.o)': found architecture 'arm64', required architecture 'x86_64'
+ld: warning: ignoring file '/Users/mathieurio/delivery/Tek/B-CPP-500-REN-5-2-rtype-tom.daniel/vcpkg/installed/arm64-osx/lib/libraylib.a[18](cocoa_init.m.o)': found architecture 'arm64', required architecture 'x86_64'
+ld: warning: ignoring file '/Users/mathieurio/delivery/Tek/B-CPP-500-REN-5-2-rtype-tom.daniel/vcpkg/installed/arm64-osx/lib/libraylib.a[17](posix_thread.c.o)': found architecture 'arm64', required architecture 'x86_64'
+ld: warning: ignoring file '/Users/mathieurio/delivery/Tek/B-CPP-500-REN-5-2-rtype-tom.daniel/vcpkg/installed/arm64-osx/lib/libraylib.a[16](posix_module.c.o)': found architecture 'arm64', required architecture 'x86_64'
+ld: warning: ignoring file '/Users/mathieurio/delivery/Tek/B-CPP-500-REN-5-2-rtype-tom.daniel/vcpkg/installed/arm64-osx/lib/libraylib.a[15](cocoa_time.c.o)': found architecture 'arm64', required architecture 'x86_64'
+ld: warning: ignoring file '/Users/mathieurio/delivery/Tek/B-CPP-500-REN-5-2-rtype-tom.daniel/vcpkg/installed/arm64-osx/lib/libraylib.a[14](null_joystick.c.o)': found architecture 'arm64', required architecture 'x86_64'
+ld: warning: ignoring file '/Users/mathieurio/delivery/Tek/B-CPP-500-REN-5-2-rtype-tom.daniel/vcpkg/installed/arm64-osx/lib/libraylib.a[13](null_window.c.o)': found architecture 'arm64', required architecture 'x86_64'
+ld: warning: ignoring file '/Users/mathieurio/delivery/Tek/B-CPP-500-REN-5-2-rtype-tom.daniel/vcpkg/installed/arm64-osx/lib/libraylib.a[12](null_monitor.c.o)': found architecture 'arm64', required architecture 'x86_64'
+ld: warning: ignoring file '/Users/mathieurio/delivery/Tek/B-CPP-500-REN-5-2-rtype-tom.daniel/vcpkg/installed/arm64-osx/lib/libraylib.a[11](null_init.c.o)': found architecture 'arm64', required architecture 'x86_64'
+ld: warning: ignoring file '/Users/mathieurio/delivery/Tek/B-CPP-500-REN-5-2-rtype-tom.daniel/vcpkg/installed/arm64-osx/lib/libraylib.a[10](osmesa_context.c.o)': found architecture 'arm64', required architecture 'x86_64'
+ld: warning: ignoring file '/Users/mathieurio/delivery/Tek/B-CPP-500-REN-5-2-rtype-tom.daniel/vcpkg/installed/arm64-osx/lib/libraylib.a[9](egl_context.c.o)': found architecture 'arm64', required architecture 'x86_64'
+ld: warning: ignoring file '/Users/mathieurio/delivery/Tek/B-CPP-500-REN-5-2-rtype-tom.daniel/vcpkg/installed/arm64-osx/lib/libraylib.a[8](window.c.o)': found architecture 'arm64', required architecture 'x86_64'
+ld: warning: ignoring file '/Users/mathieurio/delivery/Tek/B-CPP-500-REN-5-2-rtype-tom.daniel/vcpkg/installed/arm64-osx/lib/libraylib.a[7](vulkan.c.o)': found architecture 'arm64', required architecture 'x86_64'
+ld: warning: ignoring file '/Users/mathieurio/delivery/Tek/B-CPP-500-REN-5-2-rtype-tom.daniel/vcpkg/installed/arm64-osx/lib/libraylib.a[6](platform.c.o)': found architecture 'arm64', required architecture 'x86_64'
+ld: warning: ignoring file '/Users/mathieurio/delivery/Tek/B-CPP-500-REN-5-2-rtype-tom.daniel/vcpkg/installed/arm64-osx/lib/libraylib.a[5](monitor.c.o)': found architecture 'arm64', required architecture 'x86_64'
+ld: warning: ignoring file '/Users/mathieurio/delivery/Tek/B-CPP-500-REN-5-2-rtype-tom.daniel/vcpkg/installed/arm64-osx/lib/libraylib.a[4](input.c.o)': found architecture 'arm64', required architecture 'x86_64'
+ld: warning: ignoring file '/Users/mathieurio/delivery/Tek/B-CPP-500-REN-5-2-rtype-tom.daniel/vcpkg/installed/arm64-osx/lib/libraylib.a[3](init.c.o)': found architecture 'arm64', required architecture 'x86_64'
+ld: warning: ignoring file '/Users/mathieurio/delivery/Tek/B-CPP-500-REN-5-2-rtype-tom.daniel/vcpkg/installed/arm64-osx/lib/libraylib.a[2](context.c.o)': found architecture 'arm64', required architecture 'x86_64'
+ld: Undefined symbols:
+  _BeginDrawing, referenced from:
+      ClientEngine::render() in ClientEngine.cpp.o
+  _ClearBackground, referenced from:
+      ClientEngine::render() in ClientEngine.cpp.o
+  _DrawLine, referenced from:
+      ClientSystem::draw_hitbox_system() in ClientEngine.cpp.o
+      ClientSystem::draw_hitbox_system() in ClientEngine.cpp.o
+      ClientSystem::draw_hitbox_system() in ClientEngine.cpp.o
+      ClientSystem::draw_hitbox_system() in ClientEngine.cpp.o
+  _DrawTextureV, referenced from:
+      ClientSystem::draw_system() in ClientEngine.cpp.o
+  _EndDrawing, referenced from:
+      ClientEngine::render() in ClientEngine.cpp.o
+  _GetMousePosition, referenced from:
+      ClientSystem::click_system() in ClientEngine.cpp.o
+  _IsKeyDown, referenced from:
+      ClientSystem::control_system() in ClientEngine.cpp.o
+      ClientSystem::control_system() in ClientEngine.cpp.o
+      ClientSystem::control_system() in ClientEngine.cpp.o
+      ClientSystem::control_system() in ClientEngine.cpp.o
+  _IsMouseButtonPressed, referenced from:
+      ClientSystem::click_system() in ClientEngine.cpp.o
+  _WindowShouldClose, referenced from:
+      ClientEngine::run() in ClientEngine.cpp.o
+clang: error: linker command failed with exit code 1 (use -v to see invocation)
+make[2]: *** [engine/libengine.dylib] Error 1
+make[1]: *** [engine/CMakeFiles/engine.dir/all] Error 2
+make: *** [all] Error 2
