@@ -206,23 +206,22 @@ class ClientSystem {
             auto &positions = r->getComponents<Position>(scene);
             auto &drawables = r->getComponents<Drawable>(scene);
 
-            for (size_t i = 0; i < positions.size() && i < drawables.size(); ++i) {
-                auto &pos = positions[i];
-                auto &draw = drawables[i];
-
-                if (!pos || !draw)
-                    continue;
-
-                Vector2 position = { pos.value().x, pos.value().y };
-
-                DrawTextureV(draw.value().texture, position, WHITE);
-            }
-        }
-
-        void position_system() {
             std::string scene = r->getCurrentScene();
             Sparse_Array<Position> &positions = r->getComponents<Position>(scene);
             Sparse_Array<Velocity> &velocities = r->getComponents<Velocity>(scene);
+
+        /**
+         * @brief Met à jour la position des entités en fonction de leur vitesse.
+         *
+         * Ce système met à jour la position des entités qui ont des composantes
+         * `Position` et `Velocity` en fonction de leur vitesse actuelle.
+         *
+         * @param r Référence à l'objet Registry contenant les entités et composants.
+         */
+        void position_system(Registry &r) {
+            std::string scene = r.getCurrentScene();
+            Sparse_Array<Position> &positions = r.getComponents<Position>(scene);
+            Sparse_Array<Velocity> &velocities = r.getComponents<Velocity>(scene);
 
             for (size_t i = 0; i < positions.size() && i < velocities.size(); ++i) {
                 auto &pos = positions[i];

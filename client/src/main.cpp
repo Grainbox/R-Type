@@ -37,7 +37,14 @@ void reactMPlay(Registry *r)
 
 void debug(Registry *r)
 {
-    std::cout << "hello world" << std::endl;
+    // auto inputOpt = r.getEntityComponent<KeyboardInput>(ent, r.getCurrentScene());
+
+    // if (inputOpt.has_value()) {
+    //     auto &input = inputOpt.value();
+    //     std::cout << input.text << std::endl;
+    // } else {
+    //     std::cout << "Aucun composant KeyboardInput trouvé pour l'entité." << std::endl;
+    // }
 }
 
 void setupRegistry(Registry *r)
@@ -56,7 +63,6 @@ void setupRegistry(Registry *r)
 
     std::cout << "--Button Width: " << ButtonWidth << std::endl;
     std::cout << "--Button posX: " << ButtonPosX << std::endl;
-
 
     // Position playPos(100, 100);
     Position backPos(0, 0);
