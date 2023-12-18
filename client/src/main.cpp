@@ -13,6 +13,7 @@
 void pressPlay(Registry &r)
 {
     std::cout << "Play button pressed." << std::endl;
+    r.setCurrentScene("gameScene");
 }
 
 void pressSettings(Registry &r)
@@ -45,7 +46,7 @@ void debug(Registry &r)
     // }
 }
 
-void setupRegistry(Registry &r)
+void mainMenu(Registry &r)
 {
     Entity background = r.spawnEntity();
     Entity player = r.spawnEntity();
@@ -103,6 +104,32 @@ void setupRegistry(Registry &r)
     r.addComponent<Clickable>(playButton, clickPlay, mainMenu);
     r.addComponent<Clickable>(settingsButton, clickSettings, mainMenu);
     r.addComponent<Clickable>(exitButton, clickExit, mainMenu);
+}
+
+void gameScene(Registry &r)
+{
+    std::string gameScene = "gameScene";
+    Entity player = r.spawnEntity();
+
+    Position playerPos(100, 400);
+    Drawable drawPlay("assets/entity_1.png");
+    Hitbox box(100, 100, true);
+    Controllable controls;
+    controls.setKeyboardKey(&controls.Up, KEY_Z);
+    controls.setKeyboardKey(&controls.Down, KEY_S);
+    controls.setKeyboardKey(&controls.Left, KEY_Q);
+    controls.setKeyboardKey(&controls.Right, KEY_D);
+
+    r.addComponent<Position>(player, playerPos, gameScene);
+    r.addComponent<Drawable>(player, drawPlay, gameScene);
+    r.addComponent<Hitbox>(player, box, gameScene);
+    r.addComponent<Controllable>(player, controls, gameScene);
+}
+
+void setupRegistry(Registry &r)
+{
+    mainMenu(r);
+    gameScene(r);
 }
 
 int main()

@@ -13,9 +13,9 @@ r.addComponent<Controllable>(player, control, "MyView");
 ##### Définir une touche :
 
 ```C++
-control.setKeyboardKey(&control.Up, sf::Keyboard::Up); // Monter
-control.setKeyboardKey(&control.Down, sf::Keyboard::Down); // Descendre
-control.setKeyboardKey(&control.Left, sf::Keyboard::Left); // Gauche
-control.setKeyboardKey(&control.Right, sf::Keyboard::Right); // Droite
+control.setKeyboardKey(&control.Up, KEY_UP); // Monter
+control.setKeyboardKey(&control.Down, KEY_DOWN); // Descendre
+control.setKeyboardKey(&control.Left, KEY_LEFT); // Gauche
+control.setKeyboardKey(&control.Right, KEY_RIGHT); // Droite
 ```
 
