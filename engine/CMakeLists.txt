@@ -20,7 +20,7 @@ foreach(target engine engine_debug)
 
     target_include_directories(${target} PUBLIC include)
 
-    target_link_libraries(${target} PRIVATE sfml-system sfml-window sfml-graphics sfml-network sfml-audio)
+    target_link_libraries(${target} PRIVATE raylib Boost::boost Boost::serialization)
 
     add_custom_command(TARGET ${target} POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy_directory

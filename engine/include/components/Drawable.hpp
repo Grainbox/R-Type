@@ -9,7 +9,7 @@
 #define DRAWABLE_HPP_
 
 #include <string>
-#include <SFML/Graphics.hpp>
+#include <raylib.h>
 
 #include "Exceptions.hpp"
 
@@ -20,13 +20,13 @@
 class Drawable {
     public:
         Drawable(std::string spritePath) {
-            if (!this->texture.loadFromFile(spritePath)) {
+            this->texture = LoadTexture(spritePath.c_str());
+            if (!this->texture.id) {
                 throw LoadAssetException("Failed to load asset: " + spritePath);
             }
         };
 
-        sf::Texture texture;
-        sf::Sprite sprite;
+        Texture2D texture;
     protected:
     private:
 };

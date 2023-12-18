@@ -17,6 +17,7 @@
 #include <algorithm>
 #include <iostream>
 #include <functional>
+#include <raylib.h>
 
 #include "Entity.hpp"
 

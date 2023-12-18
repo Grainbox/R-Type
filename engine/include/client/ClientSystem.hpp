@@ -24,9 +24,10 @@
 #include "components/Position.hpp"
 #include "components/Clickable.hpp"
 #include "components/Hitbox.hpp"
-#include "components/KeyboardInput.hpp"
+#include "Communication_Structures.hpp"
 
-#include <SFML/Graphics.hpp>
+#include <asio.hpp>
+#include <raylib.h>
 
 /**
  * @class ClientSystem
@@ -38,78 +39,102 @@
  */
 class ClientSystem {
     public:
+        ClientSystem(Registry *r, short server_port) : _udp_socket(io_context_), r(r)
+        {
+            _udp_socket.open(asio::ip::udp::v4());
+            _server_endpoint = asio::ip::udp::endpoint(asio::ip::address::from_string("127.0.0.1"), server_port);
 
-        /**
-         * @brief Gère la saisie de text
-         *
-         * Ce système detecte chaque touche du clavier et l'ajoute à la variable text.
-         *
-         * @param r Référence à l'objet Registry contenant les entités et composants.
-         * @param event Événement SFML capturé.
-         * @param window Fenêtre SFML pour la capture de la position de la souris.
+            start_receive();
+        }
+
+        ~ClientSystem()
+        {
+            send_disconnect();
+        }
+
+        void send_disconnect()
+        {
+            DisconnectMessage msg;
+
+            msg.header.type = MessageType::Disconnect;
+            msg.reason = "Client Input";
+
+            std::ostringstream archive_stream;
+            boost::archive::text_oarchive archive(archive_stream);
+
+            archive << msg;
+
+            std::string serialized_str = archive_stream.str();
+
+            std::cout << "Send Disconnect" << std::endl;
+
+            _udp_socket.send_to(asio::buffer(serialized_str), _server_endpoint);
+        }
+
+        /*!
+        \brief Send the first connection message to the server
         */
-        void keyboard_system(Registry &r, sf::Event event, sf::RenderWindow &window) {
-            std::string scene = r.getCurrentScene();
-            Sparse_Array<KeyboardInput> &keyboards = r.getComponents<KeyboardInput>(scene);
+        void send_first_con()
+        {
+            FirstConMessage msg;
+            msg.header.type = MessageType::First_Con;
 
-            for (size_t i = 0; i < keyboards.size(); ++i) {
-                auto &key = keyboards[i];
+            std::ostringstream archive_stream;
+            boost::archive::text_oarchive archive(archive_stream);
 
-                if (!key) continue;
-                if (event.type == sf::Event::KeyPressed) {
-                    switch (event.key.code) {
-                        case sf::Keyboard::A: key.value().text += "A"; break;
-                        case sf::Keyboard::B: key.value().text += "B"; break;
-                        case sf::Keyboard::C: key.value().text += "C"; break;
-                        case sf::Keyboard::D: key.value().text += "D"; break;
-                        case sf::Keyboard::E: key.value().text += "E"; break;
-                        case sf::Keyboard::F: key.value().text += "F"; break;
-                        case sf::Keyboard::G: key.value().text += "G"; break;
-                        case sf::Keyboard::H: key.value().text += "H"; break;
-                        case sf::Keyboard::I: key.value().text += "I"; break;
-                        case sf::Keyboard::J: key.value().text += "J"; break;
-                        case sf::Keyboard::K: key.value().text += "K"; break;
-                        case sf::Keyboard::L: key.value().text += "L"; break;
-                        case sf::Keyboard::M: key.value().text += "M"; break;
-                        case sf::Keyboard::N: key.value().text += "N"; break;
-                        case sf::Keyboard::O: key.value().text += "O"; break;
-                        case sf::Keyboard::P: key.value().text += "P"; break;
-                        case sf::Keyboard::Q: key.value().text += "Q"; break;
-                        case sf::Keyboard::R: key.value().text += "R"; break;
-                        case sf::Keyboard::S: key.value().text += "S"; break;
-                        case sf::Keyboard::T: key.value().text += "T"; break;
-                        case sf::Keyboard::U: key.value().text += "U"; break;
-                        case sf::Keyboard::V: key.value().text += "V"; break;
-                        case sf::Keyboard::W: key.value().text += "W"; break;
-                        case sf::Keyboard::X: key.value().text += "X"; break;
-                        case sf::Keyboard::Y: key.value().text += "Y"; break;
-                        case sf::Keyboard::Z: key.value().text += "Z"; break;
-                        case sf::Keyboard::Num0: key.value().text += "0"; break;
-                        case sf::Keyboard::Num1: key.value().text += "1"; break;
-                        case sf::Keyboard::Num2: key.value().text += "2"; break;
-                        case sf::Keyboard::Num3: key.value().text += "3"; break;
-                        case sf::Keyboard::Num4: key.value().text += "4"; break;
-                        case sf::Keyboard::Num5: key.value().text += "5"; break;
-                        case sf::Keyboard::Num6: key.value().text += "6"; break;
-                        case sf::Keyboard::Num7: key.value().text += "7"; break;
-                        case sf::Keyboard::Num8: key.value().text += "8"; break;
-                        case sf::Keyboard::Num9: key.value().text += "9"; break;
+            archive << msg;
 
-                        case sf::Keyboard::Space: key.value().text += " "; break;
-                        case sf::Keyboard::BackSpace:
-                            if (!key.value().text.empty()) {
-                                key.value().text.pop_back();
-                            }
-                            break;
+            std::string serialized_str = archive_stream.str();
 
-                        default: break; // Pour les touches non gérées
-                    }
-                }
+            _udp_socket.send_to(asio::buffer(serialized_str), _server_endpoint);
+        }
+
+        void create_game()
+        {
+            CreateGameMessage msg;
+            msg.header.type = MessageType::Create_Game;
+
+            std::ostringstream archive_stream;
+            boost::archive::text_oarchive archive(archive_stream);
+
+            archive << msg;
+
+            std::string serialized_str = archive_stream.str();
+
+            _udp_socket.send_to(asio::buffer(serialized_str), _server_endpoint);
+        }
+
+        /*!
+        \brief Listen for the server messages asynchronously.
+        */
+        void start_receive()
+        {
+            _udp_socket.async_receive_from(
+                asio::buffer(recv_buffer_), _server_endpoint,
+                [this](std::error_code ec, std::size_t bytes_recvd)
+                {
+                    handle_receive_system(ec, bytes_recvd);
+                });
+        }
+
+        /*!
+        \brief Handles data received from the server->
+
+        \param error Boost ASIO error code, if any.
+        \param bytes_transferred Number of bytes received.
+        */
+        void handle_receive_system(const std::error_code &error, std::size_t bytes_transferred)
+        {
+            if (!error)
+            {
+                std::string received_message(recv_buffer_, bytes_transferred);
+                std::cout << "Received: " << received_message << std::endl;
             }
+            start_receive();
         }
 
         /**
-         * @brief Gère les clics de l'utilisateur.
+         * @brief Gère les clics de l'utilisateur->
          *
          * Ce système détecte les clics de souris et déclenche des actions
          * si un objet cliquable est touché.
@@ -118,19 +143,21 @@ class ClientSystem {
          * @param event Événement SFML capturé.
          * @param window Fenêtre SFML pour la capture de la position de la souris.
          */
-        void click_system(Registry &r, sf::Event event, sf::RenderWindow &window) {
-            std::string scene = r.getCurrentScene();
-            Sparse_Array<Clickable> &clickables = r.getComponents<Clickable>(scene);
-            Sparse_Array<Hitbox> &hitboxs = r.getComponents<Hitbox>(scene);
-            Sparse_Array<Position> &positions = r.getComponents<Position>(scene);
+        void click_system() {
+            std::string scene = r->getCurrentScene();
+            Sparse_Array<Clickable> &clickables = r->getComponents<Clickable>(scene);
+            Sparse_Array<Hitbox> &hitboxs = r->getComponents<Hitbox>(scene);
+            Sparse_Array<Position> &positions = r->getComponents<Position>(scene);
+
             for (size_t i = 0; i < clickables.size() && i < hitboxs.size() && i < positions.size(); ++i) {
                 auto &click = clickables[i];
                 auto &hitbox = hitboxs[i];
                 auto &position = positions[i];
 
                 if (!hitbox || !click || !position) continue;
-                if (event.type == sf::Event::MouseButtonPressed) {
-                    sf::Vector2i mouse = sf::Mouse::getPosition(window);
+
+                if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+                    Vector2 mouse = GetMousePosition();
                     if (mouse.x < position.value().x || mouse.x > (position.value().x + hitbox.value().width)) continue;
                     if (mouse.y < position.value().y || mouse.y > (position.value().y + hitbox.value().height)) continue;
                     click.value().proc(r);
@@ -138,19 +165,10 @@ class ClientSystem {
             }
         }
 
-        /**
-        * @brief Gère les contrôles utilisateur pour les entités.
-        *
-        * Ce système permet de gérer les entrées du clavier pour déplacer les entités
-        * ayant une composante `Controllable`.
-        *
-        * @param r Référence à l'objet Registry contenant les entités et composants.
-        * @param event Événement SFML capturé, représentant une touche pressée.
-        */
-        void control_system(Registry &r, sf::Event event) {
-            std::string scene = r.getCurrentScene();
-            Sparse_Array<Controllable> &controllables = r.getComponents<Controllable>(scene);
-            Sparse_Array<Velocity> &velocities = r.getComponents<Velocity>(scene);
+        void control_system() {
+            std::string scene = r->getCurrentScene();
+            Sparse_Array<Controllable> &controllables = r->getComponents<Controllable>(scene);
+            Sparse_Array<Velocity> &velocities = r->getComponents<Velocity>(scene);
 
             for (size_t i = 0; i < controllables.size() && i < velocities.size(); ++i) {
                 auto &vel = velocities[i];
@@ -159,61 +177,46 @@ class ClientSystem {
                 if (!vel || !controlle)
                     continue;
 
-                if (event.type == sf::Event::KeyPressed) {
-                    if (controlle.value().Left && event.key.code == controlle.value().Left)
-                        vel.value().vx = -1;
-                    if (controlle.value().Right && event.key.code == controlle.value().Right)
-                        vel.value().vx = 1;
-                    if (controlle.value().Up && event.key.code == controlle.value().Up)
-                        vel.value().vy = -1;
-                    if (controlle.value().Down && event.key.code == controlle.value().Down)
-                        vel.value().vy = 1;
-                } else {
-                    vel.value().vx = 0;
-                    vel.value().vy = 0;
-                }
+                // Réinitialiser la vitesse
+                vel.value().vx = 0;
+                vel.value().vy = 0;
+
+                // Vérifier les touches pressées et ajuster la vitesse en conséquence
+                if (controlle.value().Left != -1 && IsKeyDown(controlle.value().Left))
+                    vel.value().vx = -1;
+                if (controlle.value().Right != -1 && IsKeyDown(controlle.value().Right))
+                    vel.value().vx = 1;
+                if (controlle.value().Up != -1 && IsKeyDown(controlle.value().Up))
+                    vel.value().vy = -1;
+                if (controlle.value().Down != -1 && IsKeyDown(controlle.value().Down))
+                    vel.value().vy = 1;
             }
         }
 
-        /**
-         * @brief Dessine les hitboxes des entités.
-         *
-         * Ce système est utilisé pour le débogage, il dessine les hitboxes des entités
-         * sur la fenêtre de rendu.
-         *
-         * @param r Référence à l'objet Registry contenant les entités et composants.
-         * @param window Fenêtre SFML dans laquelle les hitboxes sont dessinées.
-         */
-        void draw_hitbox_system(Registry &r, sf::RenderWindow &window) {
-            std::string scene = r.getCurrentScene();
-            Sparse_Array<Hitbox> &hitboxs = r.getComponents<Hitbox>(scene);
-            Sparse_Array<Position> &positions = r.getComponents<Position>(scene);
+        void draw_hitbox_system() {
+            std::string scene = r->getCurrentScene();
+            Sparse_Array<Hitbox> &hitboxs = r->getComponents<Hitbox>(scene);
+            Sparse_Array<Position> &positions = r->getComponents<Position>(scene);
 
             for (size_t i = 0; i < positions.size() && i < hitboxs.size(); ++i) {
                 auto &position = positions[i];
                 auto &hitbox = hitboxs[i];
-                sf::VertexArray LeftLine(sf::Lines, hitbox.value().height);
-                sf::VertexArray RightLine(sf::Lines, hitbox.value().height);
-                sf::VertexArray TopLine(sf::Lines, hitbox.value().width);
-                sf::VertexArray BotLine(sf::Lines, hitbox.value().width);
 
                 if (!hitbox || !position || !hitbox.value().debug) continue;
-                for (int i = 0; i < hitbox.value().height; i++) {
-                    LeftLine[i].position = sf::Vector2f(position.value().x, position.value().y + i);
-                    LeftLine[i].color = sf::Color::Red;
-                    RightLine[i].position = sf::Vector2f((position.value().x + hitbox.value().width), position.value().y + i);
-                    RightLine[i].color = sf::Color::Red;
-                }
-                for (int i = 0; i < hitbox.value().width; i++) {
-                    TopLine[i].position = sf::Vector2f(position.value().x + i, position.value().y);
-                    TopLine[i].color = sf::Color::Red;
-                    BotLine[i].position = sf::Vector2f(position.value().x + i, (position.value().y + hitbox.value().height));
-                    BotLine[i].color = sf::Color::Red;
-                }
-                window.draw(LeftLine);
-                window.draw(RightLine);
-                window.draw(TopLine);
-                window.draw(BotLine);
+
+                // Dessiner le contour de la hitbox
+                int leftX = position.value().x;
+                int rightX = position.value().x + hitbox.value().width;
+                int topY = position.value().y;
+                int bottomY = position.value().y + hitbox.value().height;
+
+                // Lignes verticales
+                DrawLine(leftX, topY, leftX, bottomY, RED);
+                DrawLine(rightX, topY, rightX, bottomY, RED);
+
+                // Lignes horizontales
+                DrawLine(leftX, topY, rightX, topY, RED);
+                DrawLine(leftX, bottomY, rightX, bottomY, RED);
             }
         }
 
@@ -226,10 +229,10 @@ class ClientSystem {
          * @param r Référence à l'objet Registry contenant les entités et composants.
          * @param window Fenêtre SFML dans laquelle les entités sont dessinées.
          */
-        void draw_system(Registry &r, sf::RenderWindow &window) {
-            std::string scene = r.getCurrentScene();
-            Sparse_Array<Position> &positions = r.getComponents<Position>(scene);
-            Sparse_Array<Drawable> &drawables = r.getComponents<Drawable>(scene);
+        void draw_system() {
+            std::string scene = r->getCurrentScene();
+            auto &positions = r->getComponents<Position>(scene);
+            auto &drawables = r->getComponents<Drawable>(scene);
 
             for (size_t i = 0; i < positions.size() && i < drawables.size(); ++i) {
                 auto &pos = positions[i];
@@ -238,10 +241,9 @@ class ClientSystem {
                 if (!pos || !draw)
                     continue;
 
-                draw.value().sprite.setTexture(draw.value().texture);
-                draw.value().sprite.setPosition(pos.value().x, pos.value().y);
+                Vector2 position = { pos.value().x, pos.value().y };
 
-                window.draw(draw.value().sprite);
+                DrawTextureV(draw.value().texture, position, WHITE);
             }
         }
 
@@ -250,13 +252,11 @@ class ClientSystem {
          *
          * Ce système met à jour la position des entités qui ont des composantes
          * `Position` et `Velocity` en fonction de leur vitesse actuelle.
-         *
-         * @param r Référence à l'objet Registry contenant les entités et composants.
          */
-        void position_system(Registry &r) {
-            std::string scene = r.getCurrentScene();
-            Sparse_Array<Position> &positions = r.getComponents<Position>(scene);
-            Sparse_Array<Velocity> &velocities = r.getComponents<Velocity>(scene);
+        void position_system() {
+            std::string scene = r->getCurrentScene();
+            Sparse_Array<Position> &positions = r->getComponents<Position>(scene);
+            Sparse_Array<Velocity> &velocities = r->getComponents<Velocity>(scene);
 
             for (size_t i = 0; i < positions.size() && i < velocities.size(); ++i) {
                 auto &pos = positions[i];
@@ -270,8 +270,15 @@ class ClientSystem {
                 pos.value().y += vel.value().vy;
             }
         }
+
+        asio::io_context io_context_;
     protected:
     private:
+        asio::ip::udp::socket _udp_socket;
+        asio::ip::udp::endpoint _server_endpoint;
+        char recv_buffer_[1024];
+
+        Registry *r;
 
 };
 

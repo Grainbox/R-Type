@@ -12,10 +12,10 @@
 
 class Clickable {
     public:
-        Clickable(const std::function<void(Registry &)>& func) {
+        Clickable(const std::function<void(Registry *)>& func) {
             proc = func;
         }
-        std::function<void(Registry &)> proc;
+        std::function<void(Registry *)> proc;
     protected:
     private:
 };

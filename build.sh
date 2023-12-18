@@ -18,7 +18,8 @@ fi
 # Install necessary libraries using vcpkg
 "$VCPKG_DIR/vcpkg" install asio
 "$VCPKG_DIR/vcpkg" install boost-asio
-"$VCPKG_DIR/vcpkg" install sfml
+"$VCPKG_DIR/vcpkg" install raylib
+"$VCPKG_DIR/vcpkg" install boost-serialization
 
 mkdir -p build
 cd build

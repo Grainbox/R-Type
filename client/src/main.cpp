@@ -10,7 +10,7 @@
 
 #include "client/ClientEngine.hpp"
 
-void debug(Registry &r)
+void debug(Registry *r)
 {
     // auto inputOpt = r.getEntityComponent<KeyboardInput>(ent, r.getCurrentScene());
 
@@ -22,21 +22,41 @@ void debug(Registry &r)
     // }
 }
 
-void setupRegistry(Registry &r)
+void setupRegistry(Registry *r)
 {
-    Entity textbox = r.spawnEntity();
+    Entity player = r->spawnEntity();
 
-    std::string message = "";
+    Entity playButton = r->spawnEntity();
+    Entity settingsButton = r->spawnEntity();
+    Entity leaveButton = r->spawnEntity();
 
-    Position pos(100, 100);
-    Hitbox box(100, 30, true);
+    Position pos(300, 100);
+
+    Position playPos(400, 100);
+    Position settingsPos(400, 250);
+    Position leavePos(400, 400);
+
+    Drawable draw("assets/entity_1.png");
+    // Controllable control;
+    Hitbox box(100, 100, true);
     Clickable click(debug);
-    KeyboardInput keyboard;
+    // Clickable clickPlay(debugClick("playButton"));
+    // Velocity vel(0, 0);
 
-    r.addComponent<Position>(textbox, pos, "mainMenu");
-    r.addComponent<Hitbox>(textbox, box, "mainMenu");
-    r.addComponent<Clickable>(textbox, click, "mainMenu");
-    r.addComponent<KeyboardInput>(textbox, keyboard, "mainMneu");
+    // r->addComponent<Position>(player, pos, "mainMenu");
+    // r->addComponent<Drawable>(player, draw, "mainMenu");
+    // // r->addComponent<Controllable>(player, control, "mainMenu");
+    // r->addComponent<Hitbox>(player, box, "mainMenu");
+    // r->addComponent<Clickable>(player, click, "mainMenu");
+    // // r->addComponent<Velocity>(player, vel, "mainMenu");
+
+    r->addComponent<Position>(playButton, playPos, "mainMenu");
+    r->addComponent<Position>(settingsButton, settingsPos, "mainMenu");
+    r->addComponent<Position>(leaveButton, leavePos, "mainMenu");
+
+    r->addComponent<Drawable>(playButton, draw, "mainMenu");
+    r->addComponent<Drawable>(settingsButton, draw, "mainMenu");
+    r->addComponent<Drawable>(leaveButton, draw, "mainMenu");
 }
 
 int main()
@@ -45,7 +65,10 @@ int main()
     {
         Registry r("mainMenu");
 
-        setupRegistry(r);
+        InitWindow(800, 600, "My Engine");
+        SetTargetFPS(60);
+
+        setupRegistry(&r);
 
         ClientEngine engine(&r, SERVER_PORT);
     }

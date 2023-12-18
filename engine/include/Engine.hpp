@@ -24,9 +24,6 @@
 #include "client/ClientSystem.hpp"
 #include "server/ServerSystem.hpp"
 
-#include <bitset>
-#include <sstream>
-
 /*!
  \class Engine
  \brief Class managing the engine.
@@ -40,10 +37,6 @@ class ENGINE_API Engine
         ~Engine();
 
     protected:
-
-        std::string stringToBinary(const std::string &s);
-        std::string binaryToString(const std::string &binary);
-
     private:
 };
 
