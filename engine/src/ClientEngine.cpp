@@ -16,9 +16,8 @@
 ClientEngine::ClientEngine(Registry &r, short server_port)
     : r(r), system(r, server_port)
 {
-    // system.send_first_con();
-    // system.create_game();
-    std::cout << "start" << std::endl;
+    system.send_first_con();
+    system.create_game();
     run();
 }
 
@@ -34,17 +33,14 @@ ClientEngine::~ClientEngine()
 */
 void ClientEngine::run()
 {
-    std::cout << "before" << std::endl;
     while (!WindowShouldClose())
     {
-        std::cout << "hello" << std::endl;
         this->processEvents();
         this->update();
         this->render();
 
         system.io_context_.poll();
     }
-    std::cout << "after" << std::endl;
 }
 
 /*!
