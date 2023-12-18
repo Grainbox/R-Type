@@ -2,17 +2,17 @@
 ** EPITECH PROJECT, 2023
 ** B-CPP-500-REN-5-2-rtype-tom.daniel
 ** File description:
-** ReactMouse
+** ReactCursor
 */
 
-#ifndef REACTMOUSE_HPP_
-#define REACTMOUSE_HPP_
+#ifndef REACTCURSOR_HPP_
+#define REACTCURSOR_HPP_
 
 #include "ECS/Registry.hpp"
 
-class ReactMouse {
+class ReactCursor {
     public:
-        ReactMouse(const std::function<void(Registry &)>& func) {
+        ReactCursor(const std::function<void(Registry &)>& func) {
             proc = func;
         }
         std::function<void(Registry &)> proc;
@@ -20,4 +20,4 @@ class ReactMouse {
     private:
 };
 
-#endif /* !REACTMOUSE_HPP_ */
+#endif /* !REACTCURSOR_HPP_ */
