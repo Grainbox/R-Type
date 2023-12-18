@@ -50,6 +50,7 @@ void ClientEngine::processEvents()
 {
     system.control_system();
     system.click_system();
+    system.reactMouse_system();
 }
 
 /*!
