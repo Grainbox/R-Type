@@ -6,14 +6,6 @@ set(ENGINE_SOURCES
 
 add_library(engine SHARED ${ENGINE_SOURCES})
 
-if(APPLE)
-    target_include_directories(engine PUBLIC "${CMAKE_SOURCE_DIR}/vcpkg/installed/arm64-osx/include")
-elseif(WIN32)
-    target_include_directories(engine PUBLIC "${CMAKE_SOURCE_DIR}/vcpkg/installed/x64-windows/include")
-elseif(UNIX)
-    target_include_directories(engine PUBLIC "${CMAKE_SOURCE_DIR}/vcpkg/installed/x64-linux/include")
-endif()
-
 target_include_directories(engine PUBLIC include)
 target_link_libraries(engine PRIVATE raylib Boost::boost Boost::serialization)
 
