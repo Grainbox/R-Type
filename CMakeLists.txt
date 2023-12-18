@@ -16,6 +16,7 @@ elseif(WIN32)
     set(CMAKE_PREFIX_PATH "vcpkg/installed/x64-windows")
 endif()
 
+find_package(Boost COMPONENTS serialization REQUIRED)
 find_package(asio CONFIG REQUIRED)
 find_package(raylib CONFIG REQUIRED)
 

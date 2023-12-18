@@ -24,6 +24,7 @@
 #include "components/Position.hpp"
 #include "components/Clickable.hpp"
 #include "components/Hitbox.hpp"
+#include "Communication_Structures.hpp"
 
 #include <asio.hpp>
 #include <raylib.h>
@@ -46,13 +47,61 @@ class ClientSystem {
             start_receive();
         }
 
-        /*!
-        \brief Exemple function that sends a "hello" message to the server->
-        */
-        void send_hello()
+        ~ClientSystem()
         {
-            std::string message = "hello";
-            _udp_socket.send_to(asio::buffer(message), _server_endpoint);
+            send_disconnect();
+        }
+
+        void send_disconnect()
+        {
+            DisconnectMessage msg;
+
+            msg.header.type = MessageType::Disconnect;
+            msg.reason = "Client Input";
+
+            std::ostringstream archive_stream;
+            boost::archive::text_oarchive archive(archive_stream);
+
+            archive << msg;
+
+            std::string serialized_str = archive_stream.str();
+
+            std::cout << "Send Disconnect" << std::endl;
+
+            _udp_socket.send_to(asio::buffer(serialized_str), _server_endpoint);
+        }
+
+        /*!
+        \brief Send the first connection message to the server
+        */
+        void send_first_con()
+        {
+            FirstConMessage msg;
+            msg.header.type = MessageType::First_Con;
+
+            std::ostringstream archive_stream;
+            boost::archive::text_oarchive archive(archive_stream);
+
+            archive << msg;
+
+            std::string serialized_str = archive_stream.str();
+
+            _udp_socket.send_to(asio::buffer(serialized_str), _server_endpoint);
+        }
+
+        void create_game()
+        {
+            CreateGameMessage msg;
+            msg.header.type = MessageType::Create_Game;
+
+            std::ostringstream archive_stream;
+            boost::archive::text_oarchive archive(archive_stream);
+
+            archive << msg;
+
+            std::string serialized_str = archive_stream.str();
+
+            _udp_socket.send_to(asio::buffer(serialized_str), _server_endpoint);
         }
 
         /*!

@@ -1,110 +1,91 @@
-# Documentation du Protocole de Communication en C++
+# Documentation sur la Sérialisation et la Désérialisation des Structures de Messages avec Boost
 
-## Sommaire
+## Introduction
+Cette documentation explique comment sérialiser et désérialiser des structures de messages en C++ en utilisant la bibliothèque Boost. Ce processus est essentiel pour la communication réseau, permettant d'envoyer et de recevoir des données structurées de manière fiable.
 
-1. Introduction
-2. Architecture du protocole
-3. Structures des données
-4. Sérialisation des messages
-5. Désérialisation des messages
-6. Gestion des erreurs
-7. Exemples d'usage
+## Dépendances
+- Boost.Serialization
+- Boost.Asio (pour les exemples de sockets)
 
-## 1. Introduction
-
-Cette documentation décrit le processus d'envoi et de récupération de messages binaires entre un client et un serveur en utilisant le langage de programmation C++. Le protocole est basé sur UDP pour un transfert rapide et non connecté.
-
-## 2. Architecture du protocole
-
-Le protocole définit un ensemble de messages structurés qui contiennent un en-tête commun et un corps spécifique au type de message. L'en-tête contient des informations sur le type de message pour la désérialisation correcte à la réception.
-
-## 3. Structures des données
-
-### En-Tête Commun
-
-Tous les messages partagent le même en-tête pour indiquer le type de message.
+## Structures de Messages
+### Définition
+Les structures de messages sont définies pour encapsuler les données. Par exemple :
 
 ```cpp
 enum class MessageType : uint8_t {
-    Hello = 0,
-    Position = 1,
-    // ... autres types de messages
+    First_Con = 0
 };
 
 struct MessageHeader {
     MessageType type;
+
+    template<class Archive>
+    void serialize(Archive &ar, const unsigned int version) {
+        ar & type;
+    }
 };
-```
 
-### Messages Spécifiques
-
-#### Message Hello
-
-```cpp
-struct HelloMessage {
+struct FirstConMessage {
     MessageHeader header;
-    char uuid[16];
-    // ... méthodes serialize et deserialize
+    std::string test;
+
+    template<class Archive>
+    void serialize(Archive &ar, const unsigned int version) {
+        ar & header;
+        ar & test;
+    }
 };
 ```
 
-#### Message Position
+## Sérialisation
+La sérialisation convertit les structures en un format de chaîne pour la transmission.
 
+### Exemple de Sérialisation
 ```cpp
-struct PositionMessage {
-    MessageHeader header;
-    float x;
-    float y;
-    // ... méthodes serialize et deserialize
-};
+FirstConMessage msg;
+msg.test = "hello";
+std::ostringstream archive_stream;
+boost::archive::text_oarchive archive(archive_stream);
+
+archive << msg;
+
+std::string serialized_str = archive_stream.str();
+
+// Envoi via un socket UDP
+_udp_socket.send_to(asio::buffer(serialized_str), _server_endpoint);
 ```
 
-## 4. Sérialisation des messages
+## Désérialisation
+La désérialisation est le processus inverse, où la chaîne sérialisée est reconvertie en structure de message.
 
-La sérialisation est le processus de conversion d'une structure en une séquence d'octets pour l'envoi sur le réseau.
-
+### Exemple de Désérialisation
 ```cpp
-void serialize(const HelloMessage& msg, char* buffer) {
-    std::memcpy(buffer, &msg, sizeof(HelloMessage));
+auto message = std::make_shared<std::string>(_recvBuffer.data(), bytes_transferred);
+std::istringstream archive_stream(*message);
+
+boost::archive::text_iarchive archive(archive_stream);
+MessageHeader header;
+archive >> header;
+
+switch (header.type) {
+    case MessageType::First_Con: {
+        FirstConMessage msg;
+        std::istringstream archive_stream(*message);
+        boost::archive::text_iarchive archive(archive_stream);
+
+        archive >> msg;  // Désérialisation
+        std::cout << "Received: " << msg.test << std::endl;
+        break;
+    }
+    default:
+        std::cerr << "Type de message inconnu reçu!" << std::endl;
 }
 ```
 
-## 5. Désérialisation des messages
+## Remarques
+- La sérialisation et la désérialisation nécessitent que les structures de messages soient compatibles avec Boost.Serialization.
+- Il est essentiel de gérer les exceptions et les erreurs potentielles lors de l'envoi et de la réception de messages.
+- Boost.Asio est utilisé pour l'exemple de communication réseau, mais la sérialisation Boost peut être utilisée avec n'importe quel mécanisme de communication.
 
-La désérialisation est le processus inverse, où une séquence d'octets reçue est convertie en une structure.
-
-```cpp
-HelloMessage deserializeHelloMessage(const char* buffer) {
-    HelloMessage msg;
-    std::memcpy(&msg, buffer, sizeof(HelloMessage));
-    return msg;
-}
-```
-
-## 6. Gestion des erreurs
-
-Le code doit gérer les erreurs de réseau telles que la perte de paquets, les messages corrompus et les délais d'attente.
-
-## 7. Exemples d'usage
-
-### Envoi d'un Message Hello
-
-```cpp
-HelloMessage helloMsg;
-// ... Remplissez les données de helloMsg
-char buffer[sizeof(HelloMessage)];
-serialize(helloMsg, buffer);
-// ... Envoyez le buffer via UDP
-```
-
-### Réception et Traitement d'un Message Hello
-
-```cpp
-char buffer[1024];
-// ... Recevez les données dans le buffer
-MessageType type = getMessageType(buffer);
-if (type == MessageType::Hello) {
-    HelloMessage helloMsg = deserializeHelloMessage(buffer);
-    // ... Traitez le message Hello
-}
-```
+## Conclusion
+La sérialisation et la désérialisation avec Boost permettent une communication réseau efficace et structurée en C++. En suivant ce guide, les développeurs peuvent implémenter un système de communication robuste pour leurs applications réseau.
