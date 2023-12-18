@@ -8,36 +8,30 @@
 #include <iostream>
 #include <ostream>
 
-#include "Engine.hpp"
+#include "client/ClientEngine.hpp"
 
-void setupRegistry(Registry &r)
+void debug (Registry *r)
 {
-    Entity player = r.spawnEntity();
+    std::cout << "hello world" << std::endl;
+}
+
+void setupRegistry(Registry *r)
+{
+    Entity player = r->spawnEntity();
 
     Position pos(100, 0);
     Drawable draw("assets/entity_1.png");
     Controllable control;
+    Hitbox box(100, 300, true);
+    Clickable click(debug);
     Velocity vel(0, 0);
 
-    r.addComponent<Position>(player, pos, "mainMenu");
-    r.addComponent<Drawable>(player, draw, "mainMenu");
-    r.addComponent<Controllable>(player, control, "mainMenu");
-    r.addComponent<Velocity>(player, vel, "mainMenu");
-
-    Entity button = r.spawnEntity();
-
-    Position pos2(200, 200);
-    Drawable draw2("assets/entity_2.png");
-
-    r.addComponent<Position>(button, pos2, "mainMenu");
-    r.addComponent<Drawable>(button, draw2, "mainMenu");
-
-    Entity player2 = r.spawnEntity();
-
-    r.addComponent<Position>(player2, pos, "game");
-    r.addComponent<Drawable>(player2, draw, "game");
-    r.addComponent<Controllable>(player2, control, "game");
-    r.addComponent<Velocity>(player2, vel, "game");
+    r->addComponent<Position>(player, pos, "mainMenu");
+    r->addComponent<Drawable>(player, draw, "mainMenu");
+    r->addComponent<Controllable>(player, control, "mainMenu");
+    r->addComponent<Hitbox>(player, box, "mainMenu");
+    r->addComponent<Clickable>(player, click, "mainMenu");
+    r->addComponent<Velocity>(player, vel, "mainMenu");
 }
 
 int main()
@@ -46,11 +40,12 @@ int main()
     {
         Registry r("mainMenu");
 
-        setupRegistry(r);
+        InitWindow(800, 600, "My Engine");
+        SetTargetFPS(60);
 
-        EngineConfig config = {false, &r};
+        setupRegistry(&r);
 
-        Engine engine(config);
+        ClientEngine engine(&r, SERVER_PORT);
     }
     catch (std::exception &e)
     {

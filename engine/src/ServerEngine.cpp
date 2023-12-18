@@ -7,14 +7,31 @@
 
 #include "server/ServerEngine.hpp"
 
-ServerEngine::ServerEngine(Registry *r)
-    : r(r), _io_service(), _socket(_io_service, asio::ip::udp::endpoint(asio::ip::udp::v4(), 4242))
+/*!
+ \brief Constructor of ServerEngine.
+
+ \param r Pointer to a Registry object.
+ \param port Port number on which the server is listening.
+*/
+ServerEngine::ServerEngine(Registry *r, short port) : system(r, port)
 {
-    run();
+    this->r = r;
+
+    std::cout << "Server listening on port: " << port << std::endl;
+
+    this->run();
+}
+
+/*!
+ \brief Destructor of ServerEngine.
+*/
+ServerEngine::~ServerEngine()
+{
 }
 
 void ServerEngine::run()
 {
-    do_receive();
-    _io_service.run();
+    system.io_service.run();
+
+    while (1);
 }

@@ -7,15 +7,18 @@
 
 #include "Engine.hpp"
 
-Engine::Engine(EngineConfig config)
+/*!
+ \brief Constructor of Engine.
+
+ \param config Pointer to a EngineConfig object.
+*/
+Engine::Engine()
 {
-    if (!config.isServer) {
-        ClientEngine engine(config.r);
-    } else {
-        ServerEngine engine(config.r);
-    }
 }
 
+/*!
+ \brief Destructor of ServerEngine.
+*/
 Engine::~Engine()
 {
 }

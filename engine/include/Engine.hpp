@@ -18,24 +18,26 @@
 #define ENGINE_API
 #endif
 
+#define SERVER_PORT 1024
+
 #include "ECS/Registry.hpp"
-#include "client/ClientEngine.hpp"
-#include "server/ServerEngine.hpp"
+#include "client/ClientSystem.hpp"
+#include "server/ServerSystem.hpp"
 
-struct EngineConfig
-{
-    bool isServer;
-    Registry *r;
-};
+/*!
+ \class Engine
+ \brief Class managing the engine.
 
+ This class is exposed for shared library and is dispatching client / server engines.
+*/
 class ENGINE_API Engine
 {
-public:
-    Engine(EngineConfig config);
-    ~Engine();
+    public:
+        Engine();
+        ~Engine();
 
-protected:
-private:
+    protected:
+    private:
 };
 
 #endif /* !ENGINE_HPP_ */

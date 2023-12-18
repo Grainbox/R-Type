@@ -9,20 +9,33 @@
 #define DRAWABLE_HPP_
 
 #include <string>
-#include <SFML/Graphics.hpp>
+#include <raylib.h>
 
 #include "Exceptions.hpp"
 
+/*!
+ \class Drawable
+ \brief Component that is used on entities that can be rendered on the window.
+*/
 class Drawable {
     public:
         Drawable(std::string spritePath) {
-            if (!this->texture.loadFromFile(spritePath)) {
+            this->texture = LoadTexture(spritePath.c_str());
+            if (!this->texture.id) {
+                throw LoadAssetException("Failed to load asset: " + spritePath);
+            }
+        };
+        Drawable(std::string spritePath, int resizeWidth, int resizeHeight) {
+            Image image = LoadImage(spritePath.c_str());
+            ImageResize(&image, resizeWidth, resizeHeight);
+            this->texture = LoadTextureFromImage(image);
+            UnloadImage(image);
+            if (!this->texture.id) {
                 throw LoadAssetException("Failed to load asset: " + spritePath);
             }
         };
 
-        sf::Texture texture;
-        sf::Sprite sprite;
+        Texture2D texture;
     protected:
     private:
 };
