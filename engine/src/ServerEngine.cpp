@@ -13,10 +13,8 @@
  \param r Pointer to a Registry object.
  \param port Port number on which the server is listening.
 */
-ServerEngine::ServerEngine(Registry *r, short port) : system(r, port)
+ServerEngine::ServerEngine(Registry &r, short port) : r(r), system(r, port)
 {
-    this->r = r;
-
     std::cout << "Server listening on port: " << port << std::endl;
 
     this->run();

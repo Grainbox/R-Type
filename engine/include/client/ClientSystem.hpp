@@ -40,7 +40,7 @@
  */
 class ClientSystem {
     public:
-        ClientSystem(Registry *r, short server_port) : _udp_socket(io_context_), r(r)
+        ClientSystem(Registry &r, short server_port) : _udp_socket(io_context_), r(r)
         {
             _udp_socket.open(asio::ip::udp::v4());
             _server_endpoint = asio::ip::udp::endpoint(asio::ip::address::from_string("127.0.0.1"), server_port);
@@ -119,7 +119,7 @@ class ClientSystem {
         }
 
         /*!
-        \brief Handles data received from the server->
+        \brief Handles data received from the server.
 
         \param error Boost ASIO error code, if any.
         \param bytes_transferred Number of bytes received.
@@ -135,7 +135,7 @@ class ClientSystem {
         }
 
         /**
-         * @brief Gère les clics de l'utilisateur->
+         * @brief Gère les clics de l'utilisateur.
          *
          * Ce système détecte les clics de souris et déclenche des actions
          * si un objet cliquable est touché.
@@ -145,10 +145,10 @@ class ClientSystem {
          * @param window Fenêtre SFML pour la capture de la position de la souris.
          */
         void click_system() {
-            std::string scene = r->getCurrentScene();
-            Sparse_Array<Clickable> &clickables = r->getComponents<Clickable>(scene);
-            Sparse_Array<Hitbox> &hitboxs = r->getComponents<Hitbox>(scene);
-            Sparse_Array<Position> &positions = r->getComponents<Position>(scene);
+            std::string scene = r.getCurrentScene();
+            Sparse_Array<Clickable> &clickables = r.getComponents<Clickable>(scene);
+            Sparse_Array<Hitbox> &hitboxs = r.getComponents<Hitbox>(scene);
+            Sparse_Array<Position> &positions = r.getComponents<Position>(scene);
 
             for (size_t i = 0; i < clickables.size() && i < hitboxs.size() && i < positions.size(); ++i) {
                 auto &click = clickables[i];
@@ -167,7 +167,7 @@ class ClientSystem {
         }
 
         /**
-         * @brief Gère le passage de la sourie de l'utilisateur->
+         * @brief Gère le passage de la sourie de l'utilisateur.
          *
          * Ce système détecte la souris et déclenche des actions si un objet
          * réagissant est en contact avec la souris (sans click).
@@ -177,10 +177,10 @@ class ClientSystem {
          * @param window Fenêtre SFML pour la capture de la position de la souris.
          */
         void reactMouse_system() {
-            std::string scene = r->getCurrentScene();
-            Sparse_Array<ReactMouse> &reactMouses = r->getComponents<ReactMouse>(scene);
-            Sparse_Array<Hitbox> &hitboxs = r->getComponents<Hitbox>(scene);
-            Sparse_Array<Position> &positions = r->getComponents<Position>(scene);
+            std::string scene = r.getCurrentScene();
+            Sparse_Array<ReactMouse> &reactMouses = r.getComponents<ReactMouse>(scene);
+            Sparse_Array<Hitbox> &hitboxs = r.getComponents<Hitbox>(scene);
+            Sparse_Array<Position> &positions = r.getComponents<Position>(scene);
 
             for (size_t i = 0; i < reactMouses.size() && i < hitboxs.size() && i < positions.size(); ++i) {
                 auto &reactM = reactMouses[i];
@@ -197,9 +197,9 @@ class ClientSystem {
         }
 
         void control_system() {
-            std::string scene = r->getCurrentScene();
-            Sparse_Array<Controllable> &controllables = r->getComponents<Controllable>(scene);
-            Sparse_Array<Velocity> &velocities = r->getComponents<Velocity>(scene);
+            std::string scene = r.getCurrentScene();
+            Sparse_Array<Controllable> &controllables = r.getComponents<Controllable>(scene);
+            Sparse_Array<Velocity> &velocities = r.getComponents<Velocity>(scene);
 
             for (size_t i = 0; i < controllables.size() && i < velocities.size(); ++i) {
                 auto &vel = velocities[i];
@@ -225,9 +225,9 @@ class ClientSystem {
         }
 
         void draw_hitbox_system() {
-            std::string scene = r->getCurrentScene();
-            Sparse_Array<Hitbox> &hitboxs = r->getComponents<Hitbox>(scene);
-            Sparse_Array<Position> &positions = r->getComponents<Position>(scene);
+            std::string scene = r.getCurrentScene();
+            Sparse_Array<Hitbox> &hitboxs = r.getComponents<Hitbox>(scene);
+            Sparse_Array<Position> &positions = r.getComponents<Position>(scene);
 
             for (size_t i = 0; i < positions.size() && i < hitboxs.size(); ++i) {
                 auto &position = positions[i];
@@ -261,9 +261,9 @@ class ClientSystem {
          * @param window Fenêtre SFML dans laquelle les entités sont dessinées.
          */
         void draw_system() {
-            std::string scene = r->getCurrentScene();
-            auto &positions = r->getComponents<Position>(scene);
-            auto &drawables = r->getComponents<Drawable>(scene);
+            std::string scene = r.getCurrentScene();
+            auto &positions = r.getComponents<Position>(scene);
+            auto &drawables = r.getComponents<Drawable>(scene);
 
             for (size_t i = 0; i < positions.size() && i < drawables.size(); ++i) {
                 auto &pos = positions[i];
@@ -285,9 +285,9 @@ class ClientSystem {
          * `Position` et `Velocity` en fonction de leur vitesse actuelle.
          */
         void position_system() {
-            std::string scene = r->getCurrentScene();
-            Sparse_Array<Position> &positions = r->getComponents<Position>(scene);
-            Sparse_Array<Velocity> &velocities = r->getComponents<Velocity>(scene);
+            std::string scene = r.getCurrentScene();
+            Sparse_Array<Position> &positions = r.getComponents<Position>(scene);
+            Sparse_Array<Velocity> &velocities = r.getComponents<Velocity>(scene);
 
             for (size_t i = 0; i < positions.size() && i < velocities.size(); ++i) {
                 auto &pos = positions[i];
@@ -309,7 +309,7 @@ class ClientSystem {
         asio::ip::udp::endpoint _server_endpoint;
         char recv_buffer_[1024];
 
-        Registry *r;
+        Registry &r;
 
 };
 

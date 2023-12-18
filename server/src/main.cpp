@@ -31,7 +31,7 @@ int main()
 
         setupRegistry(r);
 
-        ServerEngine engine(&r, SERVER_PORT);
+        ServerEngine engine(r, SERVER_PORT);
     }
     catch (std::exception &e)
     {

@@ -13,11 +13,12 @@
  \param r Pointer to a Registry object.
  \param port Port number on which the client is connecting.
 */
-ClientEngine::ClientEngine(Registry *r, short server_port)
+ClientEngine::ClientEngine(Registry &r, short server_port)
     : r(r), system(r, server_port)
 {
-    system.send_first_con();
-    system.create_game();
+    // system.send_first_con();
+    // system.create_game();
+    std::cout << "start" << std::endl;
     run();
 }
 
@@ -33,14 +34,17 @@ ClientEngine::~ClientEngine()
 */
 void ClientEngine::run()
 {
+    std::cout << "before" << std::endl;
     while (!WindowShouldClose())
     {
+        std::cout << "hello" << std::endl;
         this->processEvents();
         this->update();
         this->render();
 
         system.io_context_.poll();
     }
+    std::cout << "after" << std::endl;
 }
 
 /*!

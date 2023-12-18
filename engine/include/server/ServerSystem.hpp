@@ -21,7 +21,7 @@ using namespace boost::placeholders;
 
 class ServerSystem {
     public:
-        ServerSystem(Registry *r, short port) : _socket(io_service, udp::endpoint(udp::v4(), port)), r(r) {
+        ServerSystem(Registry &r, short port) : _socket(io_service, udp::endpoint(udp::v4(), port)), r(r) {
             startReceive();
         }
 
@@ -31,7 +31,7 @@ class ServerSystem {
         \param error Boost ASIO error code, if any.
         \param bytes_transferred Number of bytes received.
         */
-        void handle_client(Registry *r, const boost::system::error_code& error,
+        void handle_client(Registry &r, const boost::system::error_code& error,
             std::size_t bytes_transferred)
         {
             std::cout << "-------------------------------------" << std::endl;
@@ -84,13 +84,13 @@ class ServerSystem {
 
         std::unordered_map<udp::endpoint, size_t> clients_entity;
 
-        Registry *r;
+        Registry &r;
 
         std::string client_connect_handler(FirstConMessage &msg,
             std::istringstream &archive_stream,
             boost::archive::text_iarchive &archive)
         {
-            Entity client = r->spawnEntity();
+            Entity client = r.spawnEntity();
             clients_entity[_remoteEndpoint] = client.getEntityId();
 
             std::cout << "Client Connected, assigned on: " << client.getEntityId() << std::endl;
@@ -105,7 +105,7 @@ class ServerSystem {
 
             archive >> msg;
 
-            r->killEntity(clients_entity[_remoteEndpoint], r->getCurrentScene());
+            r.killEntity(clients_entity[_remoteEndpoint], r.getCurrentScene());
             clients_entity.erase(_remoteEndpoint);
 
             std::cout << "Client Disconnected for reason: " << msg.reason << std::endl;

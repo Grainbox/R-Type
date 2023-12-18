@@ -30,11 +30,11 @@
 */
 class ENGINE_API ServerEngine : public Engine {
     public:
-        ServerEngine(Registry *r, short port);
+        ServerEngine(Registry &r, short port);
         ~ServerEngine();
     protected:
     private:
-        Registry *r;
+        Registry &r;
 
         ServerSystem system;
 

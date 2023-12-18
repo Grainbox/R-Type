@@ -10,32 +10,32 @@
 
 #include "client/ClientEngine.hpp"
 
-void pressPlay(Registry *r)
+void pressPlay(Registry &r)
 {
     std::cout << "Play button pressed." << std::endl;
 }
 
-void pressSettings(Registry *r)
+void pressSettings(Registry &r)
 {
     std::cout << "Settings button pressed." << std::endl;
 }
 
-void pressExit(Registry *r)
+void pressExit(Registry &r)
 {
     std::cout << "Exit button pressed." << std::endl;
 }
 
-void reactMPlay(Registry *r)
+void reactMPlay(Registry &r)
 {
     int ButtonWidth = GetScreenWidth() / 4;
     int ButtonHeight = GetScreenHeight() / 8;
     std::cout << "MOUSE DETECTED OVER PLAY BUTTON" << std::endl;
 
     // Drawable drawPlay("assets/Play col_Button.png", ButtonWidth, ButtonHeight);
-    // r->addComponent<Drawable>(playButton, drawPlay, mainMenu);
+    // r.addComponent<Drawable>(playButton, drawPlay, mainMenu);
 }
 
-void debug(Registry *r)
+void debug(Registry &r)
 {
     // auto inputOpt = r.getEntityComponent<KeyboardInput>(ent, r.getCurrentScene());
 
@@ -47,14 +47,14 @@ void debug(Registry *r)
     // }
 }
 
-void setupRegistry(Registry *r)
+void setupRegistry(Registry &r)
 {
-    Entity background = r->spawnEntity();
-    Entity player = r->spawnEntity();
+    Entity background = r.spawnEntity();
+    Entity player = r.spawnEntity();
 
-    Entity playButton = r->spawnEntity();
-    Entity settingsButton = r->spawnEntity();
-    Entity exitButton = r->spawnEntity();
+    Entity playButton = r.spawnEntity();
+    Entity settingsButton = r.spawnEntity();
+    Entity exitButton = r.spawnEntity();
 
     int ButtonGap = 100;
 
@@ -90,38 +90,38 @@ void setupRegistry(Registry *r)
     // Controllable control;
     // Velocity vel(0, 0);
 
-    // r->addComponent<Position>(player, pos, "mainMenu");
-    // r->addComponent<Drawable>(player, draw, "mainMenu");
-    // // r->addComponent<Controllable>(player, control, "mainMenu");
-    // r->addComponent<Hitbox>(player, box, "mainMenu");
-    // // r->addComponent<Velocity>(player, vel, "mainMenu");
+    // r.addComponent<Position>(player, pos, "mainMenu");
+    // r.addComponent<Drawable>(player, draw, "mainMenu");
+    // // r.addComponent<Controllable>(player, control, "mainMenu");
+    // r.addComponent<Hitbox>(player, box, "mainMenu");
+    // // r.addComponent<Velocity>(player, vel, "mainMenu");
 
     std::string mainMenu = "mainMenu";
 
 
-    r->addComponent<Position>(background, backPos, mainMenu);
-    r->addComponent<Position>(playButton, playPos, mainMenu);
-    r->addComponent<Position>(settingsButton, settingsPos, mainMenu);
-    r->addComponent<Position>(exitButton, leavePos, mainMenu);
+    r.addComponent<Position>(background, backPos, mainMenu);
+    r.addComponent<Position>(playButton, playPos, mainMenu);
+    r.addComponent<Position>(settingsButton, settingsPos, mainMenu);
+    r.addComponent<Position>(exitButton, leavePos, mainMenu);
 
-    r->addComponent<ReactMouse>(playButton, reactPlay, mainMenu);
+    r.addComponent<ReactMouse>(playButton, reactPlay, mainMenu);
 
-    r->addComponent<Drawable>(background, drawBackground, mainMenu);
-    r->addComponent<Drawable>(playButton, drawPlay, mainMenu);
-    r->addComponent<Drawable>(settingsButton, drawSettings, mainMenu);
-    r->addComponent<Drawable>(exitButton, drawLeave, mainMenu);
+    r.addComponent<Drawable>(background, drawBackground, mainMenu);
+    r.addComponent<Drawable>(playButton, drawPlay, mainMenu);
+    r.addComponent<Drawable>(settingsButton, drawSettings, mainMenu);
+    r.addComponent<Drawable>(exitButton, drawLeave, mainMenu);
 
-    r->addComponent<Hitbox>(playButton, box, mainMenu);
-    r->addComponent<Hitbox>(settingsButton, box, mainMenu);
-    r->addComponent<Hitbox>(exitButton, box, mainMenu);
+    r.addComponent<Hitbox>(playButton, box, mainMenu);
+    r.addComponent<Hitbox>(settingsButton, box, mainMenu);
+    r.addComponent<Hitbox>(exitButton, box, mainMenu);
 
-    r->addComponent<Clickable>(playButton, clickPlay, mainMenu);
-    r->addComponent<Clickable>(settingsButton, clickSettings, mainMenu);
-    r->addComponent<Clickable>(exitButton, clickExit, mainMenu);
+    r.addComponent<Clickable>(playButton, clickPlay, mainMenu);
+    r.addComponent<Clickable>(settingsButton, clickSettings, mainMenu);
+    r.addComponent<Clickable>(exitButton, clickExit, mainMenu);
 
-    // r->addComponent<Drawable>(playButton, draw, "mainMenu");
-    // r->addComponent<Drawable>(settingsButton, draw, "mainMenu");
-    // r->addComponent<Drawable>(leaveButton, draw, "mainMenu");
+    // r.addComponent<Drawable>(playButton, draw, "mainMenu");
+    // r.addComponent<Drawable>(settingsButton, draw, "mainMenu");
+    // r.addComponent<Drawable>(leaveButton, draw, "mainMenu");
 }
 
 int main()
@@ -136,9 +136,9 @@ int main()
         InitWindow(winWidth, winHeigth, "My Engine");
         SetTargetFPS(60);
 
-        setupRegistry(&r);
+        setupRegistry(r);
 
-        ClientEngine engine(&r, SERVER_PORT);
+        ClientEngine engine(r, SERVER_PORT);
     }
     catch (std::exception &e)
     {
