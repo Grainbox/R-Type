@@ -25,6 +25,7 @@
 #include "components/Clickable.hpp"
 #include "components/Hitbox.hpp"
 #include "components/ReactMouse.hpp"
+#include "Communication_Structures.hpp"
 
 #include <asio.hpp>
 #include <raylib.h>
@@ -47,13 +48,61 @@ class ClientSystem {
             start_receive();
         }
 
-        /*!
-        \brief Exemple function that sends a "hello" message to the server->
-        */
-        void send_hello()
+        ~ClientSystem()
         {
-            std::string message = "hello";
-            _udp_socket.send_to(asio::buffer(message), _server_endpoint);
+            send_disconnect();
+        }
+
+        void send_disconnect()
+        {
+            DisconnectMessage msg;
+
+            msg.header.type = MessageType::Disconnect;
+            msg.reason = "Client Input";
+
+            std::ostringstream archive_stream;
+            boost::archive::text_oarchive archive(archive_stream);
+
+            archive << msg;
+
+            std::string serialized_str = archive_stream.str();
+
+            std::cout << "Send Disconnect" << std::endl;
+
+            _udp_socket.send_to(asio::buffer(serialized_str), _server_endpoint);
+        }
+
+        /*!
+        \brief Send the first connection message to the server
+        */
+        void send_first_con()
+        {
+            FirstConMessage msg;
+            msg.header.type = MessageType::First_Con;
+
+            std::ostringstream archive_stream;
+            boost::archive::text_oarchive archive(archive_stream);
+
+            archive << msg;
+
+            std::string serialized_str = archive_stream.str();
+
+            _udp_socket.send_to(asio::buffer(serialized_str), _server_endpoint);
+        }
+
+        void create_game()
+        {
+            CreateGameMessage msg;
+            msg.header.type = MessageType::Create_Game;
+
+            std::ostringstream archive_stream;
+            boost::archive::text_oarchive archive(archive_stream);
+
+            archive << msg;
+
+            std::string serialized_str = archive_stream.str();
+
+            _udp_socket.send_to(asio::buffer(serialized_str), _server_endpoint);
         }
 
         /*!
@@ -116,6 +165,7 @@ class ClientSystem {
                 }
             }
         }
+
         /**
          * @brief Gère le passage de la sourie de l'utilisateur->
          *
@@ -201,27 +251,43 @@ class ClientSystem {
             }
         }
 
+        /**
+         * @brief Dessine les entités sur la fenêtre de rendu.
+         *
+         * Ce système parcourt toutes les entités disposant de composantes `Drawable`
+         * et `Position` et les dessine dans la fenêtre SFML.
+         *
+         * @param r Référence à l'objet Registry contenant les entités et composants.
+         * @param window Fenêtre SFML dans laquelle les entités sont dessinées.
+         */
         void draw_system() {
             std::string scene = r->getCurrentScene();
             auto &positions = r->getComponents<Position>(scene);
             auto &drawables = r->getComponents<Drawable>(scene);
 
-            std::string scene = r->getCurrentScene();
-            Sparse_Array<Position> &positions = r->getComponents<Position>(scene);
-            Sparse_Array<Velocity> &velocities = r->getComponents<Velocity>(scene);
+            for (size_t i = 0; i < positions.size() && i < drawables.size(); ++i) {
+                auto &pos = positions[i];
+                auto &draw = drawables[i];
+
+                if (!pos || !draw)
+                    continue;
+
+                Vector2 position = { pos.value().x, pos.value().y };
+
+                DrawTextureV(draw.value().texture, position, WHITE);
+            }
+        }
 
         /**
          * @brief Met à jour la position des entités en fonction de leur vitesse.
          *
          * Ce système met à jour la position des entités qui ont des composantes
          * `Position` et `Velocity` en fonction de leur vitesse actuelle.
-         *
-         * @param r Référence à l'objet Registry contenant les entités et composants.
          */
-        void position_system(Registry &r) {
-            std::string scene = r.getCurrentScene();
-            Sparse_Array<Position> &positions = r.getComponents<Position>(scene);
-            Sparse_Array<Velocity> &velocities = r.getComponents<Velocity>(scene);
+        void position_system() {
+            std::string scene = r->getCurrentScene();
+            Sparse_Array<Position> &positions = r->getComponents<Position>(scene);
+            Sparse_Array<Velocity> &velocities = r->getComponents<Velocity>(scene);
 
             for (size_t i = 0; i < positions.size() && i < velocities.size(); ++i) {
                 auto &pos = positions[i];

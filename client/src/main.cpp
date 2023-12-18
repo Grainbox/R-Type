@@ -50,6 +50,8 @@ void debug(Registry *r)
 void setupRegistry(Registry *r)
 {
     Entity background = r->spawnEntity();
+    Entity player = r->spawnEntity();
+
     Entity playButton = r->spawnEntity();
     Entity settingsButton = r->spawnEntity();
     Entity exitButton = r->spawnEntity();
@@ -70,8 +72,8 @@ void setupRegistry(Registry *r)
     Position settingsPos(ButtonPosX, ButtonPosY + ButtonGap);
     Position leavePos(ButtonPosX, ButtonPosY + (ButtonGap * 2));
 
-    // Drawable drawBackground("assets/animatedWallpaper.gif");
-    Drawable drawBackground("assets/animatedWallpaper.gif", GetScreenWidth(), GetScreenHeight());
+    Drawable drawBackground("assets/animatedWallpaper.gif");
+    // Drawable drawBackground("assets/animatedWallpaper.gif", GetScreenWidth(), GetScreenHeight());
     Drawable drawPlay("assets/Play Button.png", ButtonWidth, ButtonHeight);
     Drawable drawSettings("assets/Settings Button.png", ButtonWidth, ButtonHeight);
     Drawable drawLeave("assets/Exit Button.png", ButtonWidth, ButtonHeight);
@@ -117,6 +119,9 @@ void setupRegistry(Registry *r)
     r->addComponent<Clickable>(settingsButton, clickSettings, mainMenu);
     r->addComponent<Clickable>(exitButton, clickExit, mainMenu);
 
+    // r->addComponent<Drawable>(playButton, draw, "mainMenu");
+    // r->addComponent<Drawable>(settingsButton, draw, "mainMenu");
+    // r->addComponent<Drawable>(leaveButton, draw, "mainMenu");
 }
 
 int main()
