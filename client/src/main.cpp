@@ -10,32 +10,18 @@
 
 #include "client/ClientEngine.hpp"
 #include "MainView.hpp"
+#include "GameView.hpp"
 
 void mainMenu(Registry &r)
 {
     MainView mainview(r);
-    std::cout << "ici2 " << &r << std::endl;
     mainview.process();
 }
 
 void gameScene(Registry &r)
 {
-    std::string gameScene = "gameScene";
-    Entity player = r.spawnEntity();
-
-    Position playerPos(100, 400);
-    Drawable drawPlay("assets/entity_1.png");
-    Hitbox box(100, 100, true);
-    Controllable controls;
-    controls.setKeyboardKey(&controls.Up, KEY_Z);
-    controls.setKeyboardKey(&controls.Down, KEY_S);
-    controls.setKeyboardKey(&controls.Left, KEY_Q);
-    controls.setKeyboardKey(&controls.Right, KEY_D);
-
-    r.addComponent<Position>(player, playerPos, gameScene);
-    r.addComponent<Drawable>(player, drawPlay, gameScene);
-    r.addComponent<Hitbox>(player, box, gameScene);
-    r.addComponent<Controllable>(player, controls, gameScene);
+    GameView gameview(r);
+    gameview.process();
 }
 
 void setupRegistry(Registry &r)

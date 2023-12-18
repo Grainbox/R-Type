@@ -40,7 +40,6 @@ class MainView {
 
         void process()
         {
-            std::cout << "ici " << &r << std::endl;
             Entity background = r->spawnEntity();
             Entity player = r->spawnEntity();
 
@@ -54,9 +53,6 @@ class MainView {
             int ButtonHeight = GetScreenHeight() / 8;
             int ButtonPosX = (GetScreenWidth() / 2) - (ButtonWidth / 2);
             int ButtonPosY = (GetScreenHeight() / 2) - (ButtonHeight / 2);
-
-            std::cout << "--Button Width: " << ButtonWidth << std::endl;
-            std::cout << "--Button posX: " << ButtonPosX << std::endl;
 
             Position backPos(0, 0);
             Position playPos(ButtonPosX, ButtonPosY);
