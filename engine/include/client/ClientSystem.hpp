@@ -179,8 +179,6 @@ class ClientSystem {
             }
         }
 
-        
-
         /**
          * @brief Gère le passage de la sourie de l'utilisateur.
          *
@@ -202,12 +200,12 @@ class ClientSystem {
                 auto &hitbox = hitboxs[i];
                 auto &position = positions[i];
 
-                if (!hitbox || !reactM || !position) continue;
+                if (!hitbox || !reactC || !position) continue;
 
                 Vector2 mouse = GetMousePosition();
                 if (mouse.x < position.value().x || mouse.x > (position.value().x + hitbox.value().width)) continue;
                 if (mouse.y < position.value().y || mouse.y > (position.value().y + hitbox.value().height)) continue;
-                reactM.value().proc(r);
+                reactC.value().proc(r);
             }
         }
 
