@@ -44,7 +44,7 @@ void ClientEngine::run()
 }
 
 /*!
- \brief Process the SFML events and dispatch it on event related systems.
+ \brief Process the raylib events and dispatch it on event related systems.
 */
 void ClientEngine::processEvents()
 {
@@ -69,7 +69,7 @@ void ClientEngine::render()
     BeginDrawing();
 
     ClearBackground(BLACK);
-
+    system.update_sprites_system();
     system.draw_hitbox_system();
     system.draw_system();
 

@@ -34,6 +34,12 @@ class Drawable {
                 throw LoadAssetException("Failed to load asset: " + spritePath);
             }
         };
+        Drawable(Texture2D newTexture) {
+            this->texture = newTexture;
+            if (!this->texture.id) {
+                throw LoadAssetException("Failed to load texture");
+            }
+        };
 
         Texture2D texture;
     protected:

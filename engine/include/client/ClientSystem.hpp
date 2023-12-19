@@ -20,6 +20,7 @@
 #include "ECS/Sparse_Array.hpp"
 #include "components/Controllable.hpp"
 #include "components/Drawable.hpp"
+#include "components/AnimatedDraw.hpp"
 #include "components/Velocity.hpp"
 #include "components/Position.hpp"
 #include "components/Clickable.hpp"
@@ -250,11 +251,34 @@ class ClientSystem {
                 DrawLine(leftX, bottomY, rightX, bottomY, RED);
             }
         }
+        /**
+         * @brief Met à jour la texture selon un spritesheet.
+         *
+         * Ce système parcourt toutes les entités disposant de composants `AnimatedDraw`
+         * et "Drawable" et mets à jour Drawable à partir du "AnimatedDraw".
+         */
+        void update_sprites_system() {
+            std::string scene = r.getCurrentScene();
+            auto &drawables = r.getComponents<Drawable>(scene);
+            auto &animations = r.getComponents<AnimatedDraw>(scene);
+
+            for (size_t i = 0; i < drawables.size() && i < animations.size(); ++i) {
+                auto &draw = drawables[i];
+                auto &anim = animations[i];
+
+                // std::cout << "POG i = " << i << std::endl;
+
+                if (!draw || !anim)
+                    continue;
+                draw.value().texture = anim.value().textureList.at(0).at(0); 
+                // à compléter (pour l'instant: image fix)
+            }
+        }
 
         /**
          * @brief Dessine les entités sur la fenêtre de rendu.
          *
-         * Ce système parcourt toutes les entités disposant de composantes `Drawable`
+         * Ce système parcourt toutes les entités disposant de composants `Drawable`
          * et `Position` et les dessine dans la fenêtre SFML.
          *
          * @param r Référence à l'objet Registry contenant les entités et composants.
