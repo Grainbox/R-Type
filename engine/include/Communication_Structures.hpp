@@ -18,7 +18,8 @@
 enum class MessageType : uint8_t {
     First_Con = 0,
     Disconnect = 1,
-    Create_Game = 2
+    Create_Game = 2,
+    ECS_Transfert = 3,
 };
 
 struct MessageHeader {
@@ -53,6 +54,17 @@ struct FirstConMessage {
 
 struct CreateGameMessage {
     MessageHeader header;
+
+    template<class Archive>
+    void serialize(Archive &ar, const unsigned int version) {
+        ar & header;
+    }
+};
+
+struct TransfertECSMessage {
+    MessageHeader header;
+
+    std::unordered_map<std::type_index, std::any> comps;
 
     template<class Archive>
     void serialize(Archive &ar, const unsigned int version) {

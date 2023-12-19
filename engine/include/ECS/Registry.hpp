@@ -242,6 +242,11 @@ public:
         return this->_currentScene;
     }
 
+    std::unordered_map<std::type_index, std::any> &getComponentsArray()
+    {
+        return this->_components_arrays.at(this->_currentScene);
+    }
+
 protected:
 private:
     std::vector<std::function<void(Entity, std::string)>> remove_components; ///< Functions for removing components from entities.

@@ -93,7 +93,7 @@ class ServerSystem {
             Entity client = r.spawnEntity();
             clients_entity[_remoteEndpoint] = client.getEntityId();
 
-            std::cout << "Client Connected, assigned on: " << client.getEntityId() << std::endl;
+            std::cout << "Client Connected, assigned on: " << _remoteEndpoint << "->" << client.getEntityId() << std::endl;
             return "Client Connected";
         }
 
@@ -115,7 +115,36 @@ class ServerSystem {
         std::string create_game_handler(std::string message)
         {
             std::cout << "Create Game" << std::endl;
+
+            TransfertECSMessage msg;
+            msg.header.type = MessageType::ECS_Transfert;
+            msg.comps = r.getComponentsArray();
+
+            std::ostringstream archive_stream;
+            boost::archive::text_oarchive archive(archive_stream);
+
+            archive << msg;
+
+            std::string serialized_str = archive_stream.str();
+
+            std::cout << "Broadcasting Entities" << std::endl;
+
+            broadcast_message(serialized_str);
+
             return "Game Created";
+        }
+
+        void broadcast_message(const std::string& message)
+        {
+            auto shared_message = std::make_shared<std::string>(message);
+
+            for (const auto& client : clients_entity) {
+                std::cout << client.first << std::endl;
+                _socket.async_send_to(boost::asio::buffer(*shared_message), client.first,
+                    boost::bind(&ServerSystem::handle_send, this, shared_message,
+                        boost::asio::placeholders::error,
+                        boost::asio::placeholders::bytes_transferred));
+            }
         }
 
         /*!

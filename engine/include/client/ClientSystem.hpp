@@ -67,7 +67,7 @@ class ClientSystem {
 
             std::string serialized_str = archive_stream.str();
 
-            std::cout << "Send Disconnect" << std::endl;
+            std::cout << "Sending Disconnect" << std::endl;
 
             _udp_socket.send_to(asio::buffer(serialized_str), _server_endpoint);
         }
@@ -87,6 +87,8 @@ class ClientSystem {
 
             std::string serialized_str = archive_stream.str();
 
+            std::cout << "Sending First Con" << std::endl;
+
             _udp_socket.send_to(asio::buffer(serialized_str), _server_endpoint);
         }
 
@@ -101,6 +103,8 @@ class ClientSystem {
             archive << msg;
 
             std::string serialized_str = archive_stream.str();
+
+            std::cout << "Sending create game" << std::endl;
 
             _udp_socket.send_to(asio::buffer(serialized_str), _server_endpoint);
         }
@@ -128,8 +132,32 @@ class ClientSystem {
         {
             if (!error)
             {
+                std::cout << "-------------------------------------" << std::endl;
                 std::string received_message(recv_buffer_, bytes_transferred);
                 std::cout << "Received: " << received_message << std::endl;
+
+                std::istringstream archive_stream(received_message);
+                boost::archive::text_iarchive archive(archive_stream);
+                FirstConMessage msg;
+                archive >> msg;
+
+                std::string returnMessage = "ERROR";
+
+                std::cout << "Deserialized message type: " << static_cast<int>(msg.header.type) << std::endl << std::endl;
+
+                switch (msg.header.type) {
+                    case MessageType::ECS_Transfert: {
+                        TransfertECSMessage msg;
+                        std::istringstream archive_stream(received_message);
+                        boost::archive::text_iarchive archive(archive_stream);
+
+                        archive >> msg;
+                        break;
+                    }
+                    default:
+                        returnMessage = "Unknown message type received!";
+                }
+                std::cout << "-------------------------------------" << std::endl;
             }
             start_receive();
         }
