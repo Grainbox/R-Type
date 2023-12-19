@@ -40,9 +40,10 @@ class MainView {
 
         void process()
         {
+            std::string mainMenu = "mainMenu";
+
             Entity background = r->spawnEntity();
             Entity player = r->spawnEntity();
-            Entity boombox = r->spawnEntity();
 
             Entity playButton = r->spawnEntity();
             Entity settingsButton = r->spawnEntity();
@@ -73,10 +74,6 @@ class MainView {
 
             ReactCursor reactPlay(std::bind(&MainView::reactMPlay, this, std::placeholders::_1));
 
-            SoundWrapper soundbox("assets/musique.mp3", true);
-
-            std::string mainMenu = "mainMenu";
-
             r->addComponent<Position>(background, backPos, mainMenu);
             r->addComponent<Position>(playButton, playPos, mainMenu);
             r->addComponent<Position>(settingsButton, settingsPos, mainMenu);
@@ -97,7 +94,6 @@ class MainView {
             r->addComponent<Clickable>(settingsButton, clickSettings, mainMenu);
             r->addComponent<Clickable>(exitButton, clickExit, mainMenu);
 
-            r->addComponent<SoundWrapper>(boombox, soundbox, mainMenu);
         }
     protected:
     private:

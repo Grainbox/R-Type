@@ -14,19 +14,20 @@
 class SoundWrapper {
     public:
         SoundWrapper(std::string path) {
-            sound = LoadSound(path.c_str());
+            sound = LoadMusicStream(path.c_str());
+            PlayMusicStream(sound);
         };
 
         SoundWrapper(std::string path, bool stat) {
-            sound = LoadSound(path.c_str());
+            sound = LoadMusicStream(path.c_str());
+            PlayMusicStream(sound);
             this->status = stat;
         };
 
-        ~SoundWrapper() {
-            UnloadSound(sound);
-        }
+        // ~SoundWrapper() {
+        // }
 
-        Sound sound;
+        Music sound;
         bool status = false;
     protected:
     private:

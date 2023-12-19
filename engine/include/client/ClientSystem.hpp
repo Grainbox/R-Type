@@ -143,7 +143,7 @@ class ClientSystem {
                 auto &sound = soundbox[i];
 
                 if (!sound && sound.value().status) continue;
-                PlaySound(sound.value().sound);
+                UpdateMusicStream(sound.value().sound);
             }
         }
 
@@ -200,12 +200,12 @@ class ClientSystem {
                 auto &hitbox = hitboxs[i];
                 auto &position = positions[i];
 
-                if (!hitbox || !reactC || !position) continue;
+                if (!hitbox || !reactM || !position) continue;
 
                 Vector2 mouse = GetMousePosition();
                 if (mouse.x < position.value().x || mouse.x > (position.value().x + hitbox.value().width)) continue;
                 if (mouse.y < position.value().y || mouse.y > (position.value().y + hitbox.value().height)) continue;
-                reactC.value().proc(r);
+                reactM.value().proc(r);
             }
         }
 

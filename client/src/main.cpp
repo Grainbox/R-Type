@@ -38,13 +38,14 @@ int main()
 
         int winWidth = 800;
         int winHeigth = 600;
-
+        InitAudioDevice();
         InitWindow(winWidth, winHeigth, "My Engine");
         SetTargetFPS(60);
 
         setupRegistry(r);
 
         ClientEngine engine(r, SERVER_PORT);
+        CloseAudioDevice();
     }
     catch (std::exception &e)
     {
