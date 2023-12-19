@@ -38,8 +38,6 @@ void ClientEngine::run()
         this->processEvents();
         this->update();
         this->render();
-
-        system.io_context_.poll();
     }
 }
 
@@ -50,7 +48,7 @@ void ClientEngine::processEvents()
 {
     system.control_system();
     system.click_system();
-    system.reactMouse_system();
+    system.reactCursor_system();
 }
 
 /*!

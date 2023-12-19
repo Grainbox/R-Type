@@ -24,7 +24,7 @@
 #include "components/Position.hpp"
 #include "components/Clickable.hpp"
 #include "components/Hitbox.hpp"
-#include "components/ReactMouse.hpp"
+#include "components/ReactCursor.hpp"
 #include "Communication_Structures.hpp"
 
 #include <asio.hpp>
@@ -204,23 +204,23 @@ class ClientSystem {
          * @param event Événement SFML capturé.
          * @param window Fenêtre SFML pour la capture de la position de la souris.
          */
-        void reactMouse_system() {
+        void reactCursor_system() {
             std::string scene = r.getCurrentScene();
-            Sparse_Array<ReactMouse> &reactMouses = r.getComponents<ReactMouse>(scene);
+            Sparse_Array<ReactCursor> &reactCursors = r.getComponents<ReactCursor>(scene);
             Sparse_Array<Hitbox> &hitboxs = r.getComponents<Hitbox>(scene);
             Sparse_Array<Position> &positions = r.getComponents<Position>(scene);
 
-            for (size_t i = 0; i < reactMouses.size() && i < hitboxs.size() && i < positions.size(); ++i) {
-                auto &reactM = reactMouses[i];
+            for (size_t i = 0; i < reactCursors.size() && i < hitboxs.size() && i < positions.size(); ++i) {
+                auto &reactC = reactCursors[i];
                 auto &hitbox = hitboxs[i];
                 auto &position = positions[i];
 
-                if (!hitbox || !reactM || !position) continue;
+                if (!hitbox || !reactC || !position) continue;
 
                 Vector2 mouse = GetMousePosition();
                 if (mouse.x < position.value().x || mouse.x > (position.value().x + hitbox.value().width)) continue;
                 if (mouse.y < position.value().y || mouse.y > (position.value().y + hitbox.value().height)) continue;
-                reactM.value().proc(r);
+                reactC.value().proc(r);
             }
         }
 
