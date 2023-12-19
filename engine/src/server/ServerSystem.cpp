@@ -100,9 +100,7 @@ std::string ServerSystem::create_game_handler(std::string message)
 
     std::cout << "Broadcasting Entities" << std::endl;
 
-    broadcast_message(serialized_str);
-
-    return "Game Created";
+    return serialized_str;
 }
 
 void ServerSystem::broadcast_message(const std::string& message)

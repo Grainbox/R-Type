@@ -20,6 +20,7 @@
 #include <raylib.h>
 
 #include "Entity.hpp"
+#include "components/Position.hpp"
 
 #include "Exceptions.hpp"
 
@@ -240,6 +241,26 @@ public:
     std::string setCurrentScene(std::string scene) {
         this->_currentScene = scene;
         return this->_currentScene;
+    }
+
+    template <typename Component>
+    void handle_component_type(std::unordered_map<std::type_index, std::any> server_comps)
+    {
+        std::type_index typeIndex(typeid(Component));
+        auto &comp1 = std::any_cast<Sparse_Array<Component> &>(server_comps.at(typeIndex));
+
+    }
+
+    void createGameScene(std::unordered_map<std::type_index, std::any> server_comps)
+    {
+        std::type_index typeIndex(typeid(Position));
+        auto &comp1 = std::any_cast<Sparse_Array<Position> &>(server_comps.at(typeIndex));
+
+        for (size_t i = 0; i < comp1.size(); i++) {
+            auto &comp = comp1[i];
+
+            std::cout << comp.value().x << std::endl;
+        }
     }
 
     std::unordered_map<std::type_index, std::any> &getComponentsArray()

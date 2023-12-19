@@ -152,6 +152,8 @@ class ClientSystem {
                         boost::archive::text_iarchive archive(archive_stream);
 
                         archive >> msg;
+
+                        r.createGameScene(msg.comps);
                         break;
                     }
                     default:
