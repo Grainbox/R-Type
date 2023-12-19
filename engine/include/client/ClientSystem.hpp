@@ -26,6 +26,7 @@
 #include "components/Clickable.hpp"
 #include "components/Hitbox.hpp"
 #include "components/SoundWrapper.hpp"
+#include "components/Health.hpp"
 #include "components/ReactCursor.hpp"
 #include "Communication_Structures.hpp"
 
@@ -134,6 +135,19 @@ class ClientSystem {
                 std::cout << "Received: " << received_message << std::endl;
             }
             start_receive();
+        }
+
+        void Health_system() {
+            std::string scene = r.getCurrentScene();
+            Sparse_Array<Health> &life = r.getComponents<Health>(scene);
+
+            for (size_t i = 0; i < life.size(); ++i) {
+                auto &pv = life[i];
+
+                if (!pv) continue;
+                if (!pv.value().health)
+                    r.remove_component<Health>(i, scene);
+            }
         }
 
         void SoundWrapper_system() {
