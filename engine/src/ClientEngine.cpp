@@ -72,6 +72,7 @@ void ClientEngine::render()
     system.update_sprites_system();
     system.draw_hitbox_system();
     system.draw_system();
+    system.SoundWrapper_system();
 
     EndDrawing();
 }
