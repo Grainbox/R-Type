@@ -24,6 +24,7 @@
 #include "components/Position.hpp"
 #include "components/Clickable.hpp"
 #include "components/Hitbox.hpp"
+#include "components/SoundWrapper.hpp"
 #include "components/ReactCursor.hpp"
 #include "Communication_Structures.hpp"
 
@@ -134,6 +135,18 @@ class ClientSystem {
             start_receive();
         }
 
+        void SoundWrapper_system() {
+            std::string scene = r.getCurrentScene();
+            Sparse_Array<SoundWrapper> &soundbox = r.getComponents<SoundWrapper>(scene);
+
+            for (size_t i = 0; i < soundbox.size(); ++i) {
+                auto &sound = soundbox[i];
+
+                if (!sound && sound.value().status) continue;
+                PlaySound(sound.value().sound);
+            }
+        }
+
         /**
          * @brief Gère les clics de l'utilisateur.
          *
@@ -165,6 +178,8 @@ class ClientSystem {
                 }
             }
         }
+
+        
 
         /**
          * @brief Gère le passage de la sourie de l'utilisateur.

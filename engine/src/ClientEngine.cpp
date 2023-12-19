@@ -72,6 +72,7 @@ void ClientEngine::render()
 
     system.draw_hitbox_system();
     system.draw_system();
+    system.SoundWrapper_system();
 
     EndDrawing();
 }
