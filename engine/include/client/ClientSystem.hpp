@@ -279,12 +279,14 @@ class ClientSystem {
                 auto &draw = drawables[i];
                 auto &anim = animations[i];
 
-                // std::cout << "POG i = " << i << std::endl;
-
                 if (!draw || !anim)
                     continue;
-                draw.value().texture = anim.value().textureList.at(0).at(0); 
-                // à compléter (pour l'instant: image fix)
+                // Texture2D currFrame = anim.value().textureList.at(0).at(0);
+                // Image image = GetImageData(currFrame);
+                // ImageResize(&image, draw.value().resizeW, draw.value().resizeH);
+                // // draw.value().texture = currFrame;
+                draw.value().texture = anim.value().textureList.at(0).at(1);
+                // à compléter (pour l'instant: image fixe)
             }
         }
 

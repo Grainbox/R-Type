@@ -23,14 +23,14 @@ class GameView {
             Position playerPos(100, 400);
             Velocity playerVelo(10, 10);
             Drawable drawPlay("assets/entity_1.png");
-            Hitbox box(100, 100, true);
+            Hitbox box(100, 50, true);
             Controllable controls;
             controls.setKeyboardKey(&controls.Up, KEY_UP);
             controls.setKeyboardKey(&controls.Down, KEY_DOWN);
             controls.setKeyboardKey(&controls.Left, KEY_LEFT);
             controls.setKeyboardKey(&controls.Right, KEY_RIGHT);
 
-            AnimatedDraw anim("assets/player.png", 10, 1);
+            AnimatedDraw anim("assets/player.png", 10, 1, 100, 50);
 
             r->addComponent<Position>(player, playerPos, gameScene);
             r->addComponent<Velocity>(player, playerVelo, gameScene);
