@@ -21,7 +21,7 @@
 class AnimatedDraw {
     public:
         AnimatedDraw(std::string spriteSheetPath, int nbCols, int nbRows) {
-            Image spritesheet = LoadImage(spriteSheetPath.c_str()); 
+            Image spritesheet = LoadImage(spriteSheetPath.c_str());
             float frameWidth = spritesheet.width / nbCols;
             float frameHeight = spritesheet.height / nbRows;
             std::vector<Texture2D> list;
