@@ -14,6 +14,7 @@
 #include <boost/archive/text_iarchive.hpp>
 #include <boost/archive/text_oarchive.hpp>
 #include <sstream>
+#include <typeindex>
 
 enum class MessageType : uint8_t {
     First_Con = 0,

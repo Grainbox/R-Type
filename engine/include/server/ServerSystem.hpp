@@ -21,9 +21,7 @@ using namespace boost::placeholders;
 
 class ServerSystem {
     public:
-        ServerSystem(Registry &r, short port) : _socket(io_service, udp::endpoint(udp::v4(), port)), r(r) {
-            startReceive();
-        }
+        ServerSystem(Registry &r, short port);
 
         /*!
         \brief Handles data received from a client.
@@ -32,48 +30,7 @@ class ServerSystem {
         \param bytes_transferred Number of bytes received.
         */
         void handle_client(Registry &r, const boost::system::error_code& error,
-            std::size_t bytes_transferred)
-        {
-            std::cout << "-------------------------------------" << std::endl;
-            std::cout << "Bytes received: " << bytes_transferred << std::endl;
-
-            if (!error || error == boost::asio::error::message_size) {
-                auto message = std::make_shared<std::string>(_recvBuffer.data(), bytes_transferred);
-
-                std::cout << "Received data: " << *message << std::endl;
-
-                std::istringstream archive_stream(*message);
-                boost::archive::text_iarchive archive(archive_stream);
-                FirstConMessage msg;
-                archive >> msg;
-
-                std::string returnMessage = "ERROR";
-
-                std::cout << "Deserialized message type: " << static_cast<int>(msg.header.type) << std::endl << std::endl;
-
-                switch (msg.header.type) {
-                    case MessageType::First_Con: {
-                        returnMessage = client_connect_handler(msg, archive_stream, archive);
-                        break;
-                    }
-                    case MessageType::Disconnect: {
-                        returnMessage = client_disconnect_handler(*message);
-                        break;
-                    }
-                    case MessageType::Create_Game: {
-                        returnMessage = create_game_handler(*message);
-                        break;
-                    }
-                    default:
-                        returnMessage = "Unknown message type received!";
-                }
-                _socket.async_send_to(boost::asio::buffer(returnMessage), _remoteEndpoint,
-                    boost::bind(&ServerSystem::handle_send, this, message,
-                        boost::asio::placeholders::error,
-                        boost::asio::placeholders::bytes_transferred));
-            }
-            std::cout << "-------------------------------------" << std::endl;
-        }
+            std::size_t bytes_transferred);
 
         boost::asio::io_service io_service;
     protected:
@@ -86,80 +43,40 @@ class ServerSystem {
 
         Registry &r;
 
+        /*!
+        \brief Handler to connect a client
+
+        \param message the serialized data
+        */
         std::string client_connect_handler(FirstConMessage &msg,
             std::istringstream &archive_stream,
-            boost::archive::text_iarchive &archive)
-        {
-            Entity client = r.spawnEntity();
-            clients_entity[_remoteEndpoint] = client.getEntityId();
+            boost::archive::text_iarchive &archive);
 
-            std::cout << "Client Connected, assigned on: " << _remoteEndpoint << "->" << client.getEntityId() << std::endl;
-            return "Client Connected";
-        }
+        /*!
+        \brief Handler to disconnect a client
 
-        std::string client_disconnect_handler(std::string message)
-        {
-            DisconnectMessage msg;
-            std::istringstream archive_stream(message);
-            boost::archive::text_iarchive archive(archive_stream);
+        \param message the serialized data
+        */
+        std::string client_disconnect_handler(std::string message);
 
-            archive >> msg;
+        /*!
+        \brief Handler to create a game
 
-            r.killEntity(clients_entity[_remoteEndpoint], r.getCurrentScene());
-            clients_entity.erase(_remoteEndpoint);
+        \param message the serialized data
+        */
+        std::string create_game_handler(std::string message);
 
-            std::cout << "Client Disconnected for reason: " << msg.reason << std::endl;
-            return "Client Disconnected";
-        }
+        /*!
+        \brief Broadcast a message to every registered clients
 
-        std::string create_game_handler(std::string message)
-        {
-            std::cout << "Create Game" << std::endl;
-
-            TransfertECSMessage msg;
-            msg.header.type = MessageType::ECS_Transfert;
-            msg.comps = r.getComponentsArray();
-
-            std::ostringstream archive_stream;
-            boost::archive::text_oarchive archive(archive_stream);
-
-            archive << msg;
-
-            std::string serialized_str = archive_stream.str();
-
-            std::cout << "Broadcasting Entities" << std::endl;
-
-            broadcast_message(serialized_str);
-
-            return "Game Created";
-        }
-
-        void broadcast_message(const std::string& message)
-        {
-            auto shared_message = std::make_shared<std::string>(message);
-
-            for (const auto& client : clients_entity) {
-                std::cout << client.first << std::endl;
-                _socket.async_send_to(boost::asio::buffer(*shared_message), client.first,
-                    boost::bind(&ServerSystem::handle_send, this, shared_message,
-                        boost::asio::placeholders::error,
-                        boost::asio::placeholders::bytes_transferred));
-            }
-        }
+        \param message the string to send
+        */
+        void broadcast_message(const std::string& message);
 
         /*!
         \brief Starts receiving data from the network.
         */
-        void startReceive()
-        {
-            _socket.async_receive_from(
-                boost::asio::buffer(_recvBuffer), _remoteEndpoint,
-                boost::bind(&ServerSystem::handle_client, this,
-                    r,
-                    boost::asio::placeholders::error,
-                    boost::asio::placeholders::bytes_transferred)
-            );
-        }
+        void startReceive();
 
         /*!
         \brief Handles sending data to a client.
@@ -170,10 +87,7 @@ class ServerSystem {
         */
         void handle_send(std::shared_ptr<std::string> message,
             const boost::system::error_code& ec,
-            std::size_t bytes_transferred)
-        {
-            startReceive();
-        }
+            std::size_t bytes_transferred);
 };
 
 #endif /* !SERVERSYSTEM_HPP_ */

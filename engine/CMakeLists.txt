@@ -1,7 +1,8 @@
 set(ENGINE_COMMON_SOURCES
     src/Engine.cpp
     src/ClientEngine.cpp
-    src/ServerEngine.cpp
+    src/server/ServerEngine.cpp
+    src/server/ServerSystem.cpp
     include/Engine.hpp
 )
 
