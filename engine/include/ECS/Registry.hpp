@@ -242,6 +242,26 @@ public:
         return this->_currentScene;
     }
 
+    // /*!
+    // \brief Retrieve Entity Component
+    // \tparam The component type
+    // \param entity_id the entity id
+    // */
+    // template <typename Component>
+    // std::optional<Component &>get_entity_component(size_t entity_id)
+    // {
+    //     auto &comps = getComponents<Component>(this->getCurrentScene());
+
+    //     if (entity_id >= comps.size())
+    //         return {};
+    //     if (comps[entity_id].has_value()) {
+    //         // return comps[entity_id];
+    //         return std::ref(comps[entity_id].value());
+    //     } else {
+    //         return {};
+    //     }
+    // }
+
 protected:
 private:
     std::vector<std::function<void(Entity, std::string)>> remove_components; ///< Functions for removing components from entities.

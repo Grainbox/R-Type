@@ -17,6 +17,7 @@
 class Position {
     public:
         Position(float x, float y) : x(x), y(y) {};
+
         // Position(Entity entity, float x_input, float y_input, Registry &r, std::string scene)
         // {
         //     Position pos(x_input, y_input);
