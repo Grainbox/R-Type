@@ -42,9 +42,7 @@ int main()
         InitWindow(winWidth, winHeigth, "My Engine");
         SetTargetFPS(60);
 
-        std::cout << "----------------------------------" << std::endl;
         setupRegistry(r);
-        std::cout << "----------------------------------" << std::endl;
 
         ClientEngine engine(r, SERVER_PORT);
     }

@@ -22,11 +22,9 @@ class GameView {
 
         void process()
         {
-            std::cout << "before" << std::endl;
             std::string gameScene = "gameScene";
 
             Entity player = r->spawnEntity(gameScene);
-            std::cout << "after" << std::endl;
 
             Position playerPos(100, 400);
             Velocity playerVelo(10, 10);
