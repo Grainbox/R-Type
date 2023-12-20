@@ -18,7 +18,6 @@
 
 #include "ECS/Registry.hpp"
 #include "ECS/Sparse_Array.hpp"
-
 #include "Communication_Structures.hpp"
 
 #include <asio.hpp>
@@ -164,6 +163,99 @@ class ClientSystem {
             start_receive();
         }
 
+        void Health_system() {
+            std::string scene = r.getCurrentScene();
+            Sparse_Array<Health> &life = r.getComponents<Health>(scene);
+
+            for (size_t i = 0; i < life.size(); ++i) {
+                auto &pv = life[i];
+
+                if (!pv) continue;
+                if (!pv.value().health)
+                    r.remove_component<Health>(i, scene);
+            }
+        }
+
+        void SoundWrapper_system() {
+            std::string scene = r.getCurrentScene();
+            Sparse_Array<SoundWrapper> &soundbox = r.getComponents<SoundWrapper>(scene);
+
+            for (size_t i = 0; i < soundbox.size(); ++i) {
+                auto &sound = soundbox[i];
+
+                if (!sound && sound.value().status) continue;
+                UpdateMusicStream(sound.value().sound);
+            }
+        }
+
+        void Move_system() {
+            std::string scene = r.getCurrentScene();
+            Sparse_Array<MoveLeft> &moveLeft = r.getComponents<MoveLeft>(scene);
+            Sparse_Array<MoveRight> &moveRight = r.getComponents<MoveRight>(scene);
+            Sparse_Array<MoveUp> &moveUp = r.getComponents<MoveUp>(scene);
+            Sparse_Array<MoveDown> &moveDown = r.getComponents<MoveDown>(scene);
+            Sparse_Array<Velocity> &velocity = r.getComponents<Velocity>(scene);
+            Sparse_Array<Position> &position = r.getComponents<Position>(scene);
+
+            for (size_t i = 0; i < moveLeft.size() && i < moveRight.size() && i < moveDown.size() && i < moveUp.size() && i < velocity.size() && i < position.size(); ++i) {
+                auto &left = moveLeft[i];
+                auto &right = moveRight[i];
+                auto &up = moveUp[i];
+                auto &down = moveDown[i];
+                auto &mov = velocity[i];
+                auto &pos = position[i];
+
+                if (!mov || !pos) continue;
+
+                if (left)
+                    mov.value().vx += -1;
+                if (right)
+                    mov.value().vx += 1;
+                if (up)
+                    mov.value().vy += -1;
+                if (down)
+                    mov.value().vy += 1;
+                continue;
+            }
+        }
+
+        void Text_system() {
+            std::string scene = r.getCurrentScene();
+            Sparse_Array<Text> &txt = r.getComponents<Text>(scene);
+            Sparse_Array<Position> &position = r.getComponents<Position>(scene);
+
+            for (size_t i = 0; i < txt.size() && i < position.size(); ++i) {
+                auto &text = txt[i];
+                auto &pos = position[i];
+
+                if (!text || !pos) continue;
+
+                DrawText(TextFormat(text.value().text.c_str()), pos.value().x, pos.value().y, text.value().font_size, text.value().rgb);
+            }
+        }
+
+        /**
+         * @brief Gère les touches du clavier appuyées par l'utilisateur.
+         *
+         * Ce système détecte touches du clavier et déclenche des actions.
+         *
+         * @param r Référence à l'objet Registry contenant les entités et composants.
+         */
+        void key_detection_system() {
+            std::string scene = r.getCurrentScene();
+            Sparse_Array<KeyReaction> &KReactions = r.getComponents<KeyReaction>(scene);
+
+            for (size_t i = 0; i < KReactions.size(); ++i) {
+                auto &KReact = KReactions[i];
+
+                if (!KReact)
+                    continue;
+
+                if (IsKeyPressed(KReact.value().key_value))
+                    KReact.value().proc(r, i);
+            }
+        }
+
         /**
          * @brief Gère les clics de l'utilisateur.
          *
@@ -185,13 +277,14 @@ class ClientSystem {
                 auto &hitbox = hitboxs[i];
                 auto &position = positions[i];
 
-                if (!hitbox || !click || !position) continue;
+                if (!hitbox || !click || !position)
+                    continue;
 
                 if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
                     Vector2 mouse = GetMousePosition();
                     if (mouse.x < position.value().x || mouse.x > (position.value().x + hitbox.value().width)) continue;
                     if (mouse.y < position.value().y || mouse.y > (position.value().y + hitbox.value().height)) continue;
-                    click.value().proc(r);
+                    click.value().proc(r, i);
                 }
             }
         }
@@ -213,16 +306,17 @@ class ClientSystem {
             Sparse_Array<Position> &positions = r.getComponents<Position>(scene);
 
             for (size_t i = 0; i < reactCursors.size() && i < hitboxs.size() && i < positions.size(); ++i) {
-                auto &reactC = reactCursors[i];
+                auto &reactM = reactCursors[i];
                 auto &hitbox = hitboxs[i];
                 auto &position = positions[i];
 
-                if (!hitbox || !reactC || !position) continue;
+                if (!hitbox || !reactM || !position)
+                    continue;
 
                 Vector2 mouse = GetMousePosition();
                 if (mouse.x < position.value().x || mouse.x > (position.value().x + hitbox.value().width)) continue;
                 if (mouse.y < position.value().y || mouse.y > (position.value().y + hitbox.value().height)) continue;
-                reactC.value().proc(r);
+                reactM.value().proc(r);
             }
         }
 
@@ -263,7 +357,8 @@ class ClientSystem {
                 auto &position = positions[i];
                 auto &hitbox = hitboxs[i];
 
-                if (!hitbox || !position || !hitbox.value().debug) continue;
+                if (!hitbox || !position || !hitbox.value().debug)
+                    continue;
 
                 // Dessiner le contour de la hitbox
                 int leftX = position.value().x;
@@ -280,11 +375,36 @@ class ClientSystem {
                 DrawLine(leftX, bottomY, rightX, bottomY, RED);
             }
         }
+        /**
+         * @brief Met à jour la texture selon un spritesheet.
+         *
+         * Ce système parcourt toutes les entités disposant de composants `AnimatedDraw`
+         * et "Drawable" et mets à jour Drawable à partir du "AnimatedDraw".
+         */
+        void update_sprites_system() {
+            std::string scene = r.getCurrentScene();
+            auto &drawables = r.getComponents<Drawable>(scene);
+            auto &animations = r.getComponents<AnimatedDraw>(scene);
+
+            for (size_t i = 0; i < drawables.size() && i < animations.size(); ++i) {
+                auto &draw = drawables[i];
+                auto &anim = animations[i];
+
+                if (!draw || !anim)
+                    continue;
+                // Texture2D currFrame = anim.value().textureList.at(0).at(0);
+                // Image image = GetImageData(currFrame);
+                // ImageResize(&image, draw.value().resizeW, draw.value().resizeH);
+                // // draw.value().texture = currFrame;
+                draw.value().texture = anim.value().textureList.at(0).at(1);
+                // à compléter (pour l'instant: image fixe)
+            }
+        }
 
         /**
          * @brief Dessine les entités sur la fenêtre de rendu.
          *
-         * Ce système parcourt toutes les entités disposant de composantes `Drawable`
+         * Ce système parcourt toutes les entités disposant de composants `Drawable`
          * et `Position` et les dessine dans la fenêtre SFML.
          *
          * @param r Référence à l'objet Registry contenant les entités et composants.

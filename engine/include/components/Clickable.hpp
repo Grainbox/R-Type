@@ -13,17 +13,11 @@
 
 class Clickable {
     public:
-        Clickable(const std::function<void(Registry &)>& func) {
+        Clickable(const std::function<void(Registry &, size_t)>& func) {
             proc = func;
         }
-        std::function<void(Registry &)> proc;
 
-        template<class Archive>
-        void serialize(Archive &ar, const unsigned int version) {
-            ar & proc;
-        }
-
-        friend class boost::serialization::access;
+        std::function<void(Registry &, size_t)> proc;
     protected:
     private:
 };

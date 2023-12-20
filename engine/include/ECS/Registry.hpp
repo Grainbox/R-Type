@@ -202,11 +202,13 @@ public:
     {
         Entity newEntity;
 
-        if (!deadEntities.empty()) {
-            newEntity.setEntityId(deadEntities.at(scene).front());
-            deadEntities.at(scene).pop_front();
+        registerScene(scene);
+
+        if (!deadEntities[scene].empty()) {
+            newEntity.setEntityId(deadEntities[scene].front());
+            deadEntities[scene].pop_front();
         } else {
-            newEntity.setEntityId(nextEntityId.at(scene)++);
+            newEntity.setEntityId(nextEntityId[scene]++);
         }
 
         return newEntity;
@@ -246,26 +248,25 @@ public:
         return this->_currentScene;
     }
 
-    /*!
-    \brief Retrieve Entity Component for boost
+    // /*!
+    // \brief Retrieve Entity Component
+    // \tparam The component type
+    // \param entity_id the entity id
+    // */
+    // template <typename Component>
+    // std::optional<Component &>get_entity_component(size_t entity_id)
+    // {
+    //     auto &comps = getComponents<Component>(this->getCurrentScene());
 
-    \tparam The component type
-
-    \param entity_id the entity id
-    */
-    template <typename Component>
-    std::optional<Component &>get_entity_component(size_t entity_id)
-    {
-        auto &comps = getComponents<Component>(this->getCurrentScene());
-
-        if (entity_id >= comps.size())
-            return {};
-        if (comps[entity_id].has_value()) {
-            return comps[entity_id];
-        } else {
-            return {};
-        }
-    }
+    //     if (entity_id >= comps.size())
+    //         return {};
+    //     if (comps[entity_id].has_value()) {
+    //         // return comps[entity_id];
+    //         return std::ref(comps[entity_id].value());
+    //     } else {
+    //         return {};
+    //     }
+    // }
 
     /*!
     \brief Retrieve Entity Component for boost
@@ -295,9 +296,7 @@ public:
 
     std::list<size_t> getDeadEntities()
     {
-        if (this->deadEntities.find(this->getCurrentScene()) == this->deadEntities.end()) {
-            this->deadEntities[this->getCurrentScene()] = std::list<size_t>();
-        }
+        registerScene(this->getCurrentScene());
         return this->deadEntities[this->getCurrentScene()];
     }
 
