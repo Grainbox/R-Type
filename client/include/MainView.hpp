@@ -49,12 +49,12 @@ class MainView {
             Entity settingsButton = r->spawnEntity();
             Entity exitButton = r->spawnEntity();
 
-            int ButtonGap = 100;
 
             int ButtonWidth = GetScreenWidth() / 4;
             int ButtonHeight = GetScreenHeight() / 8;
             int ButtonPosX = (GetScreenWidth() / 2) - (ButtonWidth / 2);
             int ButtonPosY = (GetScreenHeight() / 2) - (ButtonHeight / 2);
+            int ButtonGap = 100;
 
             Position backPos(0, 0);
             Position playPos(ButtonPosX, ButtonPosY);
