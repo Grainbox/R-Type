@@ -35,7 +35,7 @@ void ServerSystem::handle_client(Registry &r,
 
         switch (msg.header.type) {
             case MessageType::First_Con: {
-                returnMessage = client_connect_handler(msg, archive_stream, archive);
+                returnMessage = client_connect_handler(msg);
                 break;
             }
             case MessageType::Disconnect: {
@@ -57,15 +57,20 @@ void ServerSystem::handle_client(Registry &r,
     std::cout << "-------------------------------------" << std::endl;
 }
 
-std::string ServerSystem::client_connect_handler(FirstConMessage &msg,
-    std::istringstream &archive_stream,
-    boost::archive::text_iarchive &archive)
+std::string ServerSystem::client_connect_handler(FirstConMessage &msg)
 {
-    Entity client = r.spawnEntity();
-    clients_entity[_remoteEndpoint] = client.getEntityId();
+    std::ostringstream archive_stream;
+    boost::archive::text_oarchive archive(archive_stream);
 
-    std::cout << "Client Connected, assigned on: " << _remoteEndpoint << "->" << client.getEntityId() << std::endl;
-    return "Client Connected";
+    archive << msg;
+
+    std::string serialized_str = archive_stream.str();
+
+    // Entity client = r.spawnEntity(r.getCurrentScene());
+    // clients_entity[_remoteEndpoint] = client.getEntityId();
+
+    // std::cout << "Client Connected, assigned on: " << _remoteEndpoint << "->" << client.getEntityId() << std::endl;
+    return serialized_str;
 }
 
 std::string ServerSystem::client_disconnect_handler(std::string message)
@@ -76,11 +81,13 @@ std::string ServerSystem::client_disconnect_handler(std::string message)
 
     archive >> msg;
 
-    r.killEntity(clients_entity[_remoteEndpoint], r.getCurrentScene());
-    clients_entity.erase(_remoteEndpoint);
+    std::string serialized_str = archive_stream.str();
+
+    // r.killEntity(clients_entity[_remoteEndpoint], r.getCurrentScene());
+    // clients_entity.erase(_remoteEndpoint);
 
     std::cout << "Client Disconnected for reason: " << msg.reason << std::endl;
-    return "Client Disconnected";
+    return serialized_str;
 }
 
 std::string ServerSystem::create_game_handler(std::string message)
@@ -89,7 +96,28 @@ std::string ServerSystem::create_game_handler(std::string message)
 
     TransfertECSMessage msg;
     msg.header.type = MessageType::ECS_Transfert;
-    msg.comps = r.getComponentsArray();
+
+    std::list<size_t> deadEntities = r.getDeadEntities();
+
+    for (size_t i = 0; i < r.getNextEntityId(); i++) {
+        auto it = std::find(deadEntities.begin(), deadEntities.end(), i);
+
+        if (!deadEntities.empty() && it == deadEntities.end())
+            continue;
+
+        EntityComponents comps;
+
+        comps.entity_id = i;
+        // comps.clickable = r.get_entity_component<Clickable>(i);
+        // comps.controllable = r.get_entity_component<Controllable>(i);
+        // comps.drawable = r.get_entity_component<Drawable>(i);
+        // comps.hitbox = r.get_entity_component<Hitbox>(i);
+        // comps.kb_input = r.get_entity_component<KeyboardInput>(i);
+        comps.position = r.get_boost_entity_component<Position>(i);
+        // comps.react_cursor = r.get_entity_component<ReactCursor>(i);
+        // comps.velocity = r.get_entity_component<Velocity>(i);
+        msg.entities.push_back(comps);
+    }
 
     std::ostringstream archive_stream;
     boost::archive::text_oarchive archive(archive_stream);
@@ -98,7 +126,7 @@ std::string ServerSystem::create_game_handler(std::string message)
 
     std::string serialized_str = archive_stream.str();
 
-    std::cout << "Broadcasting Entities" << std::endl;
+    std::cout << "Sending: " << serialized_str << std::endl;
 
     return serialized_str;
 }

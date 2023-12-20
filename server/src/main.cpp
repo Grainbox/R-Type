@@ -12,7 +12,7 @@
 
 void setupRegistry(Registry &r)
 {
-    Entity player = r.spawnEntity();
+    Entity player = r.spawnEntity("mainMenu");
 
     Position pos(100, 0);
     Controllable control;

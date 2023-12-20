@@ -9,6 +9,7 @@
 #define REGISTRY_HPP_
 
 #include <unordered_map>
+#include <map>
 #include <any>
 #include <typeindex>
 #include <memory>
@@ -18,9 +19,9 @@
 #include <iostream>
 #include <functional>
 #include <raylib.h>
+#include <boost/optional.hpp>
 
 #include "Entity.hpp"
-#include "components/Position.hpp"
 
 #include "Exceptions.hpp"
 
@@ -78,8 +79,10 @@ public:
      \return A reference to the scene's component storage.
     */
     std::unordered_map<std::type_index, std::any> &registerScene(std::string sceneName) {
-        if (_components_arrays.find(sceneName) == _components_arrays.end())
+        if (_components_arrays.find(sceneName) == _components_arrays.end()) {
             _components_arrays[sceneName] = std::unordered_map<std::type_index, std::any>();
+            nextEntityId[sceneName] = 0;
+        }
         return _components_arrays.at(sceneName);
     }
 
@@ -195,15 +198,15 @@ public:
      \brief Spawns a new entity and returns it.
      \return The newly spawned entity.
     */
-    Entity spawnEntity()
+    Entity spawnEntity(std::string scene)
     {
         Entity newEntity;
 
         if (!deadEntities.empty()) {
-            newEntity.setEntityId(deadEntities.front());
-            deadEntities.pop_front();
+            newEntity.setEntityId(deadEntities.at(scene).front());
+            deadEntities.at(scene).pop_front();
         } else {
-            newEntity.setEntityId(nextEntityId++);
+            newEntity.setEntityId(nextEntityId.at(scene)++);
         }
 
         return newEntity;
@@ -219,7 +222,7 @@ public:
         try {
             for (auto &func : remove_components)
                 func(ent, scene);
-            deadEntities.push_front(ent.getEntityId());
+            deadEntities[scene].push_front(ent.getEntityId());
         } catch (std::exception &e) {
             std::cerr << "Error: Registry::killEntity -> " << e.what() << std::endl;
         }
@@ -243,29 +246,59 @@ public:
         return this->_currentScene;
     }
 
+    /*!
+    \brief Retrieve Entity Component for boost
+
+    \tparam The component type
+
+    \param entity_id the entity id
+    */
     template <typename Component>
-    void handle_component_type(std::unordered_map<std::type_index, std::any> server_comps)
+    std::optional<Component &>get_entity_component(size_t entity_id)
     {
-        std::type_index typeIndex(typeid(Component));
-        auto &comp1 = std::any_cast<Sparse_Array<Component> &>(server_comps.at(typeIndex));
+        auto &comps = getComponents<Component>(this->getCurrentScene());
 
-    }
-
-    void createGameScene(std::unordered_map<std::type_index, std::any> server_comps)
-    {
-        std::type_index typeIndex(typeid(Position));
-        auto &comp1 = std::any_cast<Sparse_Array<Position> &>(server_comps.at(typeIndex));
-
-        for (size_t i = 0; i < comp1.size(); i++) {
-            auto &comp = comp1[i];
-
-            std::cout << comp.value().x << std::endl;
+        if (entity_id >= comps.size())
+            return {};
+        if (comps[entity_id].has_value()) {
+            return comps[entity_id];
+        } else {
+            return {};
         }
     }
 
-    std::unordered_map<std::type_index, std::any> &getComponentsArray()
+    /*!
+    \brief Retrieve Entity Component for boost
+
+    \tparam The component type
+
+    \param entity_id the entity id
+    */
+    template <typename Component>
+    boost::optional<Component>get_boost_entity_component(size_t entity_id)
     {
-        return this->_components_arrays.at(this->_currentScene);
+        auto &comps = getComponents<Component>(this->getCurrentScene());
+
+        if (entity_id >= comps.size())
+            return boost::none;
+        if (comps[entity_id].has_value()) {
+            return boost::optional<Component>(*comps[entity_id]);
+        } else {
+            return boost::none;
+        }
+    }
+
+    size_t getNextEntityId()
+    {
+        return this->nextEntityId.at(this->getCurrentScene());
+    }
+
+    std::list<size_t> getDeadEntities()
+    {
+        if (this->deadEntities.find(this->getCurrentScene()) == this->deadEntities.end()) {
+            this->deadEntities[this->getCurrentScene()] = std::list<size_t>();
+        }
+        return this->deadEntities[this->getCurrentScene()];
     }
 
 protected:
@@ -273,8 +306,8 @@ private:
     std::vector<std::function<void(Entity, std::string)>> remove_components; ///< Functions for removing components from entities.
     std::string _currentScene; ///< Name of the current active scene.
     std::unordered_map<std::string, std::unordered_map<std::type_index, std::any>> _components_arrays; ///< Storage for components in each scene.
-    std::list<size_t> deadEntities; ///< List of IDs of entities that have been destroyed.
-    size_t nextEntityId = 0; ///< ID to be assigned to the next spawned entity.
+    std::map<std::string, size_t> nextEntityId; ///< ID to be assigned to the next spawned entity.
+    std::map<std::string, std::list<size_t>> deadEntities; ///< List of IDs of entities that have been destroyed.
 };
 
 #endif /* !REGISTRY_HPP_ */
