@@ -59,6 +59,7 @@ class GameView {
             r->addComponent<Velocity>(ennemy, ennemyVelo, gameScene);
             r->addComponent<Drawable>(ennemy, drawEnnemy, gameScene);
             r->addComponent<Hitbox>(ennemy, box, gameScene);
+            r->addComponent<AnimatedDraw>(ennemy, anim2, gameScene);
 
             Entity Title = r->spawnEntity(gameScene);
             Position titlePos(0, 100);
@@ -69,7 +70,6 @@ class GameView {
             r->addComponent<Velocity>(Title, titleVelo, gameScene);
             r->addComponent<MoveRight>(Title, mr, gameScene);
             r->addComponent<Text>(Title, txt, gameScene);
-            r->addComponent<AnimatedDraw>(ennemy, anim2, gameScene);
 
             KeyReaction Kreact1(KEY_A, std::bind(&GameView::debugPrint, this, std::placeholders::_1, std::placeholders::_2));
             r->addComponent<KeyReaction>(player, Kreact1, gameScene);
