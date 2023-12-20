@@ -186,13 +186,13 @@ class ClientSystem {
                 if (!mov || !pos) continue;
 
                 if (left)
-                    mov.value().vx = -1;
+                    mov.value().vx += -1;
                 if (right)
-                    mov.value().vx = 1;
+                    mov.value().vx += 1;
                 if (up)
-                    mov.value().vy = -1;
+                    mov.value().vy += -1;
                 if (down)
-                    mov.value().vy = 1;
+                    mov.value().vy += 1;
                 continue;
             }
         }
