@@ -8,27 +8,28 @@
 #ifndef POSITION_HPP_
 #define POSITION_HPP_
 
-// #include "Registry.hpp"
+#include <boost/serialization/serialization.hpp>
 
 /*!
  \class Position
  \brief Component that is used on entities that has a position.
 */
 class Position {
-    public:
-        Position(float x, float y) : x(x), y(y) {};
+public:
+    Position(float x = 0.0f, float y = 0.0f) : x(x), y(y) {};
 
-        // Position(Entity entity, float x_input, float y_input, Registry &r, std::string scene)
-        // {
-        //     Position pos(x_input, y_input);
-        //     r.addComponent<Position>(entity, pos, scene);
-        // };
+    float x;
+    float y;
 
-        float x;
-        float y;
+    template<class Archive>
+    void serialize(Archive &ar, const unsigned int version) {
+        ar & x;
+        ar & y;
+    }
 
-    protected:
-    private:
+    friend class boost::serialization::access;
+protected:
+private:
 };
 
 #endif /* !POSITION_HPP_ */

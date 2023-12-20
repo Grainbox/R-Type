@@ -22,9 +22,11 @@ class GameView {
 
         void process()
         {
+            std::cout << "before" << std::endl;
             std::string gameScene = "gameScene";
 
-            Entity player = r->spawnEntity();
+            Entity player = r->spawnEntity(gameScene);
+            std::cout << "after" << std::endl;
 
             Position playerPos(100, 400);
             Velocity playerVelo(10, 10);
@@ -45,7 +47,7 @@ class GameView {
             r->addComponent<Controllable>(player, controls, gameScene);
             r->addComponent<AnimatedDraw>(player, anim, gameScene);
 
-            Entity ennemy = r->spawnEntity();
+            Entity ennemy = r->spawnEntity(gameScene);
 
             Position ennemyPos(400, 300);
             Velocity ennemyVelo(-1, 0);
@@ -58,7 +60,7 @@ class GameView {
             r->addComponent<Drawable>(ennemy, drawEnnemy, gameScene);
             r->addComponent<Hitbox>(ennemy, box, gameScene);
 
-            Entity Title = r->spawnEntity();
+            Entity Title = r->spawnEntity(gameScene);
             Position titlePos(0, 100);
             Velocity titleVelo(1, 0);
             MoveRight mr;

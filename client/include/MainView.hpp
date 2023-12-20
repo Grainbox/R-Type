@@ -47,13 +47,11 @@ class MainView {
         {
             std::string mainMenu = "mainMenu";
 
-            Entity background = r->spawnEntity();
-            Entity player = r->spawnEntity();
+            Entity background = r->spawnEntity(mainMenu);
 
-            Entity playButton = r->spawnEntity();
-            Entity settingsButton = r->spawnEntity();
-            Entity exitButton = r->spawnEntity();
-
+            Entity playButton = r->spawnEntity(mainMenu);
+            Entity settingsButton = r->spawnEntity(mainMenu);
+            Entity exitButton = r->spawnEntity(mainMenu);
 
             int ButtonWidth = GetScreenWidth() / 4;
             int ButtonHeight = GetScreenHeight() / 8;
