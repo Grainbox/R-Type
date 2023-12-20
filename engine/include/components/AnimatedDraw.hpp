@@ -52,7 +52,7 @@ class AnimatedDraw {
                 for (int col = 0; col < nbCols; col++) {
                     Rectangle sourceRect = { col * frameWidth, row * frameHeight, frameWidth, frameHeight };
                     Image frameImage = ImageFromImage(spritesheet, sourceRect);
-                    ImageResize(&frameImage, resizeWidth, resizeHeight);
+                    ImageResizeNN(&frameImage, resizeWidth, resizeHeight);
                     UnloadImage(frameImage);
                     list.push_back(LoadTextureFromImage(frameImage));
                 }

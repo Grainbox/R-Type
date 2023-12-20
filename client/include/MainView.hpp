@@ -38,6 +38,11 @@ class MainView {
             // r->addComponent<Drawable>(playButton, drawPlay, mainMenu);
         }
 
+        void debugPrint(Registry &r)
+        {
+            std::cout << "key detected" << std::endl;
+        }
+
         void process()
         {
             std::string mainMenu = "mainMenu";
@@ -94,6 +99,8 @@ class MainView {
             r->addComponent<Clickable>(settingsButton, clickSettings, mainMenu);
             r->addComponent<Clickable>(exitButton, clickExit, mainMenu);
 
+            // KeyReaction Kreact1(KEY_A, std::bind(&MainView::debugPrint, this, std::placeholders::_1));
+            // r->addComponent<KeyReaction>(background, Kreact1, mainMenu);
         }
     protected:
     private:
