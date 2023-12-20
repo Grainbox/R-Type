@@ -16,15 +16,21 @@ if [ ! -f "$VCPKG_DIR/vcpkg" ]; then
 fi
 
 # Install necessary libraries using vcpkg
-"$VCPKG_DIR/vcpkg" install asio
-"$VCPKG_DIR/vcpkg" install boost-asio
-"$VCPKG_DIR/vcpkg" install raylib
-"$VCPKG_DIR/vcpkg" install boost-serialization
+libraries=("asio" "boost-asio" "raylib" "boost-serialization")
+for lib in "${libraries[@]}"; do
+    if ! "$VCPKG_DIR/vcpkg" list | grep -q $lib; then
+        echo "Installing $lib..."
+        "$VCPKG_DIR/vcpkg" install $lib
+    fi
+done
 
 mkdir -p build
-cd build
+cd build || exit 1
 
-cmake ..
-cmake --build .
+# Run CMake configuration and build
+echo "Configuring project..."
+cmake .. -DCMAKE_TOOLCHAIN_FILE="../vcpkg/scripts/buildsystems/vcpkg.cmake" -DCMAKE_BUILD_TYPE=Release || exit 1
+echo "Building project..."
+cmake --build . || exit 1
 
 cd ..

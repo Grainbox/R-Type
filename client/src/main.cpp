@@ -25,11 +25,9 @@ void pressExit(Registry &r)
     std::cout << "Exit button pressed." << std::endl;
 }
 
-void reactMPlay(Registry &r)
+void reactCPlay(Registry &r)
 {
-    int ButtonWidth = GetScreenWidth() / 4;
-    int ButtonHeight = GetScreenHeight() / 8;
-    std::cout << "MOUSE DETECTED OVER PLAY BUTTON" << std::endl;
+    // std::cout << "MOUSE DETECTED OVER PLAY BUTTON" << std::endl;
 
     // Drawable drawPlay("assets/Play col_Button.png", ButtonWidth, ButtonHeight);
     // r.addComponent<Drawable>(playButton, drawPlay, mainMenu);
@@ -49,12 +47,14 @@ void debug(Registry &r)
 
 void setupRegistry(Registry &r)
 {
-    Entity background = r.spawnEntity();
-    Entity player = r.spawnEntity();
+    std::string mainMenu = "mainMenu";
 
-    Entity playButton = r.spawnEntity();
-    Entity settingsButton = r.spawnEntity();
-    Entity exitButton = r.spawnEntity();
+    Entity background = r.spawnEntity(mainMenu);
+    Entity player = r.spawnEntity(mainMenu);
+
+    Entity playButton = r.spawnEntity(mainMenu);
+    Entity settingsButton = r.spawnEntity(mainMenu);
+    Entity exitButton = r.spawnEntity(mainMenu);
 
     int ButtonGap = 100;
 
@@ -66,14 +66,12 @@ void setupRegistry(Registry &r)
     std::cout << "--Button Width: " << ButtonWidth << std::endl;
     std::cout << "--Button posX: " << ButtonPosX << std::endl;
 
-    // Position playPos(100, 100);
     Position backPos(0, 0);
     Position playPos(ButtonPosX, ButtonPosY);
     Position settingsPos(ButtonPosX, ButtonPosY + ButtonGap);
     Position leavePos(ButtonPosX, ButtonPosY + (ButtonGap * 2));
 
-    Drawable drawBackground("assets/animatedWallpaper.gif");
-    // Drawable drawBackground("assets/animatedWallpaper.gif", GetScreenWidth(), GetScreenHeight());
+    Drawable drawBackground("assets/animatedWallpaper.gif", GetScreenWidth(), GetScreenHeight());
     Drawable drawPlay("assets/Play Button.png", ButtonWidth, ButtonHeight);
     Drawable drawSettings("assets/Settings Button.png", ButtonWidth, ButtonHeight);
     Drawable drawLeave("assets/Exit Button.png", ButtonWidth, ButtonHeight);
@@ -84,27 +82,14 @@ void setupRegistry(Registry &r)
     Clickable clickSettings(pressSettings);
     Clickable clickExit(pressExit);
 
-    ReactMouse reactPlay(reactMPlay);
-
-    // Clickable clickPlay(debugClick("playButton"));
-    // Controllable control;
-    // Velocity vel(0, 0);
-
-    // r.addComponent<Position>(player, pos, "mainMenu");
-    // r.addComponent<Drawable>(player, draw, "mainMenu");
-    // // r.addComponent<Controllable>(player, control, "mainMenu");
-    // r.addComponent<Hitbox>(player, box, "mainMenu");
-    // // r.addComponent<Velocity>(player, vel, "mainMenu");
-
-    std::string mainMenu = "mainMenu";
-
+    ReactCursor reactPlay(reactCPlay);
 
     r.addComponent<Position>(background, backPos, mainMenu);
     r.addComponent<Position>(playButton, playPos, mainMenu);
     r.addComponent<Position>(settingsButton, settingsPos, mainMenu);
     r.addComponent<Position>(exitButton, leavePos, mainMenu);
 
-    r.addComponent<ReactMouse>(playButton, reactPlay, mainMenu);
+    r.addComponent<ReactCursor>(playButton, reactPlay, mainMenu);
 
     r.addComponent<Drawable>(background, drawBackground, mainMenu);
     r.addComponent<Drawable>(playButton, drawPlay, mainMenu);

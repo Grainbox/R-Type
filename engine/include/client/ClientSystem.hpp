@@ -18,13 +18,7 @@
 
 #include "ECS/Registry.hpp"
 #include "ECS/Sparse_Array.hpp"
-#include "components/Controllable.hpp"
-#include "components/Drawable.hpp"
-#include "components/Velocity.hpp"
-#include "components/Position.hpp"
-#include "components/Clickable.hpp"
-#include "components/Hitbox.hpp"
-#include "components/ReactMouse.hpp"
+
 #include "Communication_Structures.hpp"
 
 #include <asio.hpp>
@@ -40,7 +34,7 @@
  */
 class ClientSystem {
     public:
-        ClientSystem(Registry &r, short server_port) : _udp_socket(io_context_), r(r)
+        ClientSystem(Registry &r, short server_port) : _udp_socket(io_context), r(r)
         {
             _udp_socket.open(asio::ip::udp::v4());
             _server_endpoint = asio::ip::udp::endpoint(asio::ip::address::from_string("127.0.0.1"), server_port);
@@ -50,7 +44,6 @@ class ClientSystem {
 
         ~ClientSystem()
         {
-            send_disconnect();
         }
 
         void send_disconnect()
@@ -67,7 +60,7 @@ class ClientSystem {
 
             std::string serialized_str = archive_stream.str();
 
-            std::cout << "Send Disconnect" << std::endl;
+            std::cout << "Sending Disconnect" << std::endl;
 
             _udp_socket.send_to(asio::buffer(serialized_str), _server_endpoint);
         }
@@ -87,6 +80,8 @@ class ClientSystem {
 
             std::string serialized_str = archive_stream.str();
 
+            std::cout << "Sending First Con" << std::endl;
+
             _udp_socket.send_to(asio::buffer(serialized_str), _server_endpoint);
         }
 
@@ -101,6 +96,8 @@ class ClientSystem {
             archive << msg;
 
             std::string serialized_str = archive_stream.str();
+
+            std::cout << "Sending create game" << std::endl;
 
             _udp_socket.send_to(asio::buffer(serialized_str), _server_endpoint);
         }
@@ -126,10 +123,43 @@ class ClientSystem {
         */
         void handle_receive_system(const std::error_code &error, std::size_t bytes_transferred)
         {
+            std::cout << "Error: " << error << std::endl;
             if (!error)
             {
+                std::cout << "-------------------------------------" << std::endl;
                 std::string received_message(recv_buffer_, bytes_transferred);
                 std::cout << "Received: " << received_message << std::endl;
+
+                std::istringstream archive_stream(received_message);
+                boost::archive::text_iarchive archive(archive_stream);
+                FirstConMessage msg;
+                archive >> msg;
+
+                std::string returnMessage = "ERROR";
+
+                std::cout << "Deserialized message type: " << static_cast<int>(msg.header.type) << std::endl << std::endl;
+
+                switch (msg.header.type) {
+                    case MessageType::ECS_Transfert: {
+                        std::cout << "ECS Transfert" << std::endl;
+                        TransfertECSMessage msg;
+                        std::istringstream archive_stream(received_message);
+                        boost::archive::text_iarchive archive(archive_stream);
+
+                        archive >> msg;
+
+                        for (auto it : msg.entities) {
+                            std::cout << it.entity_id << std::endl;
+                            std::cout << "pos: " << it.position.value().x << ":" << it.position.value().y << std::endl;
+                        }
+
+                        std::cout << "Transfered" << std::endl;
+                        break;
+                    }
+                    default:
+                        returnMessage = "Unknown message type received!";
+                }
+                std::cout << "-------------------------------------" << std::endl;
             }
             start_receive();
         }
@@ -176,23 +206,23 @@ class ClientSystem {
          * @param event Événement SFML capturé.
          * @param window Fenêtre SFML pour la capture de la position de la souris.
          */
-        void reactMouse_system() {
+        void reactCursor_system() {
             std::string scene = r.getCurrentScene();
-            Sparse_Array<ReactMouse> &reactMouses = r.getComponents<ReactMouse>(scene);
+            Sparse_Array<ReactCursor> &reactCursors = r.getComponents<ReactCursor>(scene);
             Sparse_Array<Hitbox> &hitboxs = r.getComponents<Hitbox>(scene);
             Sparse_Array<Position> &positions = r.getComponents<Position>(scene);
 
-            for (size_t i = 0; i < reactMouses.size() && i < hitboxs.size() && i < positions.size(); ++i) {
-                auto &reactM = reactMouses[i];
+            for (size_t i = 0; i < reactCursors.size() && i < hitboxs.size() && i < positions.size(); ++i) {
+                auto &reactC = reactCursors[i];
                 auto &hitbox = hitboxs[i];
                 auto &position = positions[i];
 
-                if (!hitbox || !reactM || !position) continue;
+                if (!hitbox || !reactC || !position) continue;
 
                 Vector2 mouse = GetMousePosition();
                 if (mouse.x < position.value().x || mouse.x > (position.value().x + hitbox.value().width)) continue;
                 if (mouse.y < position.value().y || mouse.y > (position.value().y + hitbox.value().height)) continue;
-                reactM.value().proc(r);
+                reactC.value().proc(r);
             }
         }
 
@@ -302,7 +332,7 @@ class ClientSystem {
             }
         }
 
-        asio::io_context io_context_;
+        asio::io_context io_context;
     protected:
     private:
         asio::ip::udp::socket _udp_socket;

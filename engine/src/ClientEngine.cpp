@@ -18,6 +18,7 @@ ClientEngine::ClientEngine(Registry &r, short server_port)
 {
     system.send_first_con();
     system.create_game();
+
     run();
 }
 
@@ -26,6 +27,9 @@ ClientEngine::ClientEngine(Registry &r, short server_port)
 */
 ClientEngine::~ClientEngine()
 {
+    system.send_disconnect();
+    CloseWindow();
+    system.io_context.stop();
 }
 
 /*!
@@ -39,7 +43,7 @@ void ClientEngine::run()
         this->update();
         this->render();
 
-        system.io_context_.poll();
+        system.io_context.poll();
     }
 }
 
@@ -50,7 +54,7 @@ void ClientEngine::processEvents()
 {
     system.control_system();
     system.click_system();
-    system.reactMouse_system();
+    system.reactCursor_system();
 }
 
 /*!
