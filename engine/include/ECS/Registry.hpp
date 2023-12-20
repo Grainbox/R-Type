@@ -202,6 +202,8 @@ public:
     {
         Entity newEntity;
 
+        registerScene(scene);
+
         if (!deadEntities[scene].empty()) {
             newEntity.setEntityId(deadEntities[scene].front());
             deadEntities[scene].pop_front();
@@ -294,9 +296,7 @@ public:
 
     std::list<size_t> getDeadEntities()
     {
-        if (this->deadEntities.find(this->getCurrentScene()) == this->deadEntities.end()) {
-            this->deadEntities[this->getCurrentScene()] = std::list<size_t>();
-        }
+        registerScene(this->getCurrentScene());
         return this->deadEntities[this->getCurrentScene()];
     }
 
