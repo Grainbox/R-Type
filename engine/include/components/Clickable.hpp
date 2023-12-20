@@ -8,7 +8,8 @@
 #ifndef CLICKABLE_HPP_
 #define CLICKABLE_HPP_
 
-#include "ECS/Registry.hpp"
+    #include "ECS/Registry.hpp"
+    #include <boost/serialization/serialization.hpp>
 
 class Clickable {
     public:
@@ -16,6 +17,13 @@ class Clickable {
             proc = func;
         }
         std::function<void(Registry &)> proc;
+
+        template<class Archive>
+        void serialize(Archive &ar, const unsigned int version) {
+            ar & proc;
+        }
+
+        friend class boost::serialization::access;
     protected:
     private:
 };
