@@ -9,14 +9,13 @@
 #define MAINVIEW_HPP_
 
     #include "client/ClientEngine.hpp"
+    #include "define.hpp"
 
 class MainView {
     public:
         MainView(Registry &r) : r(&r) {};
 
-        void pressPlay(Registry &r, size_t entity_id,
-            asio::ip::udp::socket &_udp_socket,
-            asio::ip::udp::endpoint &_server_endpoint)
+        void pressPlay(script_settings)
         {
             std::cout << "Play button pressed." << std::endl;
 
@@ -37,16 +36,12 @@ class MainView {
             r.setCurrentScene("gameScene");
         }
 
-        void pressSettings(Registry &r, size_t entity_id,
-            asio::ip::udp::socket &_udp_socket,
-            asio::ip::udp::endpoint &_server_endpoint)
+        void pressSettings(script_settings)
         {
             std::cout << "Settings button pressed." << std::endl;
         }
 
-        void pressExit(Registry &r, size_t entity_id,
-            asio::ip::udp::socket &_udp_socket,
-            asio::ip::udp::endpoint &_server_endpoint)
+        void pressExit(script_settings)
         {
             std::cout << "Exit button pressed." << std::endl;
         }
@@ -116,7 +111,10 @@ class MainView {
                 std::placeholders::_4))
             );
 
-            ReactCursor reactPlay(std::bind(&MainView::reactMPlay, this, std::placeholders::_1));
+            ReactCursor reactPlay(r->registerScript(std::bind(
+                &MainView::reactMPlay, this,
+                std::placeholders::_1))
+            );
 
             r->addComponent<Position>(background, backPos, mainMenu);
             r->addComponent<Position>(playButton, playPos, mainMenu);
