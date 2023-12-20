@@ -53,15 +53,24 @@ class GameView {
             Drawable drawEnnemy("assets/entity_2.png");
             AnimatedDraw anim2("assets/r-typesheet5.gif", 16, 1, 100, 100);
 
-            r->addComponent<MoveLeft>(ennemy, leftmove, gameScene);
             r->addComponent<Position>(ennemy, ennemyPos, gameScene);
             r->addComponent<Velocity>(ennemy, ennemyVelo, gameScene);
             r->addComponent<Drawable>(ennemy, drawEnnemy, gameScene);
             r->addComponent<Hitbox>(ennemy, box, gameScene);
+
+            Entity Title = r->spawnEntity();
+            Position titlePos(0, 100);
+            Velocity titleVelo(1, 0);
+            MoveRight mr;
+            Text txt("Hello world", WHITE, 40);
+            r->addComponent<Position>(Title, titlePos, gameScene);
+            r->addComponent<Velocity>(Title, titleVelo, gameScene);
+            r->addComponent<MoveRight>(Title, mr, gameScene);
+            r->addComponent<Text>(Title, txt, gameScene);
             r->addComponent<AnimatedDraw>(ennemy, anim2, gameScene);
 
             KeyReaction Kreact1(KEY_A, std::bind(&GameView::debugPrint, this, std::placeholders::_1, std::placeholders::_2));
-            r->addComponent<KeyReaction>(player, Kreact1, gameScene);            
+            r->addComponent<KeyReaction>(player, Kreact1, gameScene);
         }
 
     protected:
