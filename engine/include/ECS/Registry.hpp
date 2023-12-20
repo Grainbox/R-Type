@@ -301,6 +301,31 @@ public:
         return this->deadEntities[this->getCurrentScene()];
     }
 
+    /*!
+    \brief Store the given function in the scripts array
+
+    \param func the function to store
+    \return the script id
+    */
+    size_t store_script(std::function<void(Registry &, size_t)> func)
+    {
+        scripts.push_back(func);
+        return scripts.size() - 1;
+    }
+
+    /*!
+    \brief Get the script for the given id
+
+    \param id The id of the script
+    \return The script
+    */
+    std::function<void(Registry &, size_t)> get_script(size_t id)
+    {
+        if (id >= scripts.size())
+            throw (ScriptNotFoundException("Script not found for id: " + id));
+        return scripts.at(id);
+    }
+
 protected:
 private:
     std::vector<std::function<void(Entity, std::string)>> remove_components; ///< Functions for removing components from entities.
@@ -308,6 +333,7 @@ private:
     std::unordered_map<std::string, std::unordered_map<std::type_index, std::any>> _components_arrays; ///< Storage for components in each scene.
     std::map<std::string, size_t> nextEntityId; ///< ID to be assigned to the next spawned entity.
     std::map<std::string, std::list<size_t>> deadEntities; ///< List of IDs of entities that have been destroyed.
+    std::vector<std::function<void(Registry &, size_t)>> scripts; ///< List of scripts defined by the client.
 };
 
 #endif /* !REGISTRY_HPP_ */
