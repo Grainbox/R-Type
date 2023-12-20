@@ -28,6 +28,7 @@
 #include "components/Hitbox.hpp"
 #include "components/SoundWrapper.hpp"
 #include "components/Health.hpp"
+#include "components/Move.hpp"
 #include "components/ReactCursor.hpp"
 #include "components/KeyReaction.hpp"
 #include "Communication_Structures.hpp"
@@ -161,6 +162,37 @@ class ClientSystem {
 
                 if (!sound && sound.value().status) continue;
                 UpdateMusicStream(sound.value().sound);
+            }
+        }
+
+        void Move_system() {
+            std::string scene = r.getCurrentScene();
+            Sparse_Array<MoveLeft> &moveLeft = r.getComponents<MoveLeft>(scene);
+            Sparse_Array<MoveRight> &moveRight = r.getComponents<MoveRight>(scene);
+            Sparse_Array<MoveUp> &moveUp = r.getComponents<MoveUp>(scene);
+            Sparse_Array<MoveDown> &moveDown = r.getComponents<MoveDown>(scene);
+            Sparse_Array<Velocity> &velocity = r.getComponents<Velocity>(scene);
+            Sparse_Array<Position> &position = r.getComponents<Position>(scene);
+
+            for (size_t i = 0; i < moveLeft.size() && i < moveRight.size() && i < moveDown.size() && i < moveUp.size() && i < velocity.size() && i < position.size(); ++i) {
+                auto &left = moveLeft[i];
+                auto &right = moveRight[i];
+                auto &up = moveUp[i];
+                auto &down = moveDown[i];
+                auto &mov = velocity[i];
+                auto &pos = position[i];
+
+                if (!mov || !pos) continue;
+
+                if (left)
+                    pos.value().x -= mov.value().vx;
+                if (right)
+                    pos.value().x += mov.value().vx;
+                if (up)
+                    pos.value().y -= mov.value().vy;
+                if (down)
+                    pos.value().y += mov.value().vy;
+                continue;
             }
         }
 

@@ -60,6 +60,7 @@ void ClientEngine::processEvents()
 void ClientEngine::update()
 {
     system.position_system();
+    system.Health_system();
 }
 
 /*!
