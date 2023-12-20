@@ -27,6 +27,7 @@ ClientEngine::ClientEngine(Registry &r, short server_port)
 */
 ClientEngine::~ClientEngine()
 {
+    CloseWindow();
 }
 
 /*!
@@ -40,7 +41,7 @@ void ClientEngine::run()
         this->update();
         this->render();
 
-        system.io_context.run();
+        system.io_context.poll();
     }
 }
 
