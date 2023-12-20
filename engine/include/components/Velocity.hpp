@@ -8,7 +8,7 @@
 #ifndef VELOCITY_HPP_
 #define VELOCITY_HPP_
 
-    #include <boost/serialization/serialization.hpp>
+#include <boost/serialization/serialization.hpp>
 
 /*!
  \class Velocity
@@ -16,7 +16,7 @@
 */
 class Velocity {
     public:
-        Velocity(int vx, int vy) : vx(vx), vy(vy) {};
+        Velocity(int vx = 0, int vy = 0) : vx(vx), vy(vy) {};
 
         int vx;
         int vy;

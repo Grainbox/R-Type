@@ -27,7 +27,7 @@ void gameScene(Registry &r)
 void setupRegistry(Registry &r)
 {
     mainMenu(r);
-    gameScene(r);
+    // gameScene(r);
 }
 
 int main()

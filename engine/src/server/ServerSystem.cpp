@@ -109,13 +109,13 @@ std::string ServerSystem::create_game_handler(std::string message)
 
         comps.entity_id = i;
         // comps.clickable = r.get_entity_component<Clickable>(i);
-        // comps.controllable = r.get_entity_component<Controllable>(i);
-        // comps.drawable = r.get_entity_component<Drawable>(i);
+        comps.controllable = r.get_boost_entity_component<Controllable>(i);
+        comps.drawable = r.get_boost_entity_component<Drawable>(i);
         // comps.hitbox = r.get_entity_component<Hitbox>(i);
         // comps.kb_input = r.get_entity_component<KeyboardInput>(i);
         comps.position = r.get_boost_entity_component<Position>(i);
         // comps.react_cursor = r.get_entity_component<ReactCursor>(i);
-        // comps.velocity = r.get_entity_component<Velocity>(i);
+        comps.velocity = r.get_boost_entity_component<Velocity>(i);
         msg.entities.push_back(comps);
     }
 

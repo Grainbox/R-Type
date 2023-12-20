@@ -15,11 +15,17 @@ void setupRegistry(Registry &r)
     Entity player = r.spawnEntity("mainMenu");
 
     Position pos(100, 0);
-    Controllable control;
+    Controllable controls;
+    controls.setKeyboardKey(&controls.Up, KEY_UP);
+    controls.setKeyboardKey(&controls.Down, KEY_DOWN);
+    controls.setKeyboardKey(&controls.Left, KEY_LEFT);
+    controls.setKeyboardKey(&controls.Right, KEY_RIGHT);
     Velocity vel(0, 0);
+    Drawable draw("assets/entity_1.png", true);
 
+    r.addComponent<Drawable>(player, draw, "mainMenu");
     r.addComponent<Position>(player, pos, "mainMenu");
-    r.addComponent<Controllable>(player, control, "mainMenu");
+    r.addComponent<Controllable>(player, controls, "mainMenu");
     r.addComponent<Velocity>(player, vel, "mainMenu");
 }
 

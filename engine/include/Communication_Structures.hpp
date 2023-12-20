@@ -70,25 +70,25 @@ struct EntityComponents {
     size_t entity_id;
 
     // std::optional<Clickable> clickable;
-    // std::optional<Controllable> controllable;
-    // std::optional<Drawable> drawable;
+    boost::optional<Controllable> controllable;
+    boost::optional<Drawable> drawable;
     // std::optional<Hitbox> hitbox;
     // std::optional<KeyboardInput> kb_input;
     boost::optional<Position> position;
     // std::optional<ReactCursor> react_cursor;
-    // std::optional<Velocity> velocity;
+    boost::optional<Velocity> velocity;
 
     template<class Archive>
     void serialize(Archive &ar, const unsigned int version) {
         ar & entity_id;
         // ar & clickable;
-        // ar & controllable;
-        // ar & drawable;
+        ar & controllable;
+        ar & drawable;
         // ar & hitbox;
         // ar & kb_input;
         ar & position;
         // ar & react_cursor;
-        // ar & velocity;
+        ar & velocity;
     }
 };
 

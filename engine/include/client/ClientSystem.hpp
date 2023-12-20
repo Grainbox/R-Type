@@ -131,8 +131,25 @@ class ClientSystem {
                         archive >> msg;
 
                         for (auto it : msg.entities) {
-                            std::cout << it.entity_id << std::endl;
-                            std::cout << "pos: " << it.position.value().x << ":" << it.position.value().y << std::endl;
+                            std::cout << "Entity ID: " << it.entity_id << std::endl;
+                            Entity ent(r.spawnEntity(r.getCurrentScene()), it.entity_id); // crée l'entité en lui donnant son id + son id server side
+                            // crée et attribue les composants envoyés par le serveur à l'entité
+                            if (it.controllable) {
+                                Controllable control = it.controllable.value();
+                                r.addComponent<Controllable>(ent, control, r.getCurrentScene());
+                            }
+                            if (it.drawable) {
+                                Drawable drawable(it.drawable.value().spritePath);
+                                r.addComponent<Drawable>(ent, drawable, r.getCurrentScene());
+                            }
+                            if (it.position) {
+                                Position position = it.position.value();
+                                r.addComponent<Position>(ent, position, r.getCurrentScene());
+                            }
+                            if (it.velocity) {
+                                Velocity velocity = it.velocity.value();
+                                r.addComponent<Velocity>(ent, velocity, r.getCurrentScene());
+                            }
                         }
 
                         std::cout << "Transfered" << std::endl;

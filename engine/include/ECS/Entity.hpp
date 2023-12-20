@@ -34,6 +34,8 @@ public:
     */
     Entity(size_t id) : _id(id) {}
 
+    Entity(size_t id, size_t server_side_id) : _id(id), _server_side_id(server_side_id) {}
+
     /*!
      \brief Get the ID of the entity.
 
@@ -41,6 +43,15 @@ public:
     */
     Entity::type getEntityId() const {
         return _id;
+    }
+
+    /*!
+     \brief Get the server side ID of the entity.
+
+     \return The server side ID of the entity.
+    */
+    Entity::type getServerSideID() const {
+        return _server_side_id;
     }
 
     /*!
@@ -55,6 +66,17 @@ public:
     }
 
     /*!
+     \brief Set the server side ID of the entity.
+
+     \param id The new server side ID for the entity.
+     \return The updated server side ID of the entity.
+    */
+    Entity::type setServerSideID(Entity::type id) {
+        this->_server_side_id = id;
+        return this->_server_side_id;
+    }
+
+    /*!
      \brief Conversion operator to size_t.
 
      Allows the Entity to be implicitly converted to a size_t representing its ID.
@@ -66,6 +88,7 @@ public:
 protected:
 private:
     size_t _id; ///< Unique identifier for the entity.
+    size_t _server_side_id; ///< Unique identifier for the server side entity.
 };
 
 #endif /* !ENTITY_HPP_ */
