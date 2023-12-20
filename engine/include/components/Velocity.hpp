@@ -8,6 +8,8 @@
 #ifndef VELOCITY_HPP_
 #define VELOCITY_HPP_
 
+    #include <boost/serialization/serialization.hpp>
+
 /*!
  \class Velocity
  \brief Component that is used on entities that has a velocity.
@@ -18,6 +20,14 @@ class Velocity {
 
         int vx;
         int vy;
+
+        template<class Archive>
+        void serialize(Archive &ar, const unsigned int version) {
+            ar & vx;
+            ar & vy;
+        }
+
+        friend class boost::serialization::access;
 
     protected:
     private:
