@@ -13,11 +13,9 @@
 
 class Clickable {
     public:
-        Clickable(const std::function<void(Registry &, size_t)>& func) {
-            proc = func;
-        }
+        Clickable(size_t script_id) : script_id(script_id) {}
 
-        std::function<void(Registry &, size_t)> proc;
+        size_t script_id;
     protected:
     private:
 };

@@ -84,23 +84,6 @@ class ClientSystem {
             _udp_socket.send_to(asio::buffer(serialized_str), _server_endpoint);
         }
 
-        void create_game()
-        {
-            CreateGameMessage msg;
-            msg.header.type = MessageType::Create_Game;
-
-            std::ostringstream archive_stream;
-            boost::archive::text_oarchive archive(archive_stream);
-
-            archive << msg;
-
-            std::string serialized_str = archive_stream.str();
-
-            std::cout << "Sending create game" << std::endl;
-
-            _udp_socket.send_to(asio::buffer(serialized_str), _server_endpoint);
-        }
-
         /*!
         \brief Listen for the server messages asynchronously.
         */
@@ -284,7 +267,7 @@ class ClientSystem {
                     Vector2 mouse = GetMousePosition();
                     if (mouse.x < position.value().x || mouse.x > (position.value().x + hitbox.value().width)) continue;
                     if (mouse.y < position.value().y || mouse.y > (position.value().y + hitbox.value().height)) continue;
-                    click.value().proc(r, i);
+                    r.getScript(click.value().script_id)(r, i, _udp_socket, _server_endpoint);
                 }
             }
         }
