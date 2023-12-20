@@ -8,14 +8,19 @@
 #ifndef COMPONENTINCLUDER_HPP_
 #define COMPONENTINCLUDER_HPP_
 
+#include "AnimatedDraw.hpp"
 #include "Clickable.hpp"
 #include "Controllable.hpp"
 #include "Drawable.hpp"
-#include "Hitbox.hpp"
+#include "Health.hpp"
 #include "Hitbox.hpp"
 #include "KeyboardInput.hpp"
+#include "KeyReaction.hpp"
+#include "Move.hpp"
 #include "Position.hpp"
 #include "ReactCursor.hpp"
+#include "SoundWrapper.hpp"
+#include "Text.hpp"
 #include "Velocity.hpp"
 
 #endif /* !COMPONENTINCLUDER_HPP_ */
