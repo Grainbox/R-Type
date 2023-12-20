@@ -12,7 +12,6 @@
 #include "Controllable.hpp"
 #include "Drawable.hpp"
 #include "Hitbox.hpp"
-#include "Hitbox.hpp"
 #include "KeyboardInput.hpp"
 #include "Position.hpp"
 #include "ReactCursor.hpp"
