@@ -27,7 +27,7 @@ class Drawable {
         };
         Drawable(std::string spritePath, int resizeWidth, int resizeHeight) {
             Image image = LoadImage(spritePath.c_str());
-            ImageResize(&image, resizeWidth, resizeHeight);
+            ImageResizeNN(&image, resizeWidth, resizeHeight);
             this->texture = LoadTextureFromImage(image);
             UnloadImage(image);
             if (!this->texture.id) {

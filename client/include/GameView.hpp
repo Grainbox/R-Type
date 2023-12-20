@@ -14,6 +14,11 @@ class GameView {
     public:
         GameView(Registry &r) : r(&r) {};
 
+        void debugPrint(Registry &r, size_t entity_id)
+        {
+            std::cout << "key detected for entity: " << entity_id << std::endl;
+        }
+
         void process()
         {
             std::string gameScene = "gameScene";
@@ -42,8 +47,10 @@ class GameView {
             Entity ennemy = r->spawnEntity();
 
             Position ennemyPos(400, 300);
-            Velocity ennemyVelo(-1, 0);
+            Velocity ennemyVelo(-3, 0);
+
             Drawable drawEnnemy("assets/entity_2.png");
+            AnimatedDraw anim2("assets/r-typesheet5.gif", 16, 1, 100, 100);
 
             r->addComponent<Position>(ennemy, ennemyPos, gameScene);
             r->addComponent<Velocity>(ennemy, ennemyVelo, gameScene);
@@ -59,6 +66,10 @@ class GameView {
             r->addComponent<Velocity>(Title, titleVelo, gameScene);
             r->addComponent<MoveRight>(Title, mr, gameScene);
             r->addComponent<Text>(Title, txt, gameScene);
+            r->addComponent<AnimatedDraw>(ennemy, anim2, gameScene);
+
+            KeyReaction Kreact1(KEY_A, std::bind(&GameView::debugPrint, this, std::placeholders::_1, std::placeholders::_2));
+            r->addComponent<KeyReaction>(player, Kreact1, gameScene);
         }
 
     protected:

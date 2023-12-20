@@ -49,6 +49,7 @@ void ClientEngine::run()
 void ClientEngine::processEvents()
 {
     system.control_system();
+    system.key_detection_system();
     system.click_system();
     system.reactCursor_system();
 }

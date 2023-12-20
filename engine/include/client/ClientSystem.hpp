@@ -25,11 +25,13 @@
 #include "components/Position.hpp"
 #include "components/Clickable.hpp"
 #include "components/Text.hpp"
+#include "components/KeyReaction.hpp"
 #include "components/Hitbox.hpp"
 #include "components/SoundWrapper.hpp"
 #include "components/Health.hpp"
 #include "components/Move.hpp"
 #include "components/ReactCursor.hpp"
+#include "components/KeyReaction.hpp"
 #include "Communication_Structures.hpp"
 
 #include <asio.hpp>
@@ -211,6 +213,28 @@ class ClientSystem {
         }
 
         /**
+         * @brief Gère les touches du clavier appuyées par l'utilisateur.
+         *
+         * Ce système détecte touches du clavier et déclenche des actions.
+         *
+         * @param r Référence à l'objet Registry contenant les entités et composants.
+         */
+        void key_detection_system() {
+            std::string scene = r.getCurrentScene();
+            Sparse_Array<KeyReaction> &KReactions = r.getComponents<KeyReaction>(scene);
+
+            for (size_t i = 0; i < KReactions.size(); ++i) {
+                auto &KReact = KReactions[i];
+
+                if (!KReact)
+                    continue;
+
+                if (IsKeyPressed(KReact.value().key_value))
+                    KReact.value().proc(r, i);
+            }
+        }
+
+        /**
          * @brief Gère les clics de l'utilisateur.
          *
          * Ce système détecte les clics de souris et déclenche des actions
@@ -231,13 +255,14 @@ class ClientSystem {
                 auto &hitbox = hitboxs[i];
                 auto &position = positions[i];
 
-                if (!hitbox || !click || !position) continue;
+                if (!hitbox || !click || !position)
+                    continue;
 
                 if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
                     Vector2 mouse = GetMousePosition();
                     if (mouse.x < position.value().x || mouse.x > (position.value().x + hitbox.value().width)) continue;
                     if (mouse.y < position.value().y || mouse.y > (position.value().y + hitbox.value().height)) continue;
-                    click.value().proc(r);
+                    click.value().proc(r, i);
                 }
             }
         }
@@ -263,7 +288,8 @@ class ClientSystem {
                 auto &hitbox = hitboxs[i];
                 auto &position = positions[i];
 
-                if (!hitbox || !reactM || !position) continue;
+                if (!hitbox || !reactM || !position)
+                    continue;
 
                 Vector2 mouse = GetMousePosition();
                 if (mouse.x < position.value().x || mouse.x > (position.value().x + hitbox.value().width)) continue;
@@ -309,7 +335,8 @@ class ClientSystem {
                 auto &position = positions[i];
                 auto &hitbox = hitboxs[i];
 
-                if (!hitbox || !position || !hitbox.value().debug) continue;
+                if (!hitbox || !position || !hitbox.value().debug)
+                    continue;
 
                 // Dessiner le contour de la hitbox
                 int leftX = position.value().x;
