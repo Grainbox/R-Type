@@ -42,9 +42,11 @@ class GameView {
             Entity ennemy = r->spawnEntity();
 
             Position ennemyPos(400, 300);
-            Velocity ennemyVelo(0, 0);
+            Velocity ennemyVelo(1, 0);
+            MoveLeft leftmove;
             Drawable drawEnnemy("assets/entity_2.png");
 
+            r->addComponent<MoveLeft>(ennemy, leftmove, gameScene);
             r->addComponent<Position>(ennemy, ennemyPos, gameScene);
             r->addComponent<Velocity>(ennemy, ennemyVelo, gameScene);
             r->addComponent<Drawable>(ennemy, drawEnnemy, gameScene);
