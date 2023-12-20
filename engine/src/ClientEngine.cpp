@@ -27,7 +27,9 @@ ClientEngine::ClientEngine(Registry &r, short server_port)
 */
 ClientEngine::~ClientEngine()
 {
+    system.send_disconnect();
     CloseWindow();
+    system.io_context.stop();
 }
 
 /*!

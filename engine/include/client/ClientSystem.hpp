@@ -44,7 +44,6 @@ class ClientSystem {
 
         ~ClientSystem()
         {
-            send_disconnect();
         }
 
         void send_disconnect()
