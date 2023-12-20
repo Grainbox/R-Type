@@ -17,7 +17,13 @@ class GameView {
         void debugPrint(Registry &r, size_t entity_id)
         {
             std::cout << "key detected for entity: " << entity_id << std::endl;
-            // auto &pos = r.get_entity_component<Position>(entity_id);
+            auto comp = r.get_entity_component<Position>(entity_id);
+
+            if (comp) {
+                auto &pos = comp->get();
+
+                std::cout << pos.x << ":" << pos.y << std::endl;
+            }
         }
 
         void process()
