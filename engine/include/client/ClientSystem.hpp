@@ -24,6 +24,7 @@
 #include "components/Velocity.hpp"
 #include "components/Position.hpp"
 #include "components/Clickable.hpp"
+#include "components/Text.hpp"
 #include "components/Hitbox.hpp"
 #include "components/SoundWrapper.hpp"
 #include "components/Health.hpp"
@@ -183,14 +184,29 @@ class ClientSystem {
                 if (!mov || !pos) continue;
 
                 if (left)
-                    pos.value().x -= mov.value().vx;
+                    mov.value().vx = -1;
                 if (right)
-                    pos.value().x += mov.value().vx;
+                    mov.value().vx = 1;
                 if (up)
-                    pos.value().y -= mov.value().vy;
+                    mov.value().vy = -1;
                 if (down)
-                    pos.value().y += mov.value().vy;
+                    mov.value().vy = 1;
                 continue;
+            }
+        }
+
+        void Text_system() {
+            std::string scene = r.getCurrentScene();
+            Sparse_Array<Text> &txt = r.getComponents<Text>(scene);
+            Sparse_Array<Position> &position = r.getComponents<Position>(scene);
+
+            for (size_t i = 0; i < txt.size() && i < position.size(); ++i) {
+                auto &text = txt[i];
+                auto &pos = position[i];
+
+                if (!text || !pos) continue;
+
+                DrawText(TextFormat(text.value().text.c_str()), pos.value().x, pos.value().y, text.value().font_size, text.value().rgb);
             }
         }
 

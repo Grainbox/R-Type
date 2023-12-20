@@ -60,6 +60,7 @@ void ClientEngine::update()
 {
     system.position_system();
     system.Health_system();
+    system.Move_system();
 }
 
 /*!
@@ -74,6 +75,7 @@ void ClientEngine::render()
     system.draw_hitbox_system();
     system.draw_system();
     system.SoundWrapper_system();
+    system.Text_system();
 
     EndDrawing();
 }
