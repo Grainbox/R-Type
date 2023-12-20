@@ -19,6 +19,7 @@
 #include "Move.hpp"
 #include "Position.hpp"
 #include "ReactCursor.hpp"
+#include "Resize.hpp"
 #include "SoundWrapper.hpp"
 #include "Text.hpp"
 #include "Velocity.hpp"

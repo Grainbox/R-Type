@@ -14,15 +14,28 @@ class GameView {
     public:
         GameView(Registry &r) : r(&r) {};
 
-        void debugPrint(Registry &r, size_t entity_id)
+        void shootBullet(Registry &r, size_t entity_id)
         {
             std::cout << "key detected for entity: " << entity_id << std::endl;
-            auto comp = r.get_entity_component<Position>(entity_id);
+            auto shipPosition = r.get_entity_component<Position>(entity_id);
+            auto resizeShip = r.get_entity_component<Resize>(entity_id);
 
-            if (comp) {
-                auto &pos = comp->get();
+            if (shipPosition && resizeShip) {
+                auto &shipPos = shipPosition->get();
+                auto &rsShip = resizeShip->get();
+                std::string gameScene = "gameScene";
+                Entity bullet = r.spawnEntity(gameScene);
+                Resize rsBullet(25, 12);
+                Drawable drawBullet("assets/bullet1.png", rsBullet.rx, rsBullet.ry);
+                Position posBullet(shipPos.x + rsShip.rx, shipPos.y + (rsShip.ry / 2));
+                Velocity velBullet(10, 0);
+                Hitbox boxBullet(rsBullet.rx, rsBullet.ry, true);
 
-                std::cout << pos.x << ":" << pos.y << std::endl;
+                r.addComponent<Position>(bullet, posBullet, gameScene);
+                r.addComponent<Resize>(bullet, rsBullet, gameScene);
+                r.addComponent<Drawable>(bullet, drawBullet, gameScene);
+                r.addComponent<Velocity>(bullet, velBullet, gameScene);
+                r.addComponent<Hitbox>(bullet, boxBullet, gameScene);
             }
         }
 
@@ -36,16 +49,18 @@ class GameView {
             Velocity playerVelo(10, 10);
             Drawable drawPlay("assets/entity_1.png");
             Hitbox box(100, 50, true);
+            Resize resizePlayer(100, 50);
             Controllable controls;
             controls.setKeyboardKey(&controls.Up, KEY_UP);
             controls.setKeyboardKey(&controls.Down, KEY_DOWN);
             controls.setKeyboardKey(&controls.Left, KEY_LEFT);
             controls.setKeyboardKey(&controls.Right, KEY_RIGHT);
 
-            AnimatedDraw anim("assets/player.png", 10, 1, 100, 50);
+            AnimatedDraw anim("assets/player1.png", 5, 1, resizePlayer.rx, resizePlayer.ry);
 
             r->addComponent<Position>(player, playerPos, gameScene);
             r->addComponent<Velocity>(player, playerVelo, gameScene);
+            r->addComponent<Resize>(player, resizePlayer, gameScene);
             r->addComponent<Drawable>(player, drawPlay, gameScene);
             r->addComponent<Hitbox>(player, box, gameScene);
             r->addComponent<Controllable>(player, controls, gameScene);
@@ -57,10 +72,12 @@ class GameView {
             Velocity ennemyVelo(-1, 0);
             MoveLeft leftmove;
             Drawable drawEnnemy("assets/entity_2.png");
-            AnimatedDraw anim2("assets/r-typesheet5.gif", 16, 1, 100, 100);
+            Resize resizeEnnemy(100, 100);
+            AnimatedDraw anim2("assets/r-typesheet5.gif", 16, 1, resizeEnnemy.rx, resizeEnnemy.ry);
 
             r->addComponent<Position>(ennemy, ennemyPos, gameScene);
             r->addComponent<Velocity>(ennemy, ennemyVelo, gameScene);
+            r->addComponent<Resize>(ennemy, resizeEnnemy, gameScene);
             r->addComponent<Drawable>(ennemy, drawEnnemy, gameScene);
             r->addComponent<Hitbox>(ennemy, box, gameScene);
             r->addComponent<AnimatedDraw>(ennemy, anim2, gameScene);
@@ -75,7 +92,7 @@ class GameView {
             r->addComponent<MoveRight>(Title, mr, gameScene);
             r->addComponent<Text>(Title, txt, gameScene);
 
-            KeyReaction Kreact1(KEY_A, std::bind(&GameView::debugPrint, this, std::placeholders::_1, std::placeholders::_2));
+            KeyReaction Kreact1(KEY_SPACE, std::bind(&GameView::shootBullet, this, std::placeholders::_1, std::placeholders::_2));
             r->addComponent<KeyReaction>(player, Kreact1, gameScene);
         }
 
