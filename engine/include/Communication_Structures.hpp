@@ -13,8 +13,12 @@
 #include <boost/serialization/string.hpp>
 #include <boost/archive/text_iarchive.hpp>
 #include <boost/archive/text_oarchive.hpp>
+#include <boost/serialization/optional.hpp>
+#include <boost/serialization/vector.hpp>
 #include <sstream>
 #include <typeindex>
+
+#include "components/ComponentIncluder.hpp"
 
 enum class MessageType : uint8_t {
     First_Con = 0,
@@ -62,14 +66,41 @@ struct CreateGameMessage {
     }
 };
 
+struct EntityComponents {
+    size_t entity_id;
+
+    // std::optional<Clickable> clickable;
+    // std::optional<Controllable> controllable;
+    // std::optional<Drawable> drawable;
+    // std::optional<Hitbox> hitbox;
+    // std::optional<KeyboardInput> kb_input;
+    boost::optional<Position> position;
+    // std::optional<ReactCursor> react_cursor;
+    // std::optional<Velocity> velocity;
+
+    template<class Archive>
+    void serialize(Archive &ar, const unsigned int version) {
+        ar & entity_id;
+        // ar & clickable;
+        // ar & controllable;
+        // ar & drawable;
+        // ar & hitbox;
+        // ar & kb_input;
+        ar & position;
+        // ar & react_cursor;
+        // ar & velocity;
+    }
+};
+
 struct TransfertECSMessage {
     MessageHeader header;
 
-    std::unordered_map<std::type_index, std::any> comps;
+    std::vector<EntityComponents> entities;
 
     template<class Archive>
     void serialize(Archive &ar, const unsigned int version) {
         ar & header;
+        ar & entities;
     }
 };
 

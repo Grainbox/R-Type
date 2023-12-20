@@ -18,13 +18,7 @@
 
 #include "ECS/Registry.hpp"
 #include "ECS/Sparse_Array.hpp"
-#include "components/Controllable.hpp"
-#include "components/Drawable.hpp"
-#include "components/Velocity.hpp"
-#include "components/Position.hpp"
-#include "components/Clickable.hpp"
-#include "components/Hitbox.hpp"
-#include "components/ReactCursor.hpp"
+
 #include "Communication_Structures.hpp"
 
 #include <asio.hpp>
@@ -40,7 +34,7 @@
  */
 class ClientSystem {
     public:
-        ClientSystem(Registry &r, short server_port) : _udp_socket(io_context_), r(r)
+        ClientSystem(Registry &r, short server_port) : _udp_socket(io_context), r(r)
         {
             _udp_socket.open(asio::ip::udp::v4());
             _server_endpoint = asio::ip::udp::endpoint(asio::ip::address::from_string("127.0.0.1"), server_port);
@@ -130,6 +124,7 @@ class ClientSystem {
         */
         void handle_receive_system(const std::error_code &error, std::size_t bytes_transferred)
         {
+            std::cout << "Error: " << error << std::endl;
             if (!error)
             {
                 std::cout << "-------------------------------------" << std::endl;
@@ -147,13 +142,19 @@ class ClientSystem {
 
                 switch (msg.header.type) {
                     case MessageType::ECS_Transfert: {
+                        std::cout << "ECS Transfert" << std::endl;
                         TransfertECSMessage msg;
                         std::istringstream archive_stream(received_message);
                         boost::archive::text_iarchive archive(archive_stream);
 
                         archive >> msg;
 
-                        r.createGameScene(msg.comps);
+                        for (auto it : msg.entities) {
+                            std::cout << it.entity_id << std::endl;
+                            std::cout << "pos: " << it.position.value().x << ":" << it.position.value().y << std::endl;
+                        }
+
+                        std::cout << "Transfered" << std::endl;
                         break;
                     }
                     default:
@@ -332,7 +333,7 @@ class ClientSystem {
             }
         }
 
-        asio::io_context io_context_;
+        asio::io_context io_context;
     protected:
     private:
         asio::ip::udp::socket _udp_socket;

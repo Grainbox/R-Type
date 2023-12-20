@@ -47,12 +47,14 @@ void debug(Registry &r)
 
 void setupRegistry(Registry &r)
 {
-    Entity background = r.spawnEntity();
-    Entity player = r.spawnEntity();
+    std::string mainMenu = "mainMenu";
 
-    Entity playButton = r.spawnEntity();
-    Entity settingsButton = r.spawnEntity();
-    Entity exitButton = r.spawnEntity();
+    Entity background = r.spawnEntity(mainMenu);
+    Entity player = r.spawnEntity(mainMenu);
+
+    Entity playButton = r.spawnEntity(mainMenu);
+    Entity settingsButton = r.spawnEntity(mainMenu);
+    Entity exitButton = r.spawnEntity(mainMenu);
 
     int ButtonGap = 100;
 
@@ -81,9 +83,6 @@ void setupRegistry(Registry &r)
     Clickable clickExit(pressExit);
 
     ReactCursor reactPlay(reactCPlay);
-
-    std::string mainMenu = "mainMenu";
-
 
     r.addComponent<Position>(background, backPos, mainMenu);
     r.addComponent<Position>(playButton, playPos, mainMenu);

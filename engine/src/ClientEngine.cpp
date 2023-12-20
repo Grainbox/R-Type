@@ -18,6 +18,7 @@ ClientEngine::ClientEngine(Registry &r, short server_port)
 {
     system.send_first_con();
     system.create_game();
+
     run();
 }
 
@@ -38,6 +39,8 @@ void ClientEngine::run()
         this->processEvents();
         this->update();
         this->render();
+
+        system.io_context.run();
     }
 }
 

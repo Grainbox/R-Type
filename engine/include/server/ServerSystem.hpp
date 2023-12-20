@@ -48,9 +48,7 @@ class ServerSystem {
 
         \param message the serialized data
         */
-        std::string client_connect_handler(FirstConMessage &msg,
-            std::istringstream &archive_stream,
-            boost::archive::text_iarchive &archive);
+        std::string client_connect_handler(FirstConMessage &msg);
 
         /*!
         \brief Handler to disconnect a client
