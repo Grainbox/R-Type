@@ -338,7 +338,7 @@ public:
     \param func the function to store
     \return the communication script id
     */
-    size_t registerComScript(std::function<std::string(Registry &, size_t, std::string, MessageType)> func)
+    size_t registerComScript(std::function<void(Registry &, size_t, MessageHandlerData)> func)
     {
         com_scripts.push_back(func);
         return com_scripts.size() - 1;
@@ -350,7 +350,7 @@ public:
     \param id The id of the communication script
     \return The communication script id
     */
-    std::function<std::string(Registry &, size_t, std::string, MessageType)> getComScript(size_t id)
+    std::function<void(Registry &, size_t, MessageHandlerData)> getComScript(size_t id)
     {
         if (id >= com_scripts.size())
             throw (ScriptNotFoundException("Script not found for id: " + id));
@@ -367,7 +367,7 @@ private:
 
     std::vector<std::function<void(Registry &, size_t, asio::ip::udp::socket &_udp_socket,
         asio::ip::udp::endpoint &_server_endpoint)>> event_scripts; ///< List of event scripts defined by the client.
-    std::vector<std::function<std::string(Registry &, size_t, std::string, MessageType)>> com_scripts; ///< List of communication scripts defined by the user
+    std::vector<std::function<void(Registry &, size_t, MessageHandlerData)>> com_scripts; ///< List of communication scripts defined by the user
 };
 
 #endif /* !REGISTRY_HPP_ */

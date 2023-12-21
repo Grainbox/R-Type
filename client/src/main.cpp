@@ -24,14 +24,14 @@ void gameScene(Registry &r)
     gameview.process();
 }
 
-std::string receive_entities(Registry &r, size_t entity_id, std::string message, MessageType type)
+void receive_entities(Registry &r, size_t entity_id, MessageHandlerData data)
 {
-    if (type != MessageType::ECS_Transfert)
-        return "";
+    if (data.type != MessageType::ECS_Transfert)
+        return;
 
     std::cout << "ECS Transfert" << std::endl;
     TransfertECSMessage msg;
-    std::istringstream archive_stream(message);
+    std::istringstream archive_stream(data.message);
     boost::archive::text_iarchive archive(archive_stream);
 
     archive >> msg;
@@ -59,7 +59,6 @@ std::string receive_entities(Registry &r, size_t entity_id, std::string message,
     }
 
     std::cout << "Transfered" << std::endl;
-    return "";
 }
 
 void setupRegistry(Registry &r)
@@ -71,8 +70,7 @@ void setupRegistry(Registry &r)
     ReceiveUDP receiveUDP(r.registerComScript(std::bind(receive_entities,
             std::placeholders::_1,
             std::placeholders::_2,
-            std::placeholders::_3,
-            std::placeholders::_4))
+            std::placeholders::_3))
     );
 
     r.addComponent<ReceiveUDP>(udp, receiveUDP, "gameScene");

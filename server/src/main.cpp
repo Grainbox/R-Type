@@ -10,37 +10,41 @@
 
 #include "server/ServerEngine.hpp"
 
-void setupRegistry(Registry &r)
+void client_connect_handler(MessageHandlerData data)
 {
-    Entity player = r.spawnEntity("mainMenu");
+    std::istringstream archive_stream(data.message);
+    boost::archive::text_iarchive archive(archive_stream);
+    FirstConMessage msg;
+    archive >> msg;
 
-    Position pos(100, 0);
-    Controllable controls;
-    controls.setKeyboardKey(&controls.Up, KEY_UP);
-    controls.setKeyboardKey(&controls.Down, KEY_DOWN);
-    controls.setKeyboardKey(&controls.Left, KEY_LEFT);
-    controls.setKeyboardKey(&controls.Right, KEY_RIGHT);
-    Velocity vel(0, 0);
-    Drawable draw("assets/entity_1.png", true);
+    // Entity client = r.spawnEntity(r.getCurrentScene());
+    // clients_entity[_remoteEndpoint] = client.getEntityId();
 
-    r.addComponent<Drawable>(player, draw, "mainMenu");
-    r.addComponent<Position>(player, pos, "mainMenu");
-    r.addComponent<Controllable>(player, controls, "mainMenu");
-    r.addComponent<Velocity>(player, vel, "mainMenu");
+    // std::cout << "Client Connected, assigned on: " << _remoteEndpoint << "->" << client.getEntityId() << std::endl;
 }
 
-    /*!
-    \brief Handler to create a game
-
-    \param message the serialized data
-    */
-std::string create_game_handler(Registry &r, size_t entity_id, std::string message, MessageType type)
+void client_disconnect_handler(MessageHandlerData data)
 {
-    std::cout << "Create Game" << std::endl;
+    DisconnectMessage msg;
+    std::istringstream archive_stream(data.message);
+    boost::archive::text_iarchive archive(archive_stream);
 
-    if (type != MessageType::Create_Game) {
-        return "";
-    }
+    archive >> msg;
+
+    std::string serialized_str = archive_stream.str();
+
+    // r.killEntity(clients_entity[_remoteEndpoint], r.getCurrentScene());
+    // clients_entity.erase(_remoteEndpoint);
+
+    std::cout << "Client Disconnected for reason: " << msg.reason << std::endl;
+}
+
+void mainUDPHandler(Registry &r, size_t entity_id, MessageHandlerData data)
+{
+    if (data.type == MessageType::First_Con)
+        return client_connect_handler(data);
+    if (data.type == MessageType::Disconnect)
+        return client_disconnect_handler(data);
 
     TransfertECSMessage msg;
     msg.header.type = MessageType::ECS_Transfert;
@@ -67,7 +71,7 @@ std::string create_game_handler(Registry &r, size_t entity_id, std::string messa
         msg.entities.push_back(comps);
     }
 
-    std::ostringstream archive_stream(message);
+    std::ostringstream archive_stream(data.message);
     boost::archive::text_oarchive archive(archive_stream);
     archive << msg;
 
@@ -75,7 +79,45 @@ std::string create_game_handler(Registry &r, size_t entity_id, std::string messa
 
     std::cout << "Sending: " << serialized_str << std::endl;
 
-    return serialized_str;
+    data._socket->async_send_to(
+        asio::buffer(serialized_str), *data._remoteEndpoint,
+        [](const std::error_code& error, std::size_t bytes_transferred) {
+            if (!error) {
+                std::cout << "Message sent successfully, bytes transferred: " << bytes_transferred << std::endl;
+            } else {
+                std::cerr << "Error sending message: " << error.message() << std::endl;
+            }
+        }
+    );
+}
+
+void setupRegistry(Registry &r)
+{
+    Entity player = r.spawnEntity("mainMenu");
+
+    Position pos(100, 0);
+    Controllable controls;
+    controls.setKeyboardKey(&controls.Up, KEY_UP);
+    controls.setKeyboardKey(&controls.Down, KEY_DOWN);
+    controls.setKeyboardKey(&controls.Left, KEY_LEFT);
+    controls.setKeyboardKey(&controls.Right, KEY_RIGHT);
+    Velocity vel(0, 0);
+    Drawable draw("assets/entity_1.png", true);
+
+    r.addComponent<Drawable>(player, draw, "mainMenu");
+    r.addComponent<Position>(player, pos, "mainMenu");
+    r.addComponent<Controllable>(player, controls, "mainMenu");
+    r.addComponent<Velocity>(player, vel, "mainMenu");
+
+    Entity udp = r.spawnEntity("mainMenu");
+
+    ReceiveUDP receiveUDP(r.registerComScript(std::bind(mainUDPHandler,
+            std::placeholders::_1,
+            std::placeholders::_2,
+            std::placeholders::_3))
+    );
+
+    r.addComponent<ReceiveUDP>(udp, receiveUDP, "mainMenu");
 }
 
 int main()
@@ -85,17 +127,6 @@ int main()
         Registry r("mainMenu");
 
         setupRegistry(r);
-
-        Entity udp = r.spawnEntity("mainMenu");
-
-        ReceiveUDP receiveUDP(r.registerComScript(std::bind(create_game_handler,
-                std::placeholders::_1,
-                std::placeholders::_2,
-                std::placeholders::_3,
-                std::placeholders::_4))
-        );
-
-        r.addComponent<ReceiveUDP>(udp, receiveUDP, "mainMenu");
 
         ServerEngine engine(r, SERVER_PORT);
     }

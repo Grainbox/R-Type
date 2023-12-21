@@ -33,10 +33,10 @@
  */
 class ClientSystem {
     public:
-        ClientSystem(Registry &r, short server_port) : _udp_socket(io_context), r(r)
+        ClientSystem(Registry &r, short server_port) : _udp_socket(io_context), r(r),
+            _server_endpoint(asio::ip::udp::endpoint(asio::ip::address::from_string("127.0.0.1"), server_port))
         {
             _udp_socket.open(asio::ip::udp::v4());
-            _server_endpoint = asio::ip::udp::endpoint(asio::ip::address::from_string("127.0.0.1"), server_port);
 
             start_receive();
         }
@@ -129,7 +129,8 @@ class ClientSystem {
                     if (!udp)
                         continue;
 
-                    returnMessage = r.getComScript(udp.value().script_id)(r, i, received_message, msg.header.type);
+                    MessageHandlerData data = {received_message, msg.header.type, &_udp_socket, &_server_endpoint};
+                    r.getComScript(udp.value().script_id)(r, i, data);
                 }
 
                 std::cout << "-------------------------------------" << std::endl;
