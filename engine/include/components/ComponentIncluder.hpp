@@ -14,6 +14,7 @@
 #include "Drawable.hpp"
 #include "Health.hpp"
 #include "Hitbox.hpp"
+#include "HitTag.hpp"
 #include "KeyboardInput.hpp"
 #include "KeyReaction.hpp"
 #include "Move.hpp"
