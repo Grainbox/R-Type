@@ -12,7 +12,7 @@ ServerSystem::ServerSystem(Registry &r, short port) : _socket(io_service, udp::e
     startReceive();
 }
 
-void ServerSystem::handle_client(Registry &r,
+void ServerSystem::handle_client_system(Registry &r,
     const boost::system::error_code& error,
     std::size_t bytes_transferred)
 {
@@ -33,22 +33,23 @@ void ServerSystem::handle_client(Registry &r,
 
         std::cout << "Deserialized message type: " << static_cast<int>(msg.header.type) << std::endl << std::endl;
 
-        switch (msg.header.type) {
-            case MessageType::First_Con: {
-                returnMessage = client_connect_handler(msg);
-                break;
-            }
-            case MessageType::Disconnect: {
-                returnMessage = client_disconnect_handler(*message);
-                break;
-            }
-            case MessageType::Create_Game: {
-                returnMessage = create_game_handler(*message);
-                break;
-            }
-            default:
-                returnMessage = "Unknown message type received!";
+        std::string scene = r.getCurrentScene();
+        Sparse_Array<ReceiveUDP> &udpComp = r.getComponents<ReceiveUDP>(scene);
+
+        for (size_t i = 0; i < udpComp.size(); i++) {
+            auto &udp = udpComp[i];
+
+            if (!udp)
+                continue;
+
+            returnMessage = r.getComScript(udp.value().script_id)(r, i, *message, msg.header.type);
         }
+
+        if (msg.header.type == MessageType::First_Con)
+            returnMessage = client_connect_handler(msg);
+        if (msg.header.type == MessageType::Disconnect)
+            returnMessage = client_disconnect_handler(*message);
+
         _socket.async_send_to(boost::asio::buffer(returnMessage), _remoteEndpoint,
             boost::bind(&ServerSystem::handle_send, this, message,
                 boost::asio::placeholders::error,
@@ -90,47 +91,6 @@ std::string ServerSystem::client_disconnect_handler(std::string message)
     return serialized_str;
 }
 
-std::string ServerSystem::create_game_handler(std::string message)
-{
-    std::cout << "Create Game" << std::endl;
-
-    TransfertECSMessage msg;
-    msg.header.type = MessageType::ECS_Transfert;
-
-    std::list<size_t> deadEntities = r.getDeadEntities();
-
-    for (size_t i = 0; i < r.getNextEntityId(); i++) {
-        auto it = std::find(deadEntities.begin(), deadEntities.end(), i);
-
-        if (!deadEntities.empty() && it == deadEntities.end())
-            continue;
-
-        EntityComponents comps;
-
-        comps.entity_id = i;
-        // comps.clickable = r.get_entity_component<Clickable>(i);
-        comps.controllable = r.get_boost_entity_component<Controllable>(i);
-        comps.drawable = r.get_boost_entity_component<Drawable>(i);
-        // comps.hitbox = r.get_entity_component<Hitbox>(i);
-        // comps.kb_input = r.get_entity_component<KeyboardInput>(i);
-        comps.position = r.get_boost_entity_component<Position>(i);
-        // comps.react_cursor = r.get_entity_component<ReactCursor>(i);
-        comps.velocity = r.get_boost_entity_component<Velocity>(i);
-        msg.entities.push_back(comps);
-    }
-
-    std::ostringstream archive_stream;
-    boost::archive::text_oarchive archive(archive_stream);
-
-    archive << msg;
-
-    std::string serialized_str = archive_stream.str();
-
-    std::cout << "Sending: " << serialized_str << std::endl;
-
-    return serialized_str;
-}
-
 void ServerSystem::broadcast_message(const std::string& message)
 {
     auto shared_message = std::make_shared<std::string>(message);
@@ -148,7 +108,7 @@ void ServerSystem::startReceive()
 {
     _socket.async_receive_from(
         boost::asio::buffer(_recvBuffer), _remoteEndpoint,
-        boost::bind(&ServerSystem::handle_client, this,
+        boost::bind(&ServerSystem::handle_client_system, this,
             r,
             boost::asio::placeholders::error,
             boost::asio::placeholders::bytes_transferred)

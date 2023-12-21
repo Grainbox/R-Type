@@ -87,7 +87,7 @@ class MainView {
 
             Hitbox box(ButtonWidth, ButtonHeight, true);
 
-            Clickable clickPlay(r->registerScript(std::bind(
+            Clickable clickPlay(r->registerEventScript(std::bind(
                 &MainView::pressPlay, this,
                 std::placeholders::_1,
                 std::placeholders::_2,
@@ -95,7 +95,7 @@ class MainView {
                 std::placeholders::_4))
             );
 
-            Clickable clickSettings(r->registerScript(std::bind(
+            Clickable clickSettings(r->registerEventScript(std::bind(
                 &MainView::pressSettings, this,
                 std::placeholders::_1,
                 std::placeholders::_2,
@@ -103,7 +103,7 @@ class MainView {
                 std::placeholders::_4))
             );
 
-            Clickable clickExit(r->registerScript(std::bind(
+            Clickable clickExit(r->registerEventScript(std::bind(
                 &MainView::pressExit, this,
                 std::placeholders::_1,
                 std::placeholders::_2,
@@ -111,7 +111,7 @@ class MainView {
                 std::placeholders::_4))
             );
 
-            ReactCursor reactPlay(r->registerScript(std::bind(
+            ReactCursor reactPlay(r->registerEventScript(std::bind(
                 &MainView::reactMPlay, this,
                 std::placeholders::_1))
             );

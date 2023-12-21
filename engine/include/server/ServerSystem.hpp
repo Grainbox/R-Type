@@ -29,7 +29,7 @@ class ServerSystem {
         \param error Boost ASIO error code, if any.
         \param bytes_transferred Number of bytes received.
         */
-        void handle_client(Registry &r, const boost::system::error_code& error,
+        void handle_client_system(Registry &r, const boost::system::error_code& error,
             std::size_t bytes_transferred);
 
         boost::asio::io_service io_service;
@@ -56,13 +56,6 @@ class ServerSystem {
         \param message the serialized data
         */
         std::string client_disconnect_handler(std::string message);
-
-        /*!
-        \brief Handler to create a game
-
-        \param message the serialized data
-        */
-        std::string create_game_handler(std::string message);
 
         /*!
         \brief Broadcast a message to every registered clients

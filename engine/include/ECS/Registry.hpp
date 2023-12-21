@@ -29,6 +29,8 @@
 
 #include "Sparse_Array.hpp"
 
+#include "Communication_Headers.hpp"
+
 /*!
  \class Registry
  \brief Class responsible for managing entities and their components.
@@ -303,31 +305,56 @@ public:
     }
 
     /*!
-    \brief Store the given function in the scripts array
+    \brief Store the given function in the event scripts array
 
     \param func the function to store
-    \return the script id
+    \return the event script id
     */
-    size_t registerScript(std::function<void(Registry &, size_t,
+    size_t registerEventScript(std::function<void(Registry &, size_t,
         asio::ip::udp::socket &_udp_socket,
         asio::ip::udp::endpoint &_server_endpoint)> func)
     {
-        scripts.push_back(func);
-        return scripts.size() - 1;
+        event_scripts.push_back(func);
+        return event_scripts.size() - 1;
     }
 
     /*!
-    \brief Get the script for the given id
+    \brief Get the event script for the given id
 
     \param id The id of the script
-    \return The script
+    \return The event script
     */
     std::function<void(Registry &, size_t, asio::ip::udp::socket &_udp_socket,
-        asio::ip::udp::endpoint &_server_endpoint)> getScript(size_t id)
+        asio::ip::udp::endpoint &_server_endpoint)> getEventScript(size_t id)
     {
-        if (id >= scripts.size())
+        if (id >= event_scripts.size())
             throw (ScriptNotFoundException("Script not found for id: " + id));
-        return scripts.at(id);
+        return event_scripts.at(id);
+    }
+
+    /*!
+    \brief Store the given function in the communication scripts array
+
+    \param func the function to store
+    \return the communication script id
+    */
+    size_t registerComScript(std::function<std::string(Registry &, size_t, std::string, MessageType)> func)
+    {
+        com_scripts.push_back(func);
+        return com_scripts.size() - 1;
+    }
+
+    /*!
+    \brief Get the communication script for the given id
+
+    \param id The id of the communication script
+    \return The communication script id
+    */
+    std::function<std::string(Registry &, size_t, std::string, MessageType)> getComScript(size_t id)
+    {
+        if (id >= com_scripts.size())
+            throw (ScriptNotFoundException("Script not found for id: " + id));
+        return com_scripts.at(id);
     }
 
 protected:
@@ -337,8 +364,10 @@ private:
     std::unordered_map<std::string, std::unordered_map<std::type_index, std::any>> _components_arrays; ///< Storage for components in each scene.
     std::map<std::string, size_t> nextEntityId; ///< ID to be assigned to the next spawned entity.
     std::map<std::string, std::list<size_t>> deadEntities; ///< List of IDs of entities that have been destroyed.
+
     std::vector<std::function<void(Registry &, size_t, asio::ip::udp::socket &_udp_socket,
-        asio::ip::udp::endpoint &_server_endpoint)>> scripts; ///< List of scripts defined by the client.
+        asio::ip::udp::endpoint &_server_endpoint)>> event_scripts; ///< List of event scripts defined by the client.
+    std::vector<std::function<std::string(Registry &, size_t, std::string, MessageType)>> com_scripts; ///< List of communication scripts defined by the user
 };
 
 #endif /* !REGISTRY_HPP_ */
