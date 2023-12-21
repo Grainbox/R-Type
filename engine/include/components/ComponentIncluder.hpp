@@ -22,5 +22,6 @@
 #include "SoundWrapper.hpp"
 #include "Text.hpp"
 #include "Velocity.hpp"
+#include "ReceiveUDP.hpp"
 
 #endif /* !COMPONENTINCLUDER_HPP_ */

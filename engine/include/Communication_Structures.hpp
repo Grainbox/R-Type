@@ -19,22 +19,7 @@
 #include <typeindex>
 
 #include "components/ComponentIncluder.hpp"
-
-enum class MessageType : uint8_t {
-    First_Con = 0,
-    Disconnect = 1,
-    Create_Game = 2,
-    ECS_Transfert = 3,
-};
-
-struct MessageHeader {
-    MessageType type;
-
-    template<class Archive>
-    void serialize(Archive &ar, const unsigned int version) {
-        ar & type;
-    }
-};
+#include "Communication_Headers.hpp"
 
 struct DisconnectMessage {
     MessageHeader header;
@@ -70,25 +55,27 @@ struct EntityComponents {
     size_t entity_id;
 
     // std::optional<Clickable> clickable;
-    // std::optional<Controllable> controllable;
-    // std::optional<Drawable> drawable;
+    boost::optional<Controllable> controllable;
+    boost::optional<Drawable> drawable;
+    boost::optional<ReceiveUDP> receiveUdp;
     // std::optional<Hitbox> hitbox;
     // std::optional<KeyboardInput> kb_input;
     boost::optional<Position> position;
     // std::optional<ReactCursor> react_cursor;
-    // std::optional<Velocity> velocity;
+    boost::optional<Velocity> velocity;
 
     template<class Archive>
     void serialize(Archive &ar, const unsigned int version) {
         ar & entity_id;
         // ar & clickable;
-        // ar & controllable;
-        // ar & drawable;
+        ar & controllable;
+        ar & drawable;
+        ar & receiveUdp;
         // ar & hitbox;
         // ar & kb_input;
         ar & position;
         // ar & react_cursor;
-        // ar & velocity;
+        ar & velocity;
     }
 };
 

@@ -9,23 +9,39 @@
 #define MAINVIEW_HPP_
 
     #include "client/ClientEngine.hpp"
+    #include "define.hpp"
 
 class MainView {
     public:
         MainView(Registry &r) : r(&r) {};
 
-        void pressPlay(Registry &r)
+        void pressPlay(script_settings)
         {
             std::cout << "Play button pressed." << std::endl;
+
+            CreateGameMessage msg;
+            msg.header.type = MessageType::Create_Game;
+
+            std::ostringstream archive_stream;
+            boost::archive::text_oarchive archive(archive_stream);
+
+            archive << msg;
+
+            std::string serialized_str = archive_stream.str();
+
+            std::cout << "Sending create game" << std::endl;
+
+            _udp_socket.send_to(asio::buffer(serialized_str), _server_endpoint);
+
             r.setCurrentScene("gameScene");
         }
 
-        void pressSettings(Registry &r)
+        void pressSettings(script_settings)
         {
             std::cout << "Settings button pressed." << std::endl;
         }
 
-        void pressExit(Registry &r)
+        void pressExit(script_settings)
         {
             std::cout << "Exit button pressed." << std::endl;
         }
@@ -71,11 +87,34 @@ class MainView {
 
             Hitbox box(ButtonWidth, ButtonHeight, true);
 
-            Clickable clickPlay(std::bind(&MainView::pressPlay, this, std::placeholders::_1));
-            Clickable clickSettings(std::bind(&MainView::pressSettings, this, std::placeholders::_1));
-            Clickable clickExit(std::bind(&MainView::pressExit, this, std::placeholders::_1));
+            Clickable clickPlay(r->registerEventScript(std::bind(
+                &MainView::pressPlay, this,
+                std::placeholders::_1,
+                std::placeholders::_2,
+                std::placeholders::_3,
+                std::placeholders::_4))
+            );
 
-            ReactCursor reactPlay(std::bind(&MainView::reactMPlay, this, std::placeholders::_1));
+            Clickable clickSettings(r->registerEventScript(std::bind(
+                &MainView::pressSettings, this,
+                std::placeholders::_1,
+                std::placeholders::_2,
+                std::placeholders::_3,
+                std::placeholders::_4))
+            );
+
+            Clickable clickExit(r->registerEventScript(std::bind(
+                &MainView::pressExit, this,
+                std::placeholders::_1,
+                std::placeholders::_2,
+                std::placeholders::_3,
+                std::placeholders::_4))
+            );
+
+            ReactCursor reactPlay(r->registerEventScript(std::bind(
+                &MainView::reactMPlay, this,
+                std::placeholders::_1))
+            );
 
             r->addComponent<Position>(background, backPos, mainMenu);
             r->addComponent<Position>(playButton, playPos, mainMenu);

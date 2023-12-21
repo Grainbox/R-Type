@@ -33,10 +33,10 @@
  */
 class ClientSystem {
     public:
-        ClientSystem(Registry &r, short server_port) : _udp_socket(io_context), r(r)
+        ClientSystem(Registry &r, short server_port) : _udp_socket(io_context), r(r),
+            _server_endpoint(asio::ip::udp::endpoint(asio::ip::address::from_string("127.0.0.1"), server_port))
         {
             _udp_socket.open(asio::ip::udp::v4());
-            _server_endpoint = asio::ip::udp::endpoint(asio::ip::address::from_string("127.0.0.1"), server_port);
 
             start_receive();
         }
@@ -84,23 +84,6 @@ class ClientSystem {
             _udp_socket.send_to(asio::buffer(serialized_str), _server_endpoint);
         }
 
-        void create_game()
-        {
-            CreateGameMessage msg;
-            msg.header.type = MessageType::Create_Game;
-
-            std::ostringstream archive_stream;
-            boost::archive::text_oarchive archive(archive_stream);
-
-            archive << msg;
-
-            std::string serialized_str = archive_stream.str();
-
-            std::cout << "Sending create game" << std::endl;
-
-            _udp_socket.send_to(asio::buffer(serialized_str), _server_endpoint);
-        }
-
         /*!
         \brief Listen for the server messages asynchronously.
         */
@@ -122,7 +105,6 @@ class ClientSystem {
         */
         void handle_receive_system(const std::error_code &error, std::size_t bytes_transferred)
         {
-            std::cout << "Error: " << error << std::endl;
             if (!error)
             {
                 std::cout << "-------------------------------------" << std::endl;
@@ -138,27 +120,22 @@ class ClientSystem {
 
                 std::cout << "Deserialized message type: " << static_cast<int>(msg.header.type) << std::endl << std::endl;
 
-                switch (msg.header.type) {
-                    case MessageType::ECS_Transfert: {
-                        std::cout << "ECS Transfert" << std::endl;
-                        TransfertECSMessage msg;
-                        std::istringstream archive_stream(received_message);
-                        boost::archive::text_iarchive archive(archive_stream);
+                std::string scene = r.getCurrentScene();
+                Sparse_Array<ReceiveUDP> &udpComp = r.getComponents<ReceiveUDP>(scene);
 
-                        archive >> msg;
+                for (size_t i = 0; i < udpComp.size(); i++) {
+                    auto &udp = udpComp[i];
 
-                        for (auto it : msg.entities) {
-                            std::cout << it.entity_id << std::endl;
-                            std::cout << "pos: " << it.position.value().x << ":" << it.position.value().y << std::endl;
-                        }
+                    if (!udp)
+                        continue;
 
-                        std::cout << "Transfered" << std::endl;
-                        break;
-                    }
-                    default:
-                        returnMessage = "Unknown message type received!";
+                    MessageHandlerData data = {received_message, msg.header.type, &_udp_socket, &_server_endpoint};
+                    r.getComScript(udp.value().script_id)(r, i, data);
                 }
+
                 std::cout << "-------------------------------------" << std::endl;
+            } else {
+                std::cout << "Error: " << error << std::endl;
             }
             start_receive();
         }
@@ -284,7 +261,7 @@ class ClientSystem {
                     Vector2 mouse = GetMousePosition();
                     if (mouse.x < position.value().x || mouse.x > (position.value().x + hitbox.value().width)) continue;
                     if (mouse.y < position.value().y || mouse.y > (position.value().y + hitbox.value().height)) continue;
-                    click.value().proc(r, i);
+                    r.getEventScript(click.value().script_id)(r, i, _udp_socket, _server_endpoint);
                 }
             }
         }
@@ -316,7 +293,7 @@ class ClientSystem {
                 Vector2 mouse = GetMousePosition();
                 if (mouse.x < position.value().x || mouse.x > (position.value().x + hitbox.value().width)) continue;
                 if (mouse.y < position.value().y || mouse.y > (position.value().y + hitbox.value().height)) continue;
-                reactM.value().proc(r);
+                r.getEventScript(reactM.value().script_id);
             }
         }
 
