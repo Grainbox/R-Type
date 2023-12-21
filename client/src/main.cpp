@@ -24,6 +24,53 @@ void gameScene(Registry &r)
     gameview.process();
 }
 
+void create_entity(EntityComponents server_ent, Registry &r, MessageHandlerData &data)
+{
+    std::cout << "Creating entity" << std::endl;
+
+    Entity ent(r.spawnEntity(r.getCurrentScene()));
+    data.client_server_entity_id[server_ent.entity_id] = ent.getEntityId();
+
+    if (server_ent.controllable) {
+        Controllable control = server_ent.controllable.value();
+        r.addComponent<Controllable>(ent, control, r.getCurrentScene());
+    }
+    if (server_ent.drawable) {
+        Drawable drawable(server_ent.drawable.value().spritePath);
+        r.addComponent<Drawable>(ent, drawable, r.getCurrentScene());
+    }
+    if (server_ent.position) {
+        Position position = server_ent.position.value();
+        r.addComponent<Position>(ent, position, r.getCurrentScene());
+    }
+    if (server_ent.velocity) {
+        Velocity velocity = server_ent.velocity.value();
+        r.addComponent<Velocity>(ent, velocity, r.getCurrentScene());
+    }
+}
+
+void update_entity(EntityComponents server_ent, Registry &r, MessageHandlerData &data, size_t ent)
+{
+    std::cout << "Updating Entity" << std::endl;
+
+    if (server_ent.controllable) {
+        Controllable control = server_ent.controllable.value();
+        r.addComponent<Controllable>(ent, control, r.getCurrentScene());
+    }
+    if (server_ent.drawable) {
+        Drawable drawable(server_ent.drawable.value().spritePath);
+        r.addComponent<Drawable>(ent, drawable, r.getCurrentScene());
+    }
+    if (server_ent.position) {
+        Position position = server_ent.position.value();
+        r.addComponent<Position>(ent, position, r.getCurrentScene());
+    }
+    if (server_ent.velocity) {
+        Velocity velocity = server_ent.velocity.value();
+        r.addComponent<Velocity>(ent, velocity, r.getCurrentScene());
+    }
+}
+
 void receive_entities(Registry &r, size_t entity_id, MessageHandlerData data)
 {
     if (data.type != MessageType::ECS_Transfert)
@@ -37,24 +84,12 @@ void receive_entities(Registry &r, size_t entity_id, MessageHandlerData data)
     archive >> msg;
 
     for (auto it : msg.entities) {
-        std::cout << "Entity ID: " << it.entity_id << std::endl;
-        Entity ent(r.spawnEntity(r.getCurrentScene()), it.entity_id); // crée l'entité en lui donnant son id + son id server side
-        // crée et attribue les composants envoyés par le serveur à l'entité
-        if (it.controllable) {
-            Controllable control = it.controllable.value();
-            r.addComponent<Controllable>(ent, control, r.getCurrentScene());
-        }
-        if (it.drawable) {
-            Drawable drawable(it.drawable.value().spritePath);
-            r.addComponent<Drawable>(ent, drawable, r.getCurrentScene());
-        }
-        if (it.position) {
-            Position position = it.position.value();
-            r.addComponent<Position>(ent, position, r.getCurrentScene());
-        }
-        if (it.velocity) {
-            Velocity velocity = it.velocity.value();
-            r.addComponent<Velocity>(ent, velocity, r.getCurrentScene());
+        std::cout << "Server Entity ID: " << it.entity_id << std::endl;
+
+        if (size_t entity_id = (data.client_server_entity_id.find(it.entity_id)) == data.client_server_entity_id.end()) {
+            create_entity(it, r, data);
+        } else {
+            update_entity(it, r, data, entity_id);
         }
     }
 
@@ -65,17 +100,17 @@ void setupRegistry(Registry &r)
 {
     mainMenu(r);
 
-    // Entity udp = r.spawnEntity("gameScene");
+    Entity udp = r.spawnEntity("gameScene");
 
-    // ReceiveUDP receiveUDP(r.registerComScript(std::bind(receive_entities,
-    //         std::placeholders::_1,
-    //         std::placeholders::_2,
-    //         std::placeholders::_3))
-    // );
+    ReceiveUDP receiveUDP(r.registerComScript(std::bind(receive_entities,
+            std::placeholders::_1,
+            std::placeholders::_2,
+            std::placeholders::_3))
+    );
 
-    // r.addComponent<ReceiveUDP>(udp, receiveUDP, "gameScene");
+    r.addComponent<ReceiveUDP>(udp, receiveUDP, "gameScene");
 
-    gameScene(r);
+    // gameScene(r);
 }
 
 int main()
