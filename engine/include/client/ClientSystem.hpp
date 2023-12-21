@@ -325,6 +325,18 @@ class ClientSystem {
             }
         }
 
+        // void hitbox_system() {
+        //     std::string scene = r.getCurrentScene();
+        //     Sparse_Array<Hitbox> &hitboxs = r.getComponents<Hitbox>(scene);
+        //     Sparse_Array<Position> &positions = r.getComponents<Position>(scene);
+        //     ;
+        // }
+        /**
+         * @brief Dessine les hitbox à l'écran.
+         *
+         * Ce système parcourt toutes les entités disposant de composants `Hitbox`
+         * et "Position", puis dessine les hitbox à l'écran (system de debug).
+         */
         void draw_hitbox_system() {
             std::string scene = r.getCurrentScene();
             Sparse_Array<Hitbox> &hitboxs = r.getComponents<Hitbox>(scene);
@@ -343,13 +355,19 @@ class ClientSystem {
                 int topY = position.value().y;
                 int bottomY = position.value().y + hitbox.value().height;
 
+                Color hitboxColor = WHITE;
+                if (hitbox.value().getHitTag().tag == HitTag::TAG1)
+                    hitboxColor = BLUE;
+                else if (hitbox.value().getHitTag().tag == HitTag::TAG2)
+                    hitboxColor = RED;
+
                 // Lignes verticales
-                DrawLine(leftX, topY, leftX, bottomY, RED);
-                DrawLine(rightX, topY, rightX, bottomY, RED);
+                DrawLine(leftX, topY, leftX, bottomY, hitboxColor);
+                DrawLine(rightX, topY, rightX, bottomY, hitboxColor);
 
                 // Lignes horizontales
-                DrawLine(leftX, topY, rightX, topY, RED);
-                DrawLine(leftX, bottomY, rightX, bottomY, RED);
+                DrawLine(leftX, topY, rightX, topY, hitboxColor);
+                DrawLine(leftX, bottomY, rightX, bottomY, hitboxColor);
             }
         }
         /**
@@ -428,6 +446,8 @@ class ClientSystem {
                 pos.value().y += vel.value().vy;
             }
         }
+
+
 
         asio::io_context io_context;
     protected:
