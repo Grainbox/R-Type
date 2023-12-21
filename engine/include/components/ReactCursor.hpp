@@ -12,10 +12,9 @@
 
 class ReactCursor {
     public:
-        ReactCursor(const std::function<void(Registry &)>& func) {
-            proc = func;
-        }
-        std::function<void(Registry &)> proc;
+        ReactCursor(size_t script_id) : script_id(script_id) {}
+
+        size_t script_id;
     protected:
     private:
 };

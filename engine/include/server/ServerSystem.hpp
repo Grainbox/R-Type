@@ -9,15 +9,11 @@
 #define SERVERSYSTEM_HPP_
 
 #include <memory>
-#include <boost/asio.hpp>
-#include <boost/bind/bind.hpp>
+#include <asio.hpp>
 #include <map>
 
 #include "Communication_Structures.hpp"
 #include "ECS/Registry.hpp"
-
-using boost::asio::ip::udp;
-using namespace boost::placeholders;
 
 class ServerSystem {
     public:
@@ -29,40 +25,18 @@ class ServerSystem {
         \param error Boost ASIO error code, if any.
         \param bytes_transferred Number of bytes received.
         */
-        void handle_client(Registry &r, const boost::system::error_code& error,
-            std::size_t bytes_transferred);
+        void handle_client_system(Registry &r, const std::array<char, 1024>& message, std::size_t length);
 
-        boost::asio::io_service io_service;
+        asio::io_service io_service;
     protected:
     private:
-        udp::socket _socket;
+        asio::ip::udp::socket _socket;
         std::array<char, 1024> _recvBuffer;
-        udp::endpoint _remoteEndpoint;
+        asio::ip::udp::endpoint _remoteEndpoint;
 
-        std::unordered_map<udp::endpoint, size_t> clients_entity;
+        std::unordered_map<asio::ip::udp::endpoint, size_t> clients_entity;
 
         Registry &r;
-
-        /*!
-        \brief Handler to connect a client
-
-        \param message the serialized data
-        */
-        std::string client_connect_handler(FirstConMessage &msg);
-
-        /*!
-        \brief Handler to disconnect a client
-
-        \param message the serialized data
-        */
-        std::string client_disconnect_handler(std::string message);
-
-        /*!
-        \brief Handler to create a game
-
-        \param message the serialized data
-        */
-        std::string create_game_handler(std::string message);
 
         /*!
         \brief Broadcast a message to every registered clients
@@ -75,17 +49,6 @@ class ServerSystem {
         \brief Starts receiving data from the network.
         */
         void startReceive();
-
-        /*!
-        \brief Handles sending data to a client.
-
-        \param message Message to send.
-        \param ec Boost ASIO error code, if any.
-        \param bytes_transferred Number of bytes sent.
-        */
-        void handle_send(std::shared_ptr<std::string> message,
-            const boost::system::error_code& ec,
-            std::size_t bytes_transferred);
 };
 
 #endif /* !SERVERSYSTEM_HPP_ */

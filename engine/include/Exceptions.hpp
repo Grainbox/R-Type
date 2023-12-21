@@ -24,6 +24,19 @@ private:
     std::string msg_;
 };
 
+class ScriptNotFoundException : public std::exception {
+public:
+    explicit ScriptNotFoundException(const std::string& message)
+        : msg_(message) {}
+
+    virtual const char* what() const noexcept override {
+        return msg_.c_str();
+    }
+
+private:
+    std::string msg_;
+};
+
 class ComponentNotFoundException : public std::exception {
 public:
     explicit ComponentNotFoundException(const std::string& message)

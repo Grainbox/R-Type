@@ -9,6 +9,7 @@
 #define HITBOX_HPP_
 
     #include <iostream>
+    #include <boost/serialization/serialization.hpp>
     #include "HitTag.hpp"
 
 class Hitbox {
@@ -22,6 +23,15 @@ class Hitbox {
         size_t width = 0;
         size_t height = 0;
         bool debug = false;
+
+        template<class Archive>
+        void serialize(Archive &ar, const unsigned int version) {
+            ar & width;
+            ar & height;
+            ar & debug;
+        }
+
+        friend class boost::serialization::access;
     protected:
     private:
         HitTag _hitTag;

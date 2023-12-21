@@ -41,8 +41,9 @@ class AnimatedDraw {
                     if (!texture.id)
                         throw LoadAssetException("Failed to load asset: " + spriteSheetPath);
         }
+
         AnimatedDraw(std::string spriteSheetPath, int nbCols, int nbRows, int resizeWidth, int resizeHeight) {
-            Image spritesheet = LoadImage(spriteSheetPath.c_str()); 
+            Image spritesheet = LoadImage(spriteSheetPath.c_str());
             float frameWidth = spritesheet.width / nbCols;
             float frameHeight = spritesheet.height / nbRows;
             std::vector<Texture2D> list;
