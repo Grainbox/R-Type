@@ -65,17 +65,17 @@ void setupRegistry(Registry &r)
 {
     mainMenu(r);
 
-    Entity udp = r.spawnEntity("gameScene");
+    // Entity udp = r.spawnEntity("gameScene");
 
-    ReceiveUDP receiveUDP(r.registerComScript(std::bind(receive_entities,
-            std::placeholders::_1,
-            std::placeholders::_2,
-            std::placeholders::_3))
-    );
+    // ReceiveUDP receiveUDP(r.registerComScript(std::bind(receive_entities,
+    //         std::placeholders::_1,
+    //         std::placeholders::_2,
+    //         std::placeholders::_3))
+    // );
 
-    r.addComponent<ReceiveUDP>(udp, receiveUDP, "gameScene");
+    // r.addComponent<ReceiveUDP>(udp, receiveUDP, "gameScene");
 
-    // gameScene(r);
+    gameScene(r);
 }
 
 int main()
