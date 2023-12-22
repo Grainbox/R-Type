@@ -15,9 +15,8 @@ class GameView {
     public:
         GameView(Registry &r) : r(&r) {};
 
-        void debugCollision(script_settings)
+        void hitTarget(script_settings)
         {
-            std::cout << "ennemy hit !" << std::endl;
             r.killEntity(entity_id, r.getCurrentScene());
         }
 
@@ -40,7 +39,7 @@ class GameView {
                 Hitbox boxBullet(rsBullet.rx, rsBullet.ry, true);
                 boxBullet.setHitTag(hitTagShip);
                 OnCollision bulletHit;
-                bulletHit.addReaction(HitTag::TAG2, r.registerEventScript(std::bind(&GameView::debugCollision, this,
+                bulletHit.addReaction(HitTag::TAG2, r.registerEventScript(std::bind(&GameView::hitTarget, this,
                     std::placeholders::_1,
                     std::placeholders::_2,
                     std::placeholders::_3,
@@ -67,15 +66,19 @@ class GameView {
             Hitbox box(100, 50, true);
             HitTag hTagPlayer(HitTag::TAG1);
             box.setHitTag(hTagPlayer);
-
             Resize resizePlayer(100, 50);
             Controllable controls;
             controls.setKeyboardKey(&controls.Up, KEY_UP);
             controls.setKeyboardKey(&controls.Down, KEY_DOWN);
             controls.setKeyboardKey(&controls.Left, KEY_LEFT);
             controls.setKeyboardKey(&controls.Right, KEY_RIGHT);
-
             AnimatedDraw anim("assets/player1.png", 5, 1, resizePlayer.rx, resizePlayer.ry);
+            OnCollision shipHit;
+            shipHit.addReaction(HitTag::TAG2, r->registerEventScript(std::bind(&GameView::hitTarget, this,
+                    std::placeholders::_1,
+                    std::placeholders::_2,
+                    std::placeholders::_3,
+                    std::placeholders::_4)));
 
             r->addComponent<Position>(player, playerPos, gameScene);
             r->addComponent<Velocity>(player, playerVelo, gameScene);
@@ -84,9 +87,10 @@ class GameView {
             r->addComponent<Hitbox>(player, box, gameScene);
             r->addComponent<Controllable>(player, controls, gameScene);
             r->addComponent<AnimatedDraw>(player, anim, gameScene);
+            r->addComponent<OnCollision>(player, shipHit, gameScene);
+
 
             Entity ennemy = r->spawnEntity(gameScene);
-
             Position ennemyPos(400, 300);
             Velocity ennemyVelo(0, 0);
             MoveLeft leftmove;
@@ -97,6 +101,12 @@ class GameView {
             Hitbox boxEnnemy(100, 50, true);
             HitTag hTagEnnemy(HitTag::TAG2);
             boxEnnemy.setHitTag(hTagEnnemy);
+            OnCollision ennemyShipHit;
+            ennemyShipHit.addReaction(HitTag::TAG1, r->registerEventScript(std::bind(&GameView::hitTarget, this,
+                    std::placeholders::_1,
+                    std::placeholders::_2,
+                    std::placeholders::_3,
+                    std::placeholders::_4)));
 
             r->addComponent<Position>(ennemy, ennemyPos, gameScene);
             r->addComponent<Velocity>(ennemy, ennemyVelo, gameScene);
@@ -104,6 +114,7 @@ class GameView {
             r->addComponent<Drawable>(ennemy, drawEnnemy, gameScene);
             r->addComponent<Hitbox>(ennemy, boxEnnemy, gameScene);
             r->addComponent<AnimatedDraw>(ennemy, anim2, gameScene);
+            r->addComponent<OnCollision>(ennemy, ennemyShipHit, gameScene);
 
             // Entity Title = r->spawnEntity(gameScene);
             // Position titlePos(0, 100);
