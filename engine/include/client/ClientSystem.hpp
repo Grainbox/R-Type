@@ -129,7 +129,7 @@ class ClientSystem {
                     if (!udp)
                         continue;
 
-                    MessageHandlerData data = {received_message, msg.header.type, &_udp_socket, &_server_endpoint};
+                    MessageHandlerData data = {received_message, msg.header.type, _udp_socket, _server_endpoint, clients_entity, client_server_entity_id, localEndpoint};
                     r.getComScript(udp.value().script_id)(r, i, data);
                 }
 
@@ -511,17 +511,48 @@ class ClientSystem {
 
                 pos.value().x += vel.value().vx;
                 pos.value().y += vel.value().vy;
+
+                // TransfertECSMessage msg;
+                // msg.header.type = MessageType::ECS_Transfert;
+
+                // EntityComponents comps;
+
+                // comps.entity_id = client_server_entity_id[i];
+
+                // comps.position = r.get_boost_entity_component<Position>(i);
+
+                // msg.entities.push_back(comps);
+
+                // std::ostringstream archive_stream;
+                // boost::archive::text_oarchive archive(archive_stream);
+                // archive << msg;
+
+                // std::string serialized_str = archive_stream.str();
+
+                // _udp_socket.async_send_to(
+                //     asio::buffer(serialized_str), _server_endpoint,
+                //     [](const std::error_code& error, std::size_t bytes_transferred) {
+                //         if (!error) {
+                //             std::cout << "Message sent successfully, bytes transferred: " << bytes_transferred << std::endl;
+                //         } else {
+                //             std::cerr << "Error sending message: " << error.message() << std::endl;
+                //         }
+                //     }
+                // );
             }
         }
-
-
 
         asio::io_context io_context;
     protected:
     private:
+        std::unordered_map<std::string, size_t> clients_entity;
+        std::unordered_map<size_t, size_t> client_server_entity_id;
+
         asio::ip::udp::socket _udp_socket;
         asio::ip::udp::endpoint _server_endpoint;
         char recv_buffer_[1024];
+
+        std::string localEndpoint;
 
         Registry &r;
 

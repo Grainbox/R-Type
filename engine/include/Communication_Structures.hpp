@@ -24,11 +24,13 @@
 struct DisconnectMessage {
     MessageHeader header;
 
+    size_t disconnected_entity;
     std::string reason;
 
     template<class Archive>
     void serialize(Archive &ar, const unsigned int version) {
         ar & header;
+        ar & disconnected_entity;
         ar & reason;
     }
 };
@@ -36,9 +38,12 @@ struct DisconnectMessage {
 struct FirstConMessage {
     MessageHeader header;
 
+    std::string endpoint;
+
     template<class Archive>
     void serialize(Archive &ar, const unsigned int version) {
         ar & header;
+        ar & endpoint;
     }
 };
 
@@ -54,6 +59,8 @@ struct CreateGameMessage {
 struct EntityComponents {
     size_t entity_id;
 
+    std::string assigned_endpoint;
+
     // std::optional<Clickable> clickable;
     boost::optional<Controllable> controllable;
     boost::optional<Drawable> drawable;
@@ -68,6 +75,7 @@ struct EntityComponents {
     template<class Archive>
     void serialize(Archive &ar, const unsigned int version) {
         ar & entity_id;
+        ar & assigned_endpoint;
         // ar & clickable;
         ar & controllable;
         ar & drawable;

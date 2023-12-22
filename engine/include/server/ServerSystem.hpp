@@ -30,20 +30,23 @@ class ServerSystem {
         asio::io_service io_service;
     protected:
     private:
+        std::unordered_map<std::string, size_t> clients_entity;
+        std::unordered_map<size_t, size_t> client_server_entity_id;
+
         asio::ip::udp::socket _socket;
         std::array<char, 1024> _recvBuffer;
         asio::ip::udp::endpoint _remoteEndpoint;
 
-        std::unordered_map<asio::ip::udp::endpoint, size_t> clients_entity;
+        std::string localEndpoint;
 
         Registry &r;
 
-        /*!
-        \brief Broadcast a message to every registered clients
+        // /*!
+        // \brief Broadcast a message to every registered clients
 
-        \param message the string to send
-        */
-        void broadcast_message(const std::string& message);
+        // \param message the string to send
+        // */
+        // void broadcast_message(const std::string& message);
 
         /*!
         \brief Starts receiving data from the network.

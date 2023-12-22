@@ -36,29 +36,29 @@ void ServerSystem::handle_client_system(Registry &r,
         if (!udp)
             continue;
 
-        MessageHandlerData data = {message, msg.header.type, &_socket, &_remoteEndpoint};
+        MessageHandlerData data = {message, msg.header.type, _socket, _remoteEndpoint, clients_entity, client_server_entity_id, localEndpoint};
         r.getComScript(udp.value().script_id)(r, i, data);
     }
 
     std::cout << "-------------------------------------" << std::endl;
 }
 
-void ServerSystem::broadcast_message(const std::string& message)
-{
-    for (const auto& client : clients_entity) {
-        std::cout << client.first << std::endl;
-        _socket.async_send_to(
-            asio::buffer(message), client.first,
-            [](const std::error_code& error, std::size_t bytes_transferred) {
-                if (!error) {
-                    std::cout << "Message sent successfully, bytes transferred: " << bytes_transferred << std::endl;
-                } else {
-                    std::cerr << "Error sending message: " << error.message() << std::endl;
-                }
-            }
-        );
-    }
-}
+// void ServerSystem::broadcast_message(const std::string& message)
+// {
+    // for (const auto& client : r.clients_entity) {
+    //     std::cout << client.first << std::endl;
+    //     _socket.async_send_to(
+    //         asio::buffer(message), client.first,
+    //         [](const std::error_code& error, std::size_t bytes_transferred) {
+    //             if (!error) {
+    //                 std::cout << "Message sent successfully, bytes transferred: " << bytes_transferred << std::endl;
+    //             } else {
+    //                 std::cerr << "Error sending message: " << error.message() << std::endl;
+    //             }
+    //         }
+    //     );
+    // }
+// }
 
 void ServerSystem::startReceive()
 {
