@@ -29,8 +29,8 @@ void setupRegistry(Registry &r)
 {
     mainMenu(r);
 
-    ServerGameScene scene(r);
-    // gameScene(r);
+    // ServerGameScene scene(r);
+    gameScene(r);
 }
 
 int main()
