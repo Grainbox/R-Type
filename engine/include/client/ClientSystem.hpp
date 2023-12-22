@@ -369,6 +369,13 @@ class ClientSystem {
                 }
             }
         }
+        /**
+         * @brief Execute les réactions aux collisions.
+         *
+         * Ce système parcourt toutes les entités disposant de composants `Hitbox`
+         * et "OnCollision", puis execute les réactions listé lorsque leur tag
+         * de collision est présent dans la liste des collisions de l'entité.
+         */
         void collision_reaction_system() {
             std::string scene = r.getCurrentScene();
             Sparse_Array<OnCollision> &onCols = r.getComponents<OnCollision>(scene);

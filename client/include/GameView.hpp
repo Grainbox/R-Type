@@ -39,19 +39,12 @@ class GameView {
                 Velocity velBullet(10, 0);
                 Hitbox boxBullet(rsBullet.rx, rsBullet.ry, true);
                 boxBullet.setHitTag(hitTagShip);
-                // boxBullet.onCollision(r, HitTag::TAG2, std::bind(&GameView::debugCollision, this, std::placeholders::_1));
-                // auto boundFunction = std::bind(&GameView::debugCollision, this, std::placeholders::_1);
-                // OnCollision hitEnnemy(r, boxBullet, HitTag::TAG2, boundFunction);
-
-                // OnCollision hitEnnemy(r, boxBullet, HitTag::TAG2, r.registerEventScript(std::bind(&GameView::debugCollision, this, std::placeholders::_1)));
                 OnCollision bulletHit;
                 bulletHit.addReaction(HitTag::TAG2, r.registerEventScript(std::bind(&GameView::debugCollision, this,
                     std::placeholders::_1,
                     std::placeholders::_2,
                     std::placeholders::_3,
                     std::placeholders::_4)));
-                for (auto pairTest : bulletHit.reactionsList)
-                    std::cout << "PAIR: " << pairTest.first << " | " << pairTest.second << std::endl;
 
                 r.addComponent<Position>(bullet, posBullet, gameScene);
                 r.addComponent<Resize>(bullet, rsBullet, gameScene);
@@ -74,9 +67,6 @@ class GameView {
             Hitbox box(100, 50, true);
             HitTag hTagPlayer(HitTag::TAG1);
             box.setHitTag(hTagPlayer);
-
-            // if (box.getHitTag().tag == HitTag::TAG1)
-            //     std::cout << "tag OK --------------------------------" << std::endl;
 
             Resize resizePlayer(100, 50);
             Controllable controls;
