@@ -381,13 +381,22 @@ class ClientSystem {
                 if (!collision || !hitbox || hitbox.value().getCollisionList().empty())
                     continue;
                 for (auto reaction : collision.value().reactionsList) {
+                    if (!collision || !hitbox)
+                        continue;
                     HitTag::hitTag tag = reaction.first;
                     size_t script_id = reaction.second;
                     for (auto id : hitbox.value().getCollisionList()) {
-                        auto box2 = r.get_entity_component<Hitbox>(id)->get();
-                        if (box2.getHitTag().tag == tag)
+                        auto boxComp = r.get_entity_component<Hitbox>(id);
+                        if (!boxComp)
+                            continue;
+                        auto box2 = boxComp->get();
+
+                        if (box2.getHitTag().tag == tag) {
                             r.getEventScript(script_id)(r, i, _udp_socket, _server_endpoint);
+                        }
                     }
+                    if (!collision)
+                        break;
                 }
             }
         }
