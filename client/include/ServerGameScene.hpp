@@ -125,10 +125,7 @@ class ServerGameScene {
                 DisconnectMessage msg;
                 archive >> msg;
 
-                std::cout << "Entity to kill: " << msg.disconnected_entity << std::endl;
-
                 if (data.client_server_entity_id.find(msg.disconnected_entity) != data.client_server_entity_id.end()) {
-                    std::cout << "Killing: " << data.client_server_entity_id[msg.disconnected_entity] << std::endl;
                     r.killEntity(data.client_server_entity_id[msg.disconnected_entity], r.getCurrentScene());
                 }
             }
