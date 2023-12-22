@@ -36,7 +36,7 @@ void ServerSystem::handle_client_system(Registry &r,
         if (!udp)
             continue;
 
-        MessageHandlerData data = {message, msg.header.type, _socket, _remoteEndpoint, clients_entity, client_server_entity_id};
+        MessageHandlerData data = {message, msg.header.type, _socket, _remoteEndpoint, clients_entity, client_server_entity_id, localEndpoint};
         r.getComScript(udp.value().script_id)(r, i, data);
     }
 

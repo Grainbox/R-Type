@@ -10,6 +10,28 @@
 
 #include "server/ServerEngine.hpp"
 
+std::optional<std::string> find_key_for_value(const std::unordered_map<std::string, size_t>& clients_entity, size_t value) {
+    for (const auto& pair : clients_entity) {
+        if (pair.second == value) {
+            return pair.first;
+        }
+    }
+    return std::nullopt;
+}
+
+asio::ip::udp::endpoint string_to_endpoint(const std::string& str) {
+    size_t colon_pos = str.find(':');
+    if (colon_pos == std::string::npos) {
+        throw std::invalid_argument("Invalid endpoint format");
+    }
+
+    std::string ip_str = str.substr(0, colon_pos);
+    std::string port_str = str.substr(colon_pos + 1);
+
+    asio::ip::udp::endpoint endpoint(asio::ip::make_address(ip_str), std::stoi(port_str));
+    return endpoint;
+}
+
 void client_connect_handler(Registry &r, MessageHandlerData data)
 {
     std::istringstream archive_stream(data.message);
@@ -19,7 +41,7 @@ void client_connect_handler(Registry &r, MessageHandlerData data)
 
     Entity client = r.spawnEntity(r.getCurrentScene());
 
-    Position pos(100, 0);
+    Position pos(client.getEntityId() * 150, 0);
     Controllable controls;
     controls.setKeyboardKey(&controls.Up, KEY_UP);
     controls.setKeyboardKey(&controls.Down, KEY_DOWN);
@@ -33,9 +55,32 @@ void client_connect_handler(Registry &r, MessageHandlerData data)
     r.addComponent<Controllable>(client, controls, "game");
     r.addComponent<Velocity>(client, vel, "game");
 
-    data.clients_entity[data._remoteEndpoint] = client.getEntityId();
+    std::string endpoint = data._remoteEndpoint.address().to_string() + ":" +
+        std::to_string(data._remoteEndpoint.port());
+
+    data.clients_entity[endpoint] = client.getEntityId();
 
     std::cout << "Client Connected, assigned on: " << client.getEntityId() << std::endl;
+
+    std::ostringstream new_archive_stream;
+    boost::archive::text_oarchive new_archive(new_archive_stream);
+
+    msg.endpoint = endpoint;
+    new_archive << msg;
+
+    std::string serialized_str = new_archive_stream.str();
+
+    // Respond to caller
+    data._socket.async_send_to(
+        asio::buffer(serialized_str), data._remoteEndpoint,
+        [](const std::error_code& error, std::size_t bytes_transferred) {
+            if (!error) {
+                std::cout << "Message sent successfully, bytes transferred: " << bytes_transferred << std::endl;
+            } else {
+                std::cerr << "Error sending message: " << error.message() << std::endl;
+            }
+        }
+    );
 }
 
 void client_disconnect_handler(Registry &r, MessageHandlerData data)
@@ -46,12 +91,36 @@ void client_disconnect_handler(Registry &r, MessageHandlerData data)
 
     archive >> msg;
 
-    std::string serialized_str = archive_stream.str();
+    std::string endpoint = data._remoteEndpoint.address().to_string() + ":" +
+        std::to_string(data._remoteEndpoint.port());
 
-    r.killEntity(data.clients_entity[data._remoteEndpoint], r.getCurrentScene());
-    data.clients_entity.erase(data._remoteEndpoint);
+    size_t entity_to_kill = data.clients_entity[endpoint];
+
+    r.killEntity(data.clients_entity[endpoint], r.getCurrentScene());
+    data.clients_entity.erase(endpoint);
 
     std::cout << "Client Disconnected for reason: " << msg.reason << std::endl;
+
+    std::ostringstream new_archive_stream;
+    boost::archive::text_oarchive new_archive(new_archive_stream);
+
+    msg.disconnected_entity = entity_to_kill;
+    new_archive << msg;
+
+    std::string serialized_str = new_archive_stream.str();
+
+    for (const auto& client : data.clients_entity) {
+        data._socket.async_send_to(
+            asio::buffer(serialized_str), string_to_endpoint(client.first),
+            [](const std::error_code& error, std::size_t bytes_transferred) {
+                if (!error) {
+                    std::cout << "Message sent successfully, bytes transferred: " << bytes_transferred << std::endl;
+                } else {
+                    std::cerr << "Error sending message: " << error.message() << std::endl;
+                }
+            }
+        );
+    }
 }
 
 void create_game_handler(Registry &r, MessageHandlerData data)
@@ -71,6 +140,14 @@ void create_game_handler(Registry &r, MessageHandlerData data)
 
         comps.entity_id = i;
 
+        auto result = find_key_for_value(data.clients_entity, i);
+
+        if (result) {
+            comps.assigned_endpoint = result.value();
+        } else {
+            comps.assigned_endpoint = "none";
+        }
+
         comps.controllable = r.get_boost_entity_component<Controllable>(i);
         comps.drawable = r.get_boost_entity_component<Drawable>(i);
         comps.position = r.get_boost_entity_component<Position>(i);
@@ -87,9 +164,8 @@ void create_game_handler(Registry &r, MessageHandlerData data)
 
     // Broadcast entities
     for (const auto& client : data.clients_entity) {
-        std::cout << client.first << std::endl;
         data._socket.async_send_to(
-            asio::buffer(serialized_str), client.first,
+            asio::buffer(serialized_str), string_to_endpoint(client.first),
             [](const std::error_code& error, std::size_t bytes_transferred) {
                 if (!error) {
                     std::cout << "Message sent successfully, bytes transferred: " << bytes_transferred << std::endl;
@@ -136,9 +212,8 @@ void update_entity(Registry &r, MessageHandlerData data)
     std::string serialized_str = archive_stream.str();
 
     for (const auto& client : data.clients_entity) {
-        std::cout << client.first << std::endl;
         data._socket.async_send_to(
-            asio::buffer(serialized_str), client.first,
+            asio::buffer(serialized_str), string_to_endpoint(client.first),
             [](const std::error_code& error, std::size_t bytes_transferred) {
                 if (!error) {
                     std::cout << "Message sent successfully, bytes transferred: " << bytes_transferred << std::endl;

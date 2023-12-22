@@ -30,12 +30,14 @@ class ServerSystem {
         asio::io_service io_service;
     protected:
     private:
-        std::unordered_map<asio::ip::udp::endpoint, size_t> clients_entity;
+        std::unordered_map<std::string, size_t> clients_entity;
         std::unordered_map<size_t, size_t> client_server_entity_id;
 
         asio::ip::udp::socket _socket;
         std::array<char, 1024> _recvBuffer;
         asio::ip::udp::endpoint _remoteEndpoint;
+
+        std::string localEndpoint;
 
         Registry &r;
 

@@ -24,8 +24,11 @@ struct MessageHandlerData {
     MessageType type;
     asio::ip::udp::socket &_socket;
     asio::ip::udp::endpoint &_remoteEndpoint;
-    std::unordered_map<asio::ip::udp::endpoint, size_t> &clients_entity;
+
+    std::unordered_map<std::string, size_t> &clients_entity;
     std::unordered_map<size_t, size_t> &client_server_entity_id;
+
+    std::string &localEndpoint;
 };
 
 struct MessageHeader {
