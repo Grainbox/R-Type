@@ -25,18 +25,21 @@ void gameScene(Registry &r)
     gameview.process();
 }
 
-void setupRegistry(Registry &r)
+void setupRegistry(Registry &r, bool multiplayer)
 {
     mainMenu(r);
 
-    // ServerGameScene scene(r);
-    gameScene(r);
+    if (multiplayer)
+        ServerGameScene scene(r);
+    else
+        gameScene(r);
 }
 
-int main()
+int main(int argc, char **argv)
 {
     try
     {
+        std::string arg;
         Registry r("mainMenu");
 
         int winWidth = 800;
@@ -45,7 +48,10 @@ int main()
         InitWindow(winWidth, winHeigth, "My Engine");
         SetTargetFPS(60);
 
-        setupRegistry(r);
+        if (argc == 2)
+            arg = argv[1];
+
+        setupRegistry(r, arg == "--multiplayer");
 
         ClientEngine engine(r, SERVER_PORT);
     }
