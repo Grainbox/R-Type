@@ -58,6 +58,7 @@ struct CreateGameMessage {
 
 struct EntityComponents {
     size_t entity_id;
+    std::string scene;
 
     std::string assigned_endpoint;
 
@@ -76,6 +77,7 @@ struct EntityComponents {
     template<class Archive>
     void serialize(Archive &ar, const unsigned int version) {
         ar & entity_id;
+        ar & scene;
         ar & assigned_endpoint;
         // ar & clickable;
         ar & controllable;

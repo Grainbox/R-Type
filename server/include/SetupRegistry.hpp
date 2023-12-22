@@ -56,10 +56,10 @@ class SetupRegistry {
             Velocity vel(0, 0);
             Drawable draw("assets/entity_1.png", true);
 
-            r.addComponent<Drawable>(client, draw, "game");
-            r.addComponent<Position>(client, pos, "game");
-            r.addComponent<Controllable>(client, controls, "game");
-            r.addComponent<Velocity>(client, vel, "game");
+            r.addComponent<Drawable>(client, draw, r.getCurrentScene());
+            r.addComponent<Position>(client, pos, r.getCurrentScene());
+            r.addComponent<Controllable>(client, controls, r.getCurrentScene());
+            r.addComponent<Velocity>(client, vel, r.getCurrentScene());
 
             std::string endpoint = data._remoteEndpoint.address().to_string() + ":" +
                 std::to_string(data._remoteEndpoint.port());
@@ -145,6 +145,7 @@ class SetupRegistry {
                 EntityComponents comps;
 
                 comps.entity_id = i;
+                comps.scene = r.getCurrentScene();
 
                 auto result = find_key_for_value(data.clients_entity, i);
 
@@ -257,7 +258,7 @@ class SetupRegistry {
 
         void setupRegistry()
         {
-            Entity udp = r.spawnEntity("game");
+            Entity udp = r.spawnEntity(r.getCurrentScene());
 
             ReceiveUDP receiveUDP(r.registerComScript(
                     std::bind(&SetupRegistry::mainUDPHandler, this,
@@ -266,7 +267,7 @@ class SetupRegistry {
                     std::placeholders::_3))
             );
 
-            r.addComponent<ReceiveUDP>(udp, receiveUDP, "game");
+            r.addComponent<ReceiveUDP>(udp, receiveUDP, r.getCurrentScene());
         }
 
     protected:
