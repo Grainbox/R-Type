@@ -369,11 +369,17 @@ class ClientSystem {
                 }
             }
         }
+        /**
+         * @brief Execute les réactions aux collisions.
+         *
+         * Ce système parcourt toutes les entités disposant de composants `Hitbox`
+         * et "OnCollision", puis execute les réactions listé lorsque leur tag
+         * de collision est présent dans la liste des collisions de l'entité.
+         */
         void collision_reaction_system() {
             std::string scene = r.getCurrentScene();
             Sparse_Array<OnCollision> &onCols = r.getComponents<OnCollision>(scene);
             Sparse_Array<Hitbox> &hitboxs = r.getComponents<Hitbox>(scene);
-
 
             for (size_t i = 0; i < onCols.size(); ++i) {
                 auto &collision = onCols[i];
@@ -382,20 +388,23 @@ class ClientSystem {
                 if (!collision || !hitbox || hitbox.value().getCollisionList().empty())
                     continue;
                 for (auto reaction : collision.value().reactionsList) {
+                    if (!collision || !hitbox)
+                        continue;
                     HitTag::hitTag tag = reaction.first;
                     size_t script_id = reaction.second;
                     for (auto id : hitbox.value().getCollisionList()) {
-                        auto box2 = r.get_entity_component<Hitbox>(id)->get();
-                        if (box2.getHitTag().tag == tag)
-                            r.getEventScript(script_id);
-                    }
-                }
+                        auto boxComp = r.get_entity_component<Hitbox>(id);
+                        if (!boxComp)
+                            continue;
+                        auto box2 = boxComp->get();
 
-                // if (collision.value().reactionsList.empty());
-                //     continue;
-                // std::cout << "ye" << std::endl;
-                // std::cout << "collision reaction possible." << std::endl;
-                // r.getEventScript(collision.value().script_id);
+                        if (box2.getHitTag().tag == tag) {
+                            r.getEventScript(script_id)(r, i, _udp_socket, _server_endpoint);
+                        }
+                    }
+                    if (!collision)
+                        break;
+                }
             }
         }
         /**

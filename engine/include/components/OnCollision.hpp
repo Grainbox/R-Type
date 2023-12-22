@@ -9,9 +9,13 @@
 #define ONCOLLISION_HPP_
 
 #include "ECS/Registry.hpp"
+#include <boost/serialization/serialization.hpp>
 #include "Hitbox.hpp"
-#include <map>
 
+/*!
+ \class OnCollision
+ \brief Component that is used on entities that need to react to identified collisions.
+*/
 class OnCollision {
     public:
         OnCollision() = default;
@@ -22,21 +26,13 @@ class OnCollision {
         }
 
         std::list<std::pair<HitTag::hitTag, size_t>> reactionsList;
-        // OnCollision(Registry &r, Hitbox hitbox, HitTag::hitTag tag, size_t script_id_input) {
-        //     std::cout << "ok" << std::endl;
-        //     for (auto id : hitbox.getCollisionList()) {
-        //         std::cout << "id: " << id << std::endl;
-        //         auto entity_hitBox = r.get_entity_component<Hitbox>(id);
-        //         HitTag entity_hitTag = entity_hitBox->get().getHitTag();
-        //         if (tag == entity_hitTag.tag)
-        //             script_id = script_id_input;
-        //         // if (tag == entity_hitBox.value().get().getHitTag().tag) {
-        //         // }
-        //     }
-        //     std::cout << "-----------------------------------------" << std::endl;
-        // }
-        // size_t script_id;
-        // std::function<void(Registry &, size_t)> proc;
+
+        template<class Archive>
+        void serialize(Archive &ar, const unsigned int version) {
+            ar & reactionsList;
+        }
+
+        friend class boost::serialization::access;
     protected:
     private:
 };
