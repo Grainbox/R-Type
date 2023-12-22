@@ -18,6 +18,7 @@
 #include "KeyboardInput.hpp"
 #include "KeyReaction.hpp"
 #include "Move.hpp"
+#include "OnCollision.hpp"
 #include "Position.hpp"
 #include "ReactCursor.hpp"
 #include "Resize.hpp"

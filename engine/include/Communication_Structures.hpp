@@ -59,6 +59,7 @@ struct EntityComponents {
     boost::optional<Drawable> drawable;
     boost::optional<ReceiveUDP> receiveUdp;
     // std::optional<Hitbox> hitbox;
+    boost::optional<HitTag> hitTag;
     // std::optional<KeyboardInput> kb_input;
     boost::optional<Position> position;
     // std::optional<ReactCursor> react_cursor;
@@ -72,6 +73,7 @@ struct EntityComponents {
         ar & drawable;
         ar & receiveUdp;
         // ar & hitbox;
+        ar & hitTag;
         // ar & kb_input;
         ar & position;
         // ar & react_cursor;

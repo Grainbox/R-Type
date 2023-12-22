@@ -283,17 +283,17 @@ class ClientSystem {
             Sparse_Array<Position> &positions = r.getComponents<Position>(scene);
 
             for (size_t i = 0; i < reactCursors.size() && i < hitboxs.size() && i < positions.size(); ++i) {
-                auto &reactM = reactCursors[i];
+                auto &reactC = reactCursors[i];
                 auto &hitbox = hitboxs[i];
                 auto &position = positions[i];
 
-                if (!hitbox || !reactM || !position)
+                if (!hitbox || !reactC || !position)
                     continue;
 
                 Vector2 mouse = GetMousePosition();
                 if (mouse.x < position.value().x || mouse.x > (position.value().x + hitbox.value().width)) continue;
                 if (mouse.y < position.value().y || mouse.y > (position.value().y + hitbox.value().height)) continue;
-                r.getEventScript(reactM.value().script_id);
+                r.getEventScript(reactC.value().script_id);
             }
         }
 
@@ -324,13 +324,80 @@ class ClientSystem {
                     vel.value().vy = 1;
             }
         }
+        /**
+         * @brief Détecte les collisions entre entités avec hitbox.
+         *
+         * Ce système parcourt toutes les entités disposant de composants `Hitbox`
+         * et "Position", puis liste les entités avec lesquelles une collision
+         * a lieu.
+         */
+        void hitbox_system() {
+            std::string scene = r.getCurrentScene();
+            Sparse_Array<Hitbox> &hitboxs = r.getComponents<Hitbox>(scene);
+            Sparse_Array<Position> &positions = r.getComponents<Position>(scene);
+            
+            for (size_t id = 0; id < hitboxs.size() && id < positions.size(); ++id) {
+                auto &hitbox = hitboxs[id];
+                auto &position = positions[id];
 
-        // void hitbox_system() {
-        //     std::string scene = r.getCurrentScene();
-        //     Sparse_Array<Hitbox> &hitboxs = r.getComponents<Hitbox>(scene);
-        //     Sparse_Array<Position> &positions = r.getComponents<Position>(scene);
-        //     ;
-        // }
+                if (!hitbox || !position)
+                    continue;
+
+                hitbox.value().clearCollisionList();
+
+                int leftX = position.value().x;
+                int rightX = position.value().x + hitbox.value().width;
+                int topY = position.value().y;
+                int bottomY = position.value().y + hitbox.value().height;
+
+                for (size_t id_other = 0; id_other < hitboxs.size() && id_other < positions.size(); ++id_other) {
+                    auto &hitbox2 = hitboxs[id_other];
+                    auto &position2 = positions[id_other];
+
+                    if (id == id_other || !hitbox2 || !position2)
+                        continue;
+                    int leftX2 = position2.value().x;
+                    int rightX2 = position2.value().x + hitbox2.value().width;
+                    int topY2 = position2.value().y;
+                    int bottomY2 = position2.value().y + hitbox2.value().height;
+
+                    if (((leftX >= leftX2 && leftX <= rightX2) || (rightX >= leftX2 && rightX <= rightX2)) &&
+                        ((topY >= topY2 && topY <= bottomY2) || (bottomY >= topY2 && bottomY <= bottomY2))) {
+                        hitbox.value().enterCollision(id_other);
+                        // std::cout << id_other << " added to collision list : " << id << std::endl;
+                    }
+                }
+            }
+        }
+        void collision_reaction_system() {
+            std::string scene = r.getCurrentScene();
+            Sparse_Array<OnCollision> &onCols = r.getComponents<OnCollision>(scene);
+            Sparse_Array<Hitbox> &hitboxs = r.getComponents<Hitbox>(scene);
+
+
+            for (size_t i = 0; i < onCols.size(); ++i) {
+                auto &collision = onCols[i];
+                auto &hitbox = hitboxs[i];
+
+                if (!collision || !hitbox || hitbox.value().getCollisionList().empty())
+                    continue;
+                for (auto reaction : collision.value().reactionsList) {
+                    HitTag::hitTag tag = reaction.first;
+                    size_t script_id = reaction.second;
+                    for (auto id : hitbox.value().getCollisionList()) {
+                        auto box2 = r.get_entity_component<Hitbox>(id)->get();
+                        if (box2.getHitTag().tag == tag)
+                            r.getEventScript(script_id);
+                    }
+                }
+
+                // if (collision.value().reactionsList.empty());
+                //     continue;
+                // std::cout << "ye" << std::endl;
+                // std::cout << "collision reaction possible." << std::endl;
+                // r.getEventScript(collision.value().script_id);
+            }
+        }
         /**
          * @brief Dessine les hitbox à l'écran.
          *

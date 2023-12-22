@@ -14,6 +14,11 @@ class GameView {
     public:
         GameView(Registry &r) : r(&r) {};
 
+        void debugCollision(Registry &r)
+        {
+            std::cout << "ennemy hit !" << std::endl;
+        }
+
         void shootBullet(Registry &r, size_t entity_id)
         {
             auto shipPosition = r.get_entity_component<Position>(entity_id);
@@ -32,12 +37,22 @@ class GameView {
                 Velocity velBullet(10, 0);
                 Hitbox boxBullet(rsBullet.rx, rsBullet.ry, true);
                 boxBullet.setHitTag(hitTagShip);
+                // boxBullet.onCollision(r, HitTag::TAG2, std::bind(&GameView::debugCollision, this, std::placeholders::_1));
+                // auto boundFunction = std::bind(&GameView::debugCollision, this, std::placeholders::_1);
+                // OnCollision hitEnnemy(r, boxBullet, HitTag::TAG2, boundFunction);
+
+                // OnCollision hitEnnemy(r, boxBullet, HitTag::TAG2, r.registerEventScript(std::bind(&GameView::debugCollision, this, std::placeholders::_1)));
+                OnCollision bulletHit;
+                bulletHit.addReaction(HitTag::TAG2, r.registerEventScript(std::bind(&GameView::debugCollision, this, std::placeholders::_1)));
+                for (auto pairTest : bulletHit.reactionsList)
+                    std::cout << "PAIR: " << pairTest.first << " | " << pairTest.second << std::endl;
 
                 r.addComponent<Position>(bullet, posBullet, gameScene);
                 r.addComponent<Resize>(bullet, rsBullet, gameScene);
                 r.addComponent<Drawable>(bullet, drawBullet, gameScene);
                 r.addComponent<Velocity>(bullet, velBullet, gameScene);
                 r.addComponent<Hitbox>(bullet, boxBullet, gameScene);
+                r.addComponent<OnCollision>(bullet, bulletHit, gameScene);
             }
         }
 
@@ -77,7 +92,7 @@ class GameView {
             Entity ennemy = r->spawnEntity(gameScene);
 
             Position ennemyPos(400, 300);
-            Velocity ennemyVelo(-1, 0);
+            Velocity ennemyVelo(0, 0);
             MoveLeft leftmove;
             Drawable drawEnnemy("assets/entity_2.png");
             Resize resizeEnnemy(100, 100);
