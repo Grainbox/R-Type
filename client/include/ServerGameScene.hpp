@@ -71,11 +71,9 @@ class ServerGameScene {
             //     r.addComponent<Drawable>(ent, drawable, r.getCurrentScene());
             // }
             if (server_ent.position) {
-                std::cout << "update pos for: " << ent << std::endl;
                 auto comp = r.get_entity_component<Position>(ent);
 
                 if (comp) {
-                    std::cout << "found comp" << std::endl;
                     auto &pos = comp->get();
                     pos.x = server_ent.position.value().x;
                     pos.y = server_ent.position.value().y;
@@ -97,8 +95,6 @@ class ServerGameScene {
             archive >> msg;
 
             for (auto it : msg.entities) {
-                std::cout << "Server Entity ID: " << it.entity_id << std::endl;
-
                 if (data.client_server_entity_id.find(it.entity_id) == data.client_server_entity_id.end()) {
                     create_entity(it, r, data);
                 } else {
