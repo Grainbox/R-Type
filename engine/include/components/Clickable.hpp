@@ -8,14 +8,14 @@
 #ifndef CLICKABLE_HPP_
 #define CLICKABLE_HPP_
 
-#include "ECS/Registry.hpp"
+    #include "ECS/Registry.hpp"
+    #include <boost/serialization/serialization.hpp>
 
 class Clickable {
     public:
-        Clickable(const std::function<void(Registry &)>& func) {
-            proc = func;
-        }
-        std::function<void(Registry &)> proc;
+        Clickable(size_t script_id) : script_id(script_id) {}
+
+        size_t script_id;
     protected:
     private:
 };

@@ -17,7 +17,7 @@ ClientEngine::ClientEngine(Registry &r, short server_port)
     : r(r), system(r, server_port)
 {
     system.send_first_con();
-    system.create_game();
+
     run();
 }
 
@@ -26,6 +26,10 @@ ClientEngine::ClientEngine(Registry &r, short server_port)
 */
 ClientEngine::~ClientEngine()
 {
+    system.send_disconnect();
+    CloseWindow();
+    CloseAudioDevice();
+    system.io_context.stop();
 }
 
 /*!
@@ -39,16 +43,17 @@ void ClientEngine::run()
         this->update();
         this->render();
 
-        system.io_context_.poll();
+        system.io_context.poll();
     }
 }
 
 /*!
- \brief Process the SFML events and dispatch it on event related systems.
+ \brief Process the raylib events and dispatch it on event related systems.
 */
 void ClientEngine::processEvents()
 {
     system.control_system();
+    system.key_detection_system();
     system.click_system();
     system.reactCursor_system();
 }
@@ -59,6 +64,10 @@ void ClientEngine::processEvents()
 void ClientEngine::update()
 {
     system.position_system();
+    system.Health_system();
+    system.Move_system();
+    system.hitbox_system();
+    system.collision_reaction_system();
 }
 
 /*!
@@ -69,9 +78,11 @@ void ClientEngine::render()
     BeginDrawing();
 
     ClearBackground(BLACK);
-
+    system.update_sprites_system();
     system.draw_hitbox_system();
     system.draw_system();
+    system.SoundWrapper_system();
+    system.Text_system();
 
     EndDrawing();
 }

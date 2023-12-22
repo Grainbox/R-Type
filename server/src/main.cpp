@@ -9,27 +9,15 @@
 #include <ostream>
 
 #include "server/ServerEngine.hpp"
-
-void setupRegistry(Registry &r)
-{
-    Entity player = r.spawnEntity();
-
-    Position pos(100, 0);
-    Controllable control;
-    Velocity vel(0, 0);
-
-    r.addComponent<Position>(player, pos, "mainMenu");
-    r.addComponent<Controllable>(player, control, "mainMenu");
-    r.addComponent<Velocity>(player, vel, "mainMenu");
-}
+#include "SetupRegistry.hpp"
 
 int main()
 {
     try
     {
-        Registry r("mainMenu");
+        Registry r("game");
 
-        setupRegistry(r);
+        SetupRegistry scene(r);
 
         ServerEngine engine(r, SERVER_PORT);
     }

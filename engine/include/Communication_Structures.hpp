@@ -13,31 +13,24 @@
 #include <boost/serialization/string.hpp>
 #include <boost/archive/text_iarchive.hpp>
 #include <boost/archive/text_oarchive.hpp>
+#include <boost/serialization/optional.hpp>
+#include <boost/serialization/vector.hpp>
 #include <sstream>
+#include <typeindex>
 
-enum class MessageType : uint8_t {
-    First_Con = 0,
-    Disconnect = 1,
-    Create_Game = 2
-};
-
-struct MessageHeader {
-    MessageType type;
-
-    template<class Archive>
-    void serialize(Archive &ar, const unsigned int version) {
-        ar & type;
-    }
-};
+#include "components/ComponentIncluder.hpp"
+#include "Communication_Headers.hpp"
 
 struct DisconnectMessage {
     MessageHeader header;
 
+    size_t disconnected_entity;
     std::string reason;
 
     template<class Archive>
     void serialize(Archive &ar, const unsigned int version) {
         ar & header;
+        ar & disconnected_entity;
         ar & reason;
     }
 };
@@ -45,9 +38,12 @@ struct DisconnectMessage {
 struct FirstConMessage {
     MessageHeader header;
 
+    std::string endpoint;
+
     template<class Archive>
     void serialize(Archive &ar, const unsigned int version) {
         ar & header;
+        ar & endpoint;
     }
 };
 
@@ -57,6 +53,51 @@ struct CreateGameMessage {
     template<class Archive>
     void serialize(Archive &ar, const unsigned int version) {
         ar & header;
+    }
+};
+
+struct EntityComponents {
+    size_t entity_id;
+
+    std::string assigned_endpoint;
+
+    // std::optional<Clickable> clickable;
+    boost::optional<Controllable> controllable;
+    boost::optional<Drawable> drawable;
+    boost::optional<ReceiveUDP> receiveUdp;
+    // std::optional<Hitbox> hitbox;
+    boost::optional<HitTag> hitTag;
+    // std::optional<KeyboardInput> kb_input;
+    boost::optional<Position> position;
+    // std::optional<ReactCursor> react_cursor;
+    boost::optional<Velocity> velocity;
+
+    template<class Archive>
+    void serialize(Archive &ar, const unsigned int version) {
+        ar & entity_id;
+        ar & assigned_endpoint;
+        // ar & clickable;
+        ar & controllable;
+        ar & drawable;
+        ar & receiveUdp;
+        // ar & hitbox;
+        ar & hitTag;
+        // ar & kb_input;
+        ar & position;
+        // ar & react_cursor;
+        ar & velocity;
+    }
+};
+
+struct TransfertECSMessage {
+    MessageHeader header;
+
+    std::vector<EntityComponents> entities;
+
+    template<class Archive>
+    void serialize(Archive &ar, const unsigned int version) {
+        ar & header;
+        ar & entities;
     }
 };
 

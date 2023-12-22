@@ -18,13 +18,6 @@
 
 #include "ECS/Registry.hpp"
 #include "ECS/Sparse_Array.hpp"
-#include "components/Controllable.hpp"
-#include "components/Drawable.hpp"
-#include "components/Velocity.hpp"
-#include "components/Position.hpp"
-#include "components/Clickable.hpp"
-#include "components/Hitbox.hpp"
-#include "components/ReactCursor.hpp"
 #include "Communication_Structures.hpp"
 
 #include <asio.hpp>
@@ -40,17 +33,16 @@
  */
 class ClientSystem {
     public:
-        ClientSystem(Registry &r, short server_port) : _udp_socket(io_context_), r(r)
+        ClientSystem(Registry &r, short server_port) : _udp_socket(io_context), r(r),
+            _server_endpoint(asio::ip::udp::endpoint(asio::ip::address::from_string("127.0.0.1"), server_port))
         {
             _udp_socket.open(asio::ip::udp::v4());
-            _server_endpoint = asio::ip::udp::endpoint(asio::ip::address::from_string("127.0.0.1"), server_port);
 
             start_receive();
         }
 
         ~ClientSystem()
         {
-            send_disconnect();
         }
 
         void send_disconnect()
@@ -67,7 +59,7 @@ class ClientSystem {
 
             std::string serialized_str = archive_stream.str();
 
-            std::cout << "Send Disconnect" << std::endl;
+            std::cout << "Sending Disconnect" << std::endl;
 
             _udp_socket.send_to(asio::buffer(serialized_str), _server_endpoint);
         }
@@ -87,20 +79,7 @@ class ClientSystem {
 
             std::string serialized_str = archive_stream.str();
 
-            _udp_socket.send_to(asio::buffer(serialized_str), _server_endpoint);
-        }
-
-        void create_game()
-        {
-            CreateGameMessage msg;
-            msg.header.type = MessageType::Create_Game;
-
-            std::ostringstream archive_stream;
-            boost::archive::text_oarchive archive(archive_stream);
-
-            archive << msg;
-
-            std::string serialized_str = archive_stream.str();
+            std::cout << "Sending First Con" << std::endl;
 
             _udp_socket.send_to(asio::buffer(serialized_str), _server_endpoint);
         }
@@ -128,10 +107,130 @@ class ClientSystem {
         {
             if (!error)
             {
+                std::cout << "-------------------------------------" << std::endl;
                 std::string received_message(recv_buffer_, bytes_transferred);
                 std::cout << "Received: " << received_message << std::endl;
+
+                std::istringstream archive_stream(received_message);
+                boost::archive::text_iarchive archive(archive_stream);
+                FirstConMessage msg;
+                archive >> msg;
+
+                std::string returnMessage = "ERROR";
+
+                std::cout << "Deserialized message type: " << static_cast<int>(msg.header.type) << std::endl << std::endl;
+
+                std::string scene = r.getCurrentScene();
+                Sparse_Array<ReceiveUDP> &udpComp = r.getComponents<ReceiveUDP>(scene);
+
+                for (size_t i = 0; i < udpComp.size(); i++) {
+                    auto &udp = udpComp[i];
+
+                    if (!udp)
+                        continue;
+
+                    MessageHandlerData data = {received_message, msg.header.type, _udp_socket, _server_endpoint, clients_entity, client_server_entity_id, localEndpoint};
+                    r.getComScript(udp.value().script_id)(r, i, data);
+                }
+
+                std::cout << "-------------------------------------" << std::endl;
+            } else {
+                std::cout << "Error: " << error << std::endl;
             }
             start_receive();
+        }
+
+        void Health_system() {
+            std::string scene = r.getCurrentScene();
+            Sparse_Array<Health> &life = r.getComponents<Health>(scene);
+
+            for (size_t i = 0; i < life.size(); ++i) {
+                auto &pv = life[i];
+
+                if (!pv) continue;
+                if (!pv.value().health)
+                    r.remove_component<Health>(i, scene);
+            }
+        }
+
+        void SoundWrapper_system() {
+            std::string scene = r.getCurrentScene();
+            Sparse_Array<SoundWrapper> &soundbox = r.getComponents<SoundWrapper>(scene);
+
+            for (size_t i = 0; i < soundbox.size(); ++i) {
+                auto &sound = soundbox[i];
+
+                if (!sound && sound.value().status) continue;
+                UpdateMusicStream(sound.value().sound);
+            }
+        }
+
+        void Move_system() {
+            std::string scene = r.getCurrentScene();
+            Sparse_Array<MoveLeft> &moveLeft = r.getComponents<MoveLeft>(scene);
+            Sparse_Array<MoveRight> &moveRight = r.getComponents<MoveRight>(scene);
+            Sparse_Array<MoveUp> &moveUp = r.getComponents<MoveUp>(scene);
+            Sparse_Array<MoveDown> &moveDown = r.getComponents<MoveDown>(scene);
+            Sparse_Array<Velocity> &velocity = r.getComponents<Velocity>(scene);
+            Sparse_Array<Position> &position = r.getComponents<Position>(scene);
+
+            for (size_t i = 0; i < moveLeft.size() && i < moveRight.size() && i < moveDown.size() && i < moveUp.size() && i < velocity.size() && i < position.size(); ++i) {
+                auto &left = moveLeft[i];
+                auto &right = moveRight[i];
+                auto &up = moveUp[i];
+                auto &down = moveDown[i];
+                auto &mov = velocity[i];
+                auto &pos = position[i];
+
+                if (!mov || !pos) continue;
+
+                if (left)
+                    mov.value().vx += -1;
+                if (right)
+                    mov.value().vx += 1;
+                if (up)
+                    mov.value().vy += -1;
+                if (down)
+                    mov.value().vy += 1;
+                continue;
+            }
+        }
+
+        void Text_system() {
+            std::string scene = r.getCurrentScene();
+            Sparse_Array<Text> &txt = r.getComponents<Text>(scene);
+            Sparse_Array<Position> &position = r.getComponents<Position>(scene);
+
+            for (size_t i = 0; i < txt.size() && i < position.size(); ++i) {
+                auto &text = txt[i];
+                auto &pos = position[i];
+
+                if (!text || !pos) continue;
+
+                DrawText(TextFormat(text.value().text.c_str()), pos.value().x, pos.value().y, text.value().font_size, text.value().rgb);
+            }
+        }
+
+        /**
+         * @brief Gère les touches du clavier appuyées par l'utilisateur.
+         *
+         * Ce système détecte touches du clavier et déclenche des actions.
+         *
+         * @param r Référence à l'objet Registry contenant les entités et composants.
+         */
+        void key_detection_system() {
+            std::string scene = r.getCurrentScene();
+            Sparse_Array<KeyReaction> &KReactions = r.getComponents<KeyReaction>(scene);
+
+            for (size_t i = 0; i < KReactions.size(); ++i) {
+                auto &KReact = KReactions[i];
+
+                if (!KReact)
+                    continue;
+
+                if (IsKeyPressed(KReact.value().key_value))
+                    KReact.value().proc(r, i);
+            }
         }
 
         /**
@@ -155,13 +254,14 @@ class ClientSystem {
                 auto &hitbox = hitboxs[i];
                 auto &position = positions[i];
 
-                if (!hitbox || !click || !position) continue;
+                if (!hitbox || !click || !position)
+                    continue;
 
                 if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
                     Vector2 mouse = GetMousePosition();
                     if (mouse.x < position.value().x || mouse.x > (position.value().x + hitbox.value().width)) continue;
                     if (mouse.y < position.value().y || mouse.y > (position.value().y + hitbox.value().height)) continue;
-                    click.value().proc(r);
+                    r.getEventScript(click.value().script_id)(r, i, _udp_socket, _server_endpoint);
                 }
             }
         }
@@ -187,12 +287,13 @@ class ClientSystem {
                 auto &hitbox = hitboxs[i];
                 auto &position = positions[i];
 
-                if (!hitbox || !reactC || !position) continue;
+                if (!hitbox || !reactC || !position)
+                    continue;
 
                 Vector2 mouse = GetMousePosition();
                 if (mouse.x < position.value().x || mouse.x > (position.value().x + hitbox.value().width)) continue;
                 if (mouse.y < position.value().y || mouse.y > (position.value().y + hitbox.value().height)) continue;
-                reactC.value().proc(r);
+                r.getEventScript(reactC.value().script_id);
             }
         }
 
@@ -223,7 +324,86 @@ class ClientSystem {
                     vel.value().vy = 1;
             }
         }
+        /**
+         * @brief Détecte les collisions entre entités avec hitbox.
+         *
+         * Ce système parcourt toutes les entités disposant de composants `Hitbox`
+         * et "Position", puis liste les entités avec lesquelles une collision
+         * a lieu.
+         */
+        void hitbox_system() {
+            std::string scene = r.getCurrentScene();
+            Sparse_Array<Hitbox> &hitboxs = r.getComponents<Hitbox>(scene);
+            Sparse_Array<Position> &positions = r.getComponents<Position>(scene);
+            
+            for (size_t id = 0; id < hitboxs.size() && id < positions.size(); ++id) {
+                auto &hitbox = hitboxs[id];
+                auto &position = positions[id];
 
+                if (!hitbox || !position)
+                    continue;
+
+                hitbox.value().clearCollisionList();
+
+                int leftX = position.value().x;
+                int rightX = position.value().x + hitbox.value().width;
+                int topY = position.value().y;
+                int bottomY = position.value().y + hitbox.value().height;
+
+                for (size_t id_other = 0; id_other < hitboxs.size() && id_other < positions.size(); ++id_other) {
+                    auto &hitbox2 = hitboxs[id_other];
+                    auto &position2 = positions[id_other];
+
+                    if (id == id_other || !hitbox2 || !position2)
+                        continue;
+                    int leftX2 = position2.value().x;
+                    int rightX2 = position2.value().x + hitbox2.value().width;
+                    int topY2 = position2.value().y;
+                    int bottomY2 = position2.value().y + hitbox2.value().height;
+
+                    if (((leftX >= leftX2 && leftX <= rightX2) || (rightX >= leftX2 && rightX <= rightX2)) &&
+                        ((topY >= topY2 && topY <= bottomY2) || (bottomY >= topY2 && bottomY <= bottomY2))) {
+                        hitbox.value().enterCollision(id_other);
+                        // std::cout << id_other << " added to collision list : " << id << std::endl;
+                    }
+                }
+            }
+        }
+        void collision_reaction_system() {
+            std::string scene = r.getCurrentScene();
+            Sparse_Array<OnCollision> &onCols = r.getComponents<OnCollision>(scene);
+            Sparse_Array<Hitbox> &hitboxs = r.getComponents<Hitbox>(scene);
+
+
+            for (size_t i = 0; i < onCols.size(); ++i) {
+                auto &collision = onCols[i];
+                auto &hitbox = hitboxs[i];
+
+                if (!collision || !hitbox || hitbox.value().getCollisionList().empty())
+                    continue;
+                for (auto reaction : collision.value().reactionsList) {
+                    HitTag::hitTag tag = reaction.first;
+                    size_t script_id = reaction.second;
+                    for (auto id : hitbox.value().getCollisionList()) {
+                        auto box2 = r.get_entity_component<Hitbox>(id)->get();
+                        if (box2.getHitTag().tag == tag)
+                            r.getEventScript(script_id);
+                    }
+                }
+
+                // if (collision.value().reactionsList.empty());
+                //     continue;
+                // std::cout << "ye" << std::endl;
+                // std::cout << "collision reaction possible." << std::endl;
+                // r.getEventScript(collision.value().script_id);
+            }
+        }
+        /**
+         * @brief Dessine les hitbox à l'écran.
+         *
+         * Ce système parcourt toutes les entités disposant de composants `Hitbox`
+         * et "Position", puis dessine les hitbox à l'écran (system de debug).
+         */
         void draw_hitbox_system() {
             std::string scene = r.getCurrentScene();
             Sparse_Array<Hitbox> &hitboxs = r.getComponents<Hitbox>(scene);
@@ -233,7 +413,8 @@ class ClientSystem {
                 auto &position = positions[i];
                 auto &hitbox = hitboxs[i];
 
-                if (!hitbox || !position || !hitbox.value().debug) continue;
+                if (!hitbox || !position || !hitbox.value().debug)
+                    continue;
 
                 // Dessiner le contour de la hitbox
                 int leftX = position.value().x;
@@ -241,20 +422,51 @@ class ClientSystem {
                 int topY = position.value().y;
                 int bottomY = position.value().y + hitbox.value().height;
 
+                Color hitboxColor = WHITE;
+                if (hitbox.value().getHitTag().tag == HitTag::TAG1)
+                    hitboxColor = BLUE;
+                else if (hitbox.value().getHitTag().tag == HitTag::TAG2)
+                    hitboxColor = RED;
+
                 // Lignes verticales
-                DrawLine(leftX, topY, leftX, bottomY, RED);
-                DrawLine(rightX, topY, rightX, bottomY, RED);
+                DrawLine(leftX, topY, leftX, bottomY, hitboxColor);
+                DrawLine(rightX, topY, rightX, bottomY, hitboxColor);
 
                 // Lignes horizontales
-                DrawLine(leftX, topY, rightX, topY, RED);
-                DrawLine(leftX, bottomY, rightX, bottomY, RED);
+                DrawLine(leftX, topY, rightX, topY, hitboxColor);
+                DrawLine(leftX, bottomY, rightX, bottomY, hitboxColor);
+            }
+        }
+        /**
+         * @brief Met à jour la texture selon un spritesheet.
+         *
+         * Ce système parcourt toutes les entités disposant de composants `AnimatedDraw`
+         * et "Drawable" et mets à jour Drawable à partir du "AnimatedDraw".
+         */
+        void update_sprites_system() {
+            std::string scene = r.getCurrentScene();
+            auto &drawables = r.getComponents<Drawable>(scene);
+            auto &animations = r.getComponents<AnimatedDraw>(scene);
+
+            for (size_t i = 0; i < drawables.size() && i < animations.size(); ++i) {
+                auto &draw = drawables[i];
+                auto &anim = animations[i];
+
+                if (!draw || !anim)
+                    continue;
+                // Texture2D currFrame = anim.value().textureList.at(0).at(0);
+                // Image image = GetImageData(currFrame);
+                // ImageResize(&image, draw.value().resizeW, draw.value().resizeH);
+                // // draw.value().texture = currFrame;
+                draw.value().texture = anim.value().textureList.at(0).at(1);
+                // à compléter (pour l'instant: image fixe)
             }
         }
 
         /**
          * @brief Dessine les entités sur la fenêtre de rendu.
          *
-         * Ce système parcourt toutes les entités disposant de composantes `Drawable`
+         * Ce système parcourt toutes les entités disposant de composants `Drawable`
          * et `Position` et les dessine dans la fenêtre SFML.
          *
          * @param r Référence à l'objet Registry contenant les entités et composants.
@@ -299,15 +511,48 @@ class ClientSystem {
 
                 pos.value().x += vel.value().vx;
                 pos.value().y += vel.value().vy;
+
+                // TransfertECSMessage msg;
+                // msg.header.type = MessageType::ECS_Transfert;
+
+                // EntityComponents comps;
+
+                // comps.entity_id = client_server_entity_id[i];
+
+                // comps.position = r.get_boost_entity_component<Position>(i);
+
+                // msg.entities.push_back(comps);
+
+                // std::ostringstream archive_stream;
+                // boost::archive::text_oarchive archive(archive_stream);
+                // archive << msg;
+
+                // std::string serialized_str = archive_stream.str();
+
+                // _udp_socket.async_send_to(
+                //     asio::buffer(serialized_str), _server_endpoint,
+                //     [](const std::error_code& error, std::size_t bytes_transferred) {
+                //         if (!error) {
+                //             std::cout << "Message sent successfully, bytes transferred: " << bytes_transferred << std::endl;
+                //         } else {
+                //             std::cerr << "Error sending message: " << error.message() << std::endl;
+                //         }
+                //     }
+                // );
             }
         }
 
-        asio::io_context io_context_;
+        asio::io_context io_context;
     protected:
     private:
+        std::unordered_map<std::string, size_t> clients_entity;
+        std::unordered_map<size_t, size_t> client_server_entity_id;
+
         asio::ip::udp::socket _udp_socket;
         asio::ip::udp::endpoint _server_endpoint;
         char recv_buffer_[1024];
+
+        std::string localEndpoint;
 
         Registry &r;
 

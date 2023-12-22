@@ -16,7 +16,7 @@ if [ ! -f "$VCPKG_DIR/vcpkg" ]; then
 fi
 
 # Install necessary libraries using vcpkg
-libraries=("asio" "boost-asio" "raylib" "boost-serialization")
+libraries=("asio" "raylib" "boost-serialization")
 for lib in "${libraries[@]}"; do
     if ! "$VCPKG_DIR/vcpkg" list | grep -q $lib; then
         echo "Installing $lib..."

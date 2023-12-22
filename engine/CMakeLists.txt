@@ -1,7 +1,9 @@
 set(ENGINE_SOURCES
     src/Engine.cpp
     src/ClientEngine.cpp
-    src/ServerEngine.cpp
+    src/server/ServerEngine.cpp
+    src/server/ServerSystem.cpp
+    include/Engine.hpp
 )
 
 add_library(engine SHARED ${ENGINE_SOURCES})
