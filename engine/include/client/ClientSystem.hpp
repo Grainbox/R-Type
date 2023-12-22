@@ -167,32 +167,31 @@ class ClientSystem {
 
         void Move_system() {
             std::string scene = r.getCurrentScene();
-            Sparse_Array<MoveLeft> &moveLeft = r.getComponents<MoveLeft>(scene);
-            Sparse_Array<MoveRight> &moveRight = r.getComponents<MoveRight>(scene);
-            Sparse_Array<MoveUp> &moveUp = r.getComponents<MoveUp>(scene);
-            Sparse_Array<MoveDown> &moveDown = r.getComponents<MoveDown>(scene);
             Sparse_Array<Velocity> &velocity = r.getComponents<Velocity>(scene);
             Sparse_Array<Position> &position = r.getComponents<Position>(scene);
+            Sparse_Array<MoveBehavior> &behaviors = r.getComponents<MoveBehavior>(scene);
 
-            for (size_t i = 0; i < moveLeft.size() && i < moveRight.size() && i < moveDown.size() && i < moveUp.size() && i < velocity.size() && i < position.size(); ++i) {
-                auto &left = moveLeft[i];
-                auto &right = moveRight[i];
-                auto &up = moveUp[i];
-                auto &down = moveDown[i];
-                auto &mov = velocity[i];
+            for (size_t i = 0; i < velocity.size() && i < position.size() && i < behaviors.size(); ++i) {
+                auto &vel = velocity[i];
                 auto &pos = position[i];
+                auto &behavior = behaviors[i];
 
-                if (!mov || !pos) continue;
-
-                if (left)
-                    mov.value().vx += -1;
-                if (right)
-                    mov.value().vx += 1;
-                if (up)
-                    mov.value().vy += -1;
-                if (down)
-                    mov.value().vy += 1;
-                continue;
+                if (!vel || !pos || !behavior)
+                    continue;
+                vel.value().vx = 0;
+                vel.value().vy = 0;
+                if (behavior.value().constMovX)
+                    vel.value().vx += behavior.value().constMovX;
+                if (behavior.value().constMovY)
+                    vel.value().vy += behavior.value().constMovY;
+                if (behavior.value().getOffScreenMov() == false) {
+                    if ((vel.value().vx < 0 && pos.value().x <= 0) ||
+                        (vel.value().vx > 0 && pos.value().x >= GetScreenWidth()))
+                        vel.value().vx = 0;
+                    if ((vel.value().vy < 0 && pos.value().y <= 0) ||
+                        (vel.value().vy > 0 && pos.value().y >= GetScreenHeight()))
+                        vel.value().vy = 0;
+                }
             }
         }
 
@@ -301,12 +300,18 @@ class ClientSystem {
             std::string scene = r.getCurrentScene();
             Sparse_Array<Controllable> &controllables = r.getComponents<Controllable>(scene);
             Sparse_Array<Velocity> &velocities = r.getComponents<Velocity>(scene);
+            Sparse_Array<Position> &positions = r.getComponents<Position>(scene);
+            Sparse_Array<MoveBehavior> &behaviors = r.getComponents<MoveBehavior>(scene);
+            Sparse_Array<Resize> &resizes = r.getComponents<Resize>(scene);
 
-            for (size_t i = 0; i < controllables.size() && i < velocities.size(); ++i) {
+            for (size_t i = 0; i < controllables.size() && i < velocities.size() && i < behaviors.size(); ++i) {
                 auto &vel = velocities[i];
-                auto &controlle = controllables[i];
+                auto &control = controllables[i];
+                auto &pos = positions[i];
+                auto &behavior = behaviors[i];
+                auto &resize = resizes[i];
 
-                if (!vel || !controlle)
+                if (!vel || !control)
                     continue;
 
                 // Réinitialiser la vitesse
@@ -314,14 +319,26 @@ class ClientSystem {
                 vel.value().vy = 0;
 
                 // Vérifier les touches pressées et ajuster la vitesse en conséquence
-                if (controlle.value().Left != -1 && IsKeyDown(controlle.value().Left))
+                if (control.value().Left != -1 && IsKeyDown(control.value().Left))
                     vel.value().vx = -1;
-                if (controlle.value().Right != -1 && IsKeyDown(controlle.value().Right))
+                if (control.value().Right != -1 && IsKeyDown(control.value().Right))
                     vel.value().vx = 1;
-                if (controlle.value().Up != -1 && IsKeyDown(controlle.value().Up))
+                if (control.value().Up != -1 && IsKeyDown(control.value().Up))
                     vel.value().vy = -1;
-                if (controlle.value().Down != -1 && IsKeyDown(controlle.value().Down))
+                if (control.value().Down != -1 && IsKeyDown(control.value().Down))
                     vel.value().vy = 1;
+                if (!pos || !behavior || !resize)
+                    continue;
+                if (behavior.value().getOffScreenMov() == false) {
+                    if (vel.value().vx < 0 && pos.value().x <= 0 )
+                        vel.value().vx = 0;
+                    if (vel.value().vx > 0 && pos.value().x + resize.value().rx >= GetScreenWidth() )
+                        vel.value().vx = 0;
+                    if (vel.value().vy < 0 && pos.value().y <= 0 )
+                        vel.value().vy = 0;
+                    if (vel.value().vy > 0 && pos.value().y + resize.value().ry >= GetScreenHeight() )
+                        vel.value().vy = 0;
+                }
             }
         }
         /**
@@ -364,7 +381,6 @@ class ClientSystem {
                     if (((leftX >= leftX2 && leftX <= rightX2) || (rightX >= leftX2 && rightX <= rightX2)) &&
                         ((topY >= topY2 && topY <= bottomY2) || (bottomY >= topY2 && bottomY <= bottomY2))) {
                         hitbox.value().enterCollision(id_other);
-                        // std::cout << id_other << " added to collision list : " << id << std::endl;
                     }
                 }
             }
@@ -397,10 +413,8 @@ class ClientSystem {
                         if (!boxComp)
                             continue;
                         auto box2 = boxComp->get();
-
-                        if (box2.getHitTag().tag == tag) {
+                        if (box2.getHitTag().tag == tag)
                             r.getEventScript(script_id)(r, i, _udp_socket, _server_endpoint);
-                        }
                     }
                     if (!collision)
                         break;
@@ -513,7 +527,6 @@ class ClientSystem {
             for (size_t i = 0; i < positions.size() && i < velocities.size(); ++i) {
                 auto &pos = positions[i];
                 auto &vel = velocities[i];
-
 
                 if (!pos || !vel)
                     continue;

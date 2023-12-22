@@ -68,6 +68,7 @@ struct EntityComponents {
     // std::optional<Hitbox> hitbox;
     boost::optional<HitTag> hitTag;
     // std::optional<KeyboardInput> kb_input;
+    // boost::optional<MoveBehavior> moveBehavior;
     // boost::optional<OnCollision> onCollision;
     boost::optional<Position> position;
     // std::optional<ReactCursor> react_cursor;
@@ -84,6 +85,7 @@ struct EntityComponents {
         // ar & hitbox;
         ar & hitTag;
         // ar & kb_input;
+        // ar & moveBehavior;
         // ar & onCollision;
         ar & position;
         // ar & react_cursor;

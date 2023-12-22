@@ -79,6 +79,8 @@ class GameView {
                     std::placeholders::_2,
                     std::placeholders::_3,
                     std::placeholders::_4)));
+            MoveBehavior shipMovs;
+            shipMovs.setOffScreenMov(false);
 
             r->addComponent<Position>(player, playerPos, gameScene);
             r->addComponent<Velocity>(player, playerVelo, gameScene);
@@ -88,12 +90,12 @@ class GameView {
             r->addComponent<Controllable>(player, controls, gameScene);
             r->addComponent<AnimatedDraw>(player, anim, gameScene);
             r->addComponent<OnCollision>(player, shipHit, gameScene);
+            r->addComponent<MoveBehavior>(player, shipMovs, gameScene);
 
 
             Entity ennemy = r->spawnEntity(gameScene);
-            Position ennemyPos(400, 300);
+            Position ennemyPos(600, 300);
             Velocity ennemyVelo(0, 0);
-            MoveLeft leftmove;
             Drawable drawEnnemy("assets/entity_2.png");
             Resize resizeEnnemy(100, 100);
             AnimatedDraw anim2("assets/r-typesheet5.gif", 16, 1, resizeEnnemy.rx, resizeEnnemy.ry);
@@ -107,6 +109,8 @@ class GameView {
                     std::placeholders::_2,
                     std::placeholders::_3,
                     std::placeholders::_4)));
+            MoveBehavior ennemyMov;
+            ennemyMov.setConstMov(-1, 2);
 
             r->addComponent<Position>(ennemy, ennemyPos, gameScene);
             r->addComponent<Velocity>(ennemy, ennemyVelo, gameScene);
@@ -115,11 +119,11 @@ class GameView {
             r->addComponent<Hitbox>(ennemy, boxEnnemy, gameScene);
             r->addComponent<AnimatedDraw>(ennemy, anim2, gameScene);
             r->addComponent<OnCollision>(ennemy, ennemyShipHit, gameScene);
+            r->addComponent<MoveBehavior>(ennemy, ennemyMov, gameScene);
 
             // Entity Title = r->spawnEntity(gameScene);
             // Position titlePos(0, 100);
             // Velocity titleVelo(1, 0);
-            // MoveRight mr;
             // Text txt("Hello world", WHITE, 40);
             // r->addComponent<Position>(Title, titlePos, gameScene);
             // r->addComponent<Velocity>(Title, titleVelo, gameScene);
