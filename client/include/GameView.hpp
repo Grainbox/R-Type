@@ -9,14 +9,16 @@
 #define GAMEVIEW_HPP_
 
     #include "client/ClientEngine.hpp"
+    #include "define.hpp"
 
 class GameView {
     public:
         GameView(Registry &r) : r(&r) {};
 
-        void debugCollision(Registry &r)
+        void debugCollision(script_settings)
         {
             std::cout << "ennemy hit !" << std::endl;
+            r.killEntity(entity_id, r.getCurrentScene());
         }
 
         void shootBullet(Registry &r, size_t entity_id)
@@ -43,7 +45,11 @@ class GameView {
 
                 // OnCollision hitEnnemy(r, boxBullet, HitTag::TAG2, r.registerEventScript(std::bind(&GameView::debugCollision, this, std::placeholders::_1)));
                 OnCollision bulletHit;
-                bulletHit.addReaction(HitTag::TAG2, r.registerEventScript(std::bind(&GameView::debugCollision, this, std::placeholders::_1)));
+                bulletHit.addReaction(HitTag::TAG2, r.registerEventScript(std::bind(&GameView::debugCollision, this,
+                    std::placeholders::_1,
+                    std::placeholders::_2,
+                    std::placeholders::_3,
+                    std::placeholders::_4)));
                 for (auto pairTest : bulletHit.reactionsList)
                     std::cout << "PAIR: " << pairTest.first << " | " << pairTest.second << std::endl;
 

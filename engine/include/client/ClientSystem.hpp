@@ -374,7 +374,6 @@ class ClientSystem {
             Sparse_Array<OnCollision> &onCols = r.getComponents<OnCollision>(scene);
             Sparse_Array<Hitbox> &hitboxs = r.getComponents<Hitbox>(scene);
 
-
             for (size_t i = 0; i < onCols.size(); ++i) {
                 auto &collision = onCols[i];
                 auto &hitbox = hitboxs[i];
@@ -387,15 +386,9 @@ class ClientSystem {
                     for (auto id : hitbox.value().getCollisionList()) {
                         auto box2 = r.get_entity_component<Hitbox>(id)->get();
                         if (box2.getHitTag().tag == tag)
-                            r.getEventScript(script_id);
+                            r.getEventScript(script_id)(r, i, _udp_socket, _server_endpoint);
                     }
                 }
-
-                // if (collision.value().reactionsList.empty());
-                //     continue;
-                // std::cout << "ye" << std::endl;
-                // std::cout << "collision reaction possible." << std::endl;
-                // r.getEventScript(collision.value().script_id);
             }
         }
         /**
