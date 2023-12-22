@@ -380,7 +380,8 @@ class ClientSystem {
 
                     if (((leftX >= leftX2 && leftX <= rightX2) || (rightX >= leftX2 && rightX <= rightX2)) &&
                         ((topY >= topY2 && topY <= bottomY2) || (bottomY >= topY2 && bottomY <= bottomY2))) {
-                        hitbox.value().enterCollision(id_other);
+                        hitbox.value().enterCollision(id_other, hitbox2.value().getHitTag().tag);
+                        std::cout << "collision " << id_other << " entered in " << id << std::endl;
                     }
                 }
             }
@@ -404,16 +405,14 @@ class ClientSystem {
                 if (!collision || !hitbox || hitbox.value().getCollisionList().empty())
                     continue;
                 for (auto reaction : collision.value().reactionsList) {
-                    if (!collision || !hitbox)
-                        continue;
                     HitTag::hitTag tag = reaction.first;
                     size_t script_id = reaction.second;
-                    for (auto id : hitbox.value().getCollisionList()) {
-                        auto boxComp = r.get_entity_component<Hitbox>(id);
-                        if (!boxComp)
-                            continue;
-                        auto box2 = boxComp->get();
-                        if (box2.getHitTag().tag == tag)
+                    for (auto collisionInfo : hitbox.value().getCollisionList()) {
+                        // auto boxComp = r.get_entity_component<Hitbox>(collisionInfo.first);
+                        // if (!boxComp)
+                        //     continue;
+                        // auto box2 = boxComp->get();
+                        if (collisionInfo.second == tag)
                             r.getEventScript(script_id)(r, i, _udp_socket, _server_endpoint);
                     }
                     if (!collision)

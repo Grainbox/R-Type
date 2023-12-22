@@ -19,6 +19,11 @@ class GameView {
         {
             r.killEntity(entity_id, r.getCurrentScene());
         }
+        void ennemyRespawn(script_settings)
+        {
+            r.killEntity(entity_id, r.getCurrentScene());
+            spawn_ennemy("gameScene", GetRandomValue(50, 500));
+        }
 
         void shootBullet(Registry &r, size_t entity_id)
         {
@@ -54,10 +59,8 @@ class GameView {
             }
         }
 
-        void process()
+        void spawn_player(std::string gameScene)
         {
-            std::string gameScene = "gameScene";
-
             Entity player = r->spawnEntity(gameScene);
 
             Position playerPos(100, 400);
@@ -81,6 +84,7 @@ class GameView {
                     std::placeholders::_4)));
             MoveBehavior shipMovs;
             shipMovs.setOffScreenMov(false);
+            KeyReaction Kreact1(KEY_SPACE, std::bind(&GameView::shootBullet, this, std::placeholders::_1, std::placeholders::_2));
 
             r->addComponent<Position>(player, playerPos, gameScene);
             r->addComponent<Velocity>(player, playerVelo, gameScene);
@@ -91,10 +95,13 @@ class GameView {
             r->addComponent<AnimatedDraw>(player, anim, gameScene);
             r->addComponent<OnCollision>(player, shipHit, gameScene);
             r->addComponent<MoveBehavior>(player, shipMovs, gameScene);
+            r->addComponent<KeyReaction>(player, Kreact1, gameScene);
+        }
 
-
+        void spawn_ennemy(std::string gameScene, int posY)
+        {
             Entity ennemy = r->spawnEntity(gameScene);
-            Position ennemyPos(600, 300);
+            Position ennemyPos(600, posY);
             Velocity ennemyVelo(0, 0);
             Drawable drawEnnemy("assets/entity_2.png");
             Resize resizeEnnemy(100, 100);
@@ -104,13 +111,13 @@ class GameView {
             HitTag hTagEnnemy(HitTag::TAG2);
             boxEnnemy.setHitTag(hTagEnnemy);
             OnCollision ennemyShipHit;
-            ennemyShipHit.addReaction(HitTag::TAG1, r->registerEventScript(std::bind(&GameView::hitTarget, this,
+            ennemyShipHit.addReaction(HitTag::TAG1, r->registerEventScript(std::bind(&GameView::ennemyRespawn, this,
                     std::placeholders::_1,
                     std::placeholders::_2,
                     std::placeholders::_3,
                     std::placeholders::_4)));
             MoveBehavior ennemyMov;
-            ennemyMov.setConstMov(-1, 2);
+            ennemyMov.setConstMov(0, 0);
 
             r->addComponent<Position>(ennemy, ennemyPos, gameScene);
             r->addComponent<Velocity>(ennemy, ennemyVelo, gameScene);
@@ -120,18 +127,13 @@ class GameView {
             r->addComponent<AnimatedDraw>(ennemy, anim2, gameScene);
             r->addComponent<OnCollision>(ennemy, ennemyShipHit, gameScene);
             r->addComponent<MoveBehavior>(ennemy, ennemyMov, gameScene);
+        }
 
-            // Entity Title = r->spawnEntity(gameScene);
-            // Position titlePos(0, 100);
-            // Velocity titleVelo(1, 0);
-            // Text txt("Hello world", WHITE, 40);
-            // r->addComponent<Position>(Title, titlePos, gameScene);
-            // r->addComponent<Velocity>(Title, titleVelo, gameScene);
-            // r->addComponent<MoveRight>(Title, mr, gameScene);
-            // r->addComponent<Text>(Title, txt, gameScene);
-
-            KeyReaction Kreact1(KEY_SPACE, std::bind(&GameView::shootBullet, this, std::placeholders::_1, std::placeholders::_2));
-            r->addComponent<KeyReaction>(player, Kreact1, gameScene);
+        void process()
+        {
+            std::string gameScene = "gameScene";
+            spawn_player(gameScene);
+            spawn_ennemy(gameScene, 300);
         }
 
     protected:
