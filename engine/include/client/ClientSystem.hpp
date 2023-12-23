@@ -534,6 +534,7 @@ class ClientSystem {
                 }
 
                 comps.entity_id = server_id.value();
+                comps.scene = r.getCurrentScene();
 
                 comps.position = r.get_boost_entity_component<Position>(i);
 

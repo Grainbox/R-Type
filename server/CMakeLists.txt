@@ -1,4 +1,9 @@
-add_executable(r-type_server src/main.cpp)
+set(SERVER_SOURCES
+    src/main.cpp
+    src/SetupRegistry.cpp
+)
+
+add_executable(r-type_server ${SERVER_SOURCES})
 
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -g")
 
