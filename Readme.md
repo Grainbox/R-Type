@@ -37,3 +37,28 @@ R-Type is an advanced C++ project focused on developing a multithreaded server a
 
 ### Linux:
 - [Setup Project](docs/InitDependancies.md)
+
+## Launching the Game
+
+### Solo Play (Linux)
+To play R-Type in solo mode on Linux:
+1. Navigate to the `build/client` directory.
+2. Run the game using the command:
+   ```
+   ./r-type-client
+   ```
+
+### Multiplayer Play (Linux)
+To play R-Type in multiplayer mode on Linux:
+1. Start the server:
+   - Navigate to the `build/server` directory.
+   - Run the server using the command:
+     ```
+     ./r-type-server
+     ```
+2. Then, start the client in multiplayer mode:
+   - Navigate to the `build/client` directory.
+   - Run the client with the multiplayer flag using the command:
+     ```
+     ./r-type-client --multiplayer
+     ```

@@ -15,7 +15,7 @@ class MainView {
     public:
         MainView(Registry &r) : r(&r) {};
 
-        void pressPlay(script_settings)
+        bool pressPlay(script_settings)
         {
             std::cout << "Play button pressed." << std::endl;
 
@@ -34,24 +34,28 @@ class MainView {
             _udp_socket.send_to(asio::buffer(serialized_str), _server_endpoint);
 
             r.setCurrentScene("gameScene");
+            return true;
         }
 
-        void pressSettings(script_settings)
+        bool pressSettings(script_settings)
         {
             std::cout << "Settings button pressed." << std::endl;
+            return true;
         }
 
-        void pressExit(script_settings)
+        bool pressExit(script_settings)
         {
             std::cout << "Exit button pressed." << std::endl;
+            return true;
         }
 
-        void reactMPlay(Registry &r)
+        bool reactMPlay(Registry &r)
         {
             // std::cout << "MOUSE DETECTED OVER PLAY BUTTON" << std::endl;
 
             // Drawable drawPlay("assets/Play col_Button.png", ButtonWidth, ButtonHeight);
             // r->addComponent<Drawable>(playButton, drawPlay, mainMenu);
+            return true;
         }
 
         void debugPrint(Registry &r)

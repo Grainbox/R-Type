@@ -309,7 +309,7 @@ public:
     \param func the function to store
     \return the event script id
     */
-    size_t registerEventScript(std::function<void(Registry &, size_t,
+    size_t registerEventScript(std::function<bool(Registry &, size_t,
         asio::ip::udp::socket &_udp_socket,
         asio::ip::udp::endpoint &_server_endpoint)> func)
     {
@@ -323,7 +323,7 @@ public:
     \param id The id of the script
     \return The event script
     */
-    std::function<void(Registry &, size_t, asio::ip::udp::socket &_udp_socket,
+    std::function<bool(Registry &, size_t, asio::ip::udp::socket &_udp_socket,
         asio::ip::udp::endpoint &_server_endpoint)> getEventScript(size_t id)
     {
         if (id >= event_scripts.size())
@@ -364,7 +364,7 @@ private:
     std::map<std::string, size_t> nextEntityId; ///< ID to be assigned to the next spawned entity.
     std::map<std::string, std::list<size_t>> deadEntities; ///< List of IDs of entities that have been destroyed.
 
-    std::vector<std::function<void(Registry &, size_t, asio::ip::udp::socket &_udp_socket,
+    std::vector<std::function<bool(Registry &, size_t, asio::ip::udp::socket &_udp_socket,
         asio::ip::udp::endpoint &_server_endpoint)>> event_scripts; ///< List of event scripts defined by the client.
     std::vector<std::function<void(Registry &, size_t, MessageHandlerData)>> com_scripts; ///< List of communication scripts defined by the user
 };

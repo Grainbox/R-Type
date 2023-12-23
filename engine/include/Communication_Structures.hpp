@@ -58,33 +58,27 @@ struct CreateGameMessage {
 
 struct EntityComponents {
     size_t entity_id;
+    std::string scene;
 
     std::string assigned_endpoint;
 
-    // std::optional<Clickable> clickable;
     boost::optional<Controllable> controllable;
     boost::optional<Drawable> drawable;
     boost::optional<ReceiveUDP> receiveUdp;
-    // std::optional<Hitbox> hitbox;
     boost::optional<HitTag> hitTag;
-    // std::optional<KeyboardInput> kb_input;
     boost::optional<Position> position;
-    // std::optional<ReactCursor> react_cursor;
     boost::optional<Velocity> velocity;
 
     template<class Archive>
     void serialize(Archive &ar, const unsigned int version) {
         ar & entity_id;
+        ar & scene;
         ar & assigned_endpoint;
-        // ar & clickable;
         ar & controllable;
         ar & drawable;
         ar & receiveUdp;
-        // ar & hitbox;
         ar & hitTag;
-        // ar & kb_input;
         ar & position;
-        // ar & react_cursor;
         ar & velocity;
     }
 };

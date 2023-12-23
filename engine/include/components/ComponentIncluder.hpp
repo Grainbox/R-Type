@@ -17,7 +17,7 @@
 #include "HitTag.hpp"
 #include "KeyboardInput.hpp"
 #include "KeyReaction.hpp"
-#include "Move.hpp"
+#include "MoveBehavior.hpp"
 #include "OnCollision.hpp"
 #include "Position.hpp"
 #include "ReactCursor.hpp"
