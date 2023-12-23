@@ -15,14 +15,17 @@ class GameView {
     public:
         GameView(Registry &r) : r(&r) {};
 
-        void hitTarget(script_settings)
+        bool hitTarget(script_settings)
         {
             r.killEntity(entity_id, r.getCurrentScene());
+            return false;
         }
-        void ennemyRespawn(script_settings)
+
+        bool ennemyRespawn(script_settings)
         {
             r.killEntity(entity_id, r.getCurrentScene());
             spawn_ennemy("gameScene", GetRandomValue(50, 500));
+            return false;
         }
 
         void shootBullet(Registry &r, size_t entity_id)

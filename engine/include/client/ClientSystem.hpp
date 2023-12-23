@@ -319,7 +319,7 @@ class ClientSystem {
                     Vector2 mouse = GetMousePosition();
                     if (mouse.x < position.value().x || mouse.x > (position.value().x + hitbox.value().width)) continue;
                     if (mouse.y < position.value().y || mouse.y > (position.value().y + hitbox.value().height)) continue;
-                    r.getEventScript(click.value().script_id)(r, i, _udp_socket, _server_endpoint);
+                    if (!r.getEventScript(click.value().script_id)(r, i, _udp_socket, _server_endpoint)) continue;
                 }
             }
         }
@@ -365,7 +365,7 @@ class ClientSystem {
             std::string scene = r.getCurrentScene();
             Sparse_Array<Hitbox> &hitboxs = r.getComponents<Hitbox>(scene);
             Sparse_Array<Position> &positions = r.getComponents<Position>(scene);
-            
+
             for (size_t id = 0; id < hitboxs.size() && id < positions.size(); ++id) {
                 auto &hitbox = hitboxs[id];
                 auto &position = positions[id];
@@ -399,6 +399,7 @@ class ClientSystem {
                 }
             }
         }
+
         /**
          * @brief Execute les réactions aux collisions.
          *
@@ -410,8 +411,9 @@ class ClientSystem {
             std::string scene = r.getCurrentScene();
             Sparse_Array<OnCollision> &onCols = r.getComponents<OnCollision>(scene);
             Sparse_Array<Hitbox> &hitboxs = r.getComponents<Hitbox>(scene);
+            bool entityAlive = true;
 
-            for (size_t i = 0; i < onCols.size(); ++i) {
+            for (size_t i = 0; i < onCols.size() && i < hitboxs.size(); ++i) {
                 auto &collision = onCols[i];
                 auto &hitbox = hitboxs[i];
 
@@ -421,14 +423,13 @@ class ClientSystem {
                     HitTag::hitTag tag = reaction.first;
                     size_t script_id = reaction.second;
                     for (auto collisionInfo : hitbox.value().getCollisionList()) {
-                        // auto boxComp = r.get_entity_component<Hitbox>(collisionInfo.first);
-                        // if (!boxComp)
-                        //     continue;
-                        // auto box2 = boxComp->get();
-                        if (collisionInfo.second == tag)
-                            r.getEventScript(script_id)(r, i, _udp_socket, _server_endpoint);
+                        if (collisionInfo.second == tag) {
+                            entityAlive = r.getEventScript(script_id)(r, i, _udp_socket, _server_endpoint);
+                            if (!entityAlive)
+                                break;
+                        }
                     }
-                    if (!collision)
+                    if (!entityAlive)
                         break;
                 }
             }
