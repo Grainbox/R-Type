@@ -10,7 +10,7 @@
 
 #include "ECS/Registry.hpp"
 #include <boost/serialization/serialization.hpp>
-#include "Hitbox.hpp"
+#include "HitTag.hpp"
 
 /*!
  \class OnCollision

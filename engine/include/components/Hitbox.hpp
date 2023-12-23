@@ -20,9 +20,9 @@ class Hitbox {
 
         void setHitTag(HitTag new_tag) { _hitTag = new_tag; };
         HitTag getHitTag(void) { return _hitTag; };
-        std::list<size_t> getCollisionList(void) { return _collisions; };
+        std::list<std::pair<size_t, HitTag::hitTag>> getCollisionList(void) { return _collisions; };
         void clearCollisionList(void) { _collisions.clear(); };
-        void enterCollision(size_t id) { _collisions.push_back(id); };
+        void enterCollision(size_t id, HitTag::hitTag tag) { _collisions.push_back(std::make_pair(id, tag)); };
 
         // void onCollision(Registry &r, HitTag::hitTag tag, const std::function<void(Registry &, size_t)>& func)
         // {
@@ -56,7 +56,7 @@ class Hitbox {
     protected:
     private:
         HitTag _hitTag;
-        std::list<size_t> _collisions;
+        std::list<std::pair<size_t, HitTag::hitTag>> _collisions;
 };
 
 #endif /* !HITBOX_HPP_ */

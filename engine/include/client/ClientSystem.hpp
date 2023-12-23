@@ -164,38 +164,96 @@ class ClientSystem {
                 UpdateMusicStream(sound.value().sound);
             }
         }
-
+        /**
+         * @brief Analyse les données du composant MoveBehavior et met à jour la
+         * velocité en conséquence.
+         */
         void Move_system() {
             std::string scene = r.getCurrentScene();
-            Sparse_Array<MoveLeft> &moveLeft = r.getComponents<MoveLeft>(scene);
-            Sparse_Array<MoveRight> &moveRight = r.getComponents<MoveRight>(scene);
-            Sparse_Array<MoveUp> &moveUp = r.getComponents<MoveUp>(scene);
-            Sparse_Array<MoveDown> &moveDown = r.getComponents<MoveDown>(scene);
             Sparse_Array<Velocity> &velocity = r.getComponents<Velocity>(scene);
             Sparse_Array<Position> &position = r.getComponents<Position>(scene);
+            Sparse_Array<MoveBehavior> &behaviors = r.getComponents<MoveBehavior>(scene);
 
-            for (size_t i = 0; i < moveLeft.size() && i < moveRight.size() && i < moveDown.size() && i < moveUp.size() && i < velocity.size() && i < position.size(); ++i) {
-                auto &left = moveLeft[i];
-                auto &right = moveRight[i];
-                auto &up = moveUp[i];
-                auto &down = moveDown[i];
-                auto &mov = velocity[i];
+            for (size_t i = 0; i < velocity.size() && i < position.size() && i < behaviors.size(); ++i) {
+                auto &vel = velocity[i];
                 auto &pos = position[i];
+                auto &behavior = behaviors[i];
 
-                if (!mov || !pos) continue;
+                if (!vel || !pos || !behavior)
+                    continue;
 
-                if (left)
-                    mov.value().vx += -1;
-                if (right)
-                    mov.value().vx += 1;
-                if (up)
-                    mov.value().vy += -1;
-                if (down)
-                    mov.value().vy += 1;
-                continue;
+                // Réinitialisation de la vélocité de l'entité.
+                vel.value().vx = 0;
+                vel.value().vy = 0;
+
+                int move_speed = 1;
+                if (behavior.value().getMoveSpeed() != 0)
+                    move_speed = behavior.value().getMoveSpeed();
+
+                // Process d'ajout des mouvements constants enregistrés.
+                if (behavior.value().constMovX)
+                    vel.value().vx += behavior.value().constMovX * move_speed;
+                if (behavior.value().constMovY)
+                    vel.value().vy += behavior.value().constMovY * move_speed;
+                
+                // Process de mis à jour de la vélocité selon les controls
+                if (behavior.value().isControllable()) {
+                    if (behavior.value().PressUp)
+                        vel.value().vy -= move_speed;
+                    if (behavior.value().PressDown)
+                        vel.value().vy += move_speed;
+                    if (behavior.value().PressLeft)
+                        vel.value().vx -= move_speed;
+                    if (behavior.value().PressRight)
+                        vel.value().vx += move_speed;
+                }
+
+                // process empêchant l'entité de sortir de l'écran.
+                if (behavior.value().getOffScreenMov() == false) {
+                    if ((vel.value().vx < 0 && pos.value().x <= 0) ||
+                        (vel.value().vx > 0 && pos.value().x >= GetScreenWidth()))
+                        vel.value().vx = 0;
+                    if ((vel.value().vy < 0 && pos.value().y <= 0) ||
+                        (vel.value().vy > 0 && pos.value().y >= GetScreenHeight()))
+                        vel.value().vy = 0;
+                }
             }
         }
+        /**
+         * @brief Détecte les appuies des touches pour le controle des entités
+         * controllables.
+         *
+         * Ce système parcourt toutes les entités disposant de composants
+         * 'MoveBehavior' avec l'option 'Controllable' et vérifie si les touches
+         * paramétrées pour le controle de l'entité son appuyées.
+         */
+        void control_system() { 
+            std::string scene = r.getCurrentScene();
+            Sparse_Array<MoveBehavior> &behaviors = r.getComponents<MoveBehavior>(scene);
 
+            for (size_t i = 0; i < behaviors.size(); ++i) {
+                auto &behavior = behaviors[i];
+
+                if (!behavior)
+                    continue;
+
+                // Réinitialisation des booléen attestant l'appuie des touches.
+                behavior.value().PressUp = false;
+                behavior.value().PressDown = false;
+                behavior.value().PressLeft = false;
+                behavior.value().PressRight = false;
+
+                // Récupération de l'info via la fonction raylib 'isKeyDown'
+                if (behavior.value().UpInput != -1 && IsKeyDown(behavior.value().UpInput))
+                    behavior.value().PressUp = true;
+                if (behavior.value().DownInput != -1 && IsKeyDown(behavior.value().DownInput))
+                    behavior.value().PressDown = true;
+                if (behavior.value().LeftInput != -1 && IsKeyDown(behavior.value().LeftInput))
+                    behavior.value().PressLeft = true;
+                if (behavior.value().RightInput != -1 && IsKeyDown(behavior.value().RightInput))
+                    behavior.value().PressRight = true;
+            }
+        }
         void Text_system() {
             std::string scene = r.getCurrentScene();
             Sparse_Array<Text> &txt = r.getComponents<Text>(scene);
@@ -261,7 +319,7 @@ class ClientSystem {
                     Vector2 mouse = GetMousePosition();
                     if (mouse.x < position.value().x || mouse.x > (position.value().x + hitbox.value().width)) continue;
                     if (mouse.y < position.value().y || mouse.y > (position.value().y + hitbox.value().height)) continue;
-                    r.getEventScript(click.value().script_id)(r, i, _udp_socket, _server_endpoint);
+                    if (!r.getEventScript(click.value().script_id)(r, i, _udp_socket, _server_endpoint)) continue;
                 }
             }
         }
@@ -294,34 +352,6 @@ class ClientSystem {
                 if (mouse.x < position.value().x || mouse.x > (position.value().x + hitbox.value().width)) continue;
                 if (mouse.y < position.value().y || mouse.y > (position.value().y + hitbox.value().height)) continue;
                 r.getEventScript(reactC.value().script_id);
-            }
-        }
-
-        void control_system() {
-            std::string scene = r.getCurrentScene();
-            Sparse_Array<Controllable> &controllables = r.getComponents<Controllable>(scene);
-            Sparse_Array<Velocity> &velocities = r.getComponents<Velocity>(scene);
-
-            for (size_t i = 0; i < controllables.size() && i < velocities.size(); ++i) {
-                auto &vel = velocities[i];
-                auto &controlle = controllables[i];
-
-                if (!vel || !controlle)
-                    continue;
-
-                // Réinitialiser la vitesse
-                vel.value().vx = 0;
-                vel.value().vy = 0;
-
-                // Vérifier les touches pressées et ajuster la vitesse en conséquence
-                if (controlle.value().Left != -1 && IsKeyDown(controlle.value().Left))
-                    vel.value().vx = -1;
-                if (controlle.value().Right != -1 && IsKeyDown(controlle.value().Right))
-                    vel.value().vx = 1;
-                if (controlle.value().Up != -1 && IsKeyDown(controlle.value().Up))
-                    vel.value().vy = -1;
-                if (controlle.value().Down != -1 && IsKeyDown(controlle.value().Down))
-                    vel.value().vy = 1;
             }
         }
         /**
@@ -363,12 +393,13 @@ class ClientSystem {
 
                     if (((leftX >= leftX2 && leftX <= rightX2) || (rightX >= leftX2 && rightX <= rightX2)) &&
                         ((topY >= topY2 && topY <= bottomY2) || (bottomY >= topY2 && bottomY <= bottomY2))) {
-                        hitbox.value().enterCollision(id_other);
-                        // std::cout << id_other << " added to collision list : " << id << std::endl;
+                        hitbox.value().enterCollision(id_other, hitbox2.value().getHitTag().tag);
+                        std::cout << "collision " << id_other << " entered in " << id << std::endl;
                     }
                 }
             }
         }
+
         /**
          * @brief Execute les réactions aux collisions.
          *
@@ -380,29 +411,25 @@ class ClientSystem {
             std::string scene = r.getCurrentScene();
             Sparse_Array<OnCollision> &onCols = r.getComponents<OnCollision>(scene);
             Sparse_Array<Hitbox> &hitboxs = r.getComponents<Hitbox>(scene);
+            bool entityAlive = true;
 
-            for (size_t i = 0; i < onCols.size(); ++i) {
+            for (size_t i = 0; i < onCols.size() && i < hitboxs.size(); ++i) {
                 auto &collision = onCols[i];
                 auto &hitbox = hitboxs[i];
 
                 if (!collision || !hitbox || hitbox.value().getCollisionList().empty())
                     continue;
                 for (auto reaction : collision.value().reactionsList) {
-                    if (!collision || !hitbox)
-                        continue;
                     HitTag::hitTag tag = reaction.first;
                     size_t script_id = reaction.second;
-                    for (auto id : hitbox.value().getCollisionList()) {
-                        auto boxComp = r.get_entity_component<Hitbox>(id);
-                        if (!boxComp)
-                            continue;
-                        auto box2 = boxComp->get();
-
-                        if (box2.getHitTag().tag == tag) {
-                            r.getEventScript(script_id)(r, i, _udp_socket, _server_endpoint);
+                    for (auto collisionInfo : hitbox.value().getCollisionList()) {
+                        if (collisionInfo.second == tag) {
+                            entityAlive = r.getEventScript(script_id)(r, i, _udp_socket, _server_endpoint);
+                            if (!entityAlive)
+                                break;
                         }
                     }
-                    if (!collision)
+                    if (!entityAlive)
                         break;
                 }
             }
@@ -513,7 +540,6 @@ class ClientSystem {
             for (size_t i = 0; i < positions.size() && i < velocities.size(); ++i) {
                 auto &pos = positions[i];
                 auto &vel = velocities[i];
-
 
                 if (!pos || !vel || (vel.value().vx == 0 && vel.value().vy == 0))
                     continue;

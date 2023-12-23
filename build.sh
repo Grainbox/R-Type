@@ -29,7 +29,7 @@ cd build || exit 1
 
 # Run CMake configuration and build
 echo "Configuring project..."
-cmake .. -DCMAKE_TOOLCHAIN_FILE="../vcpkg/scripts/buildsystems/vcpkg.cmake" -DCMAKE_BUILD_TYPE=Release || exit 1
+cmake .. -DCMAKE_TOOLCHAIN_FILE="../vcpkg/scripts/buildsystems/vcpkg.cmake" -DCMAKE_BUILD_TYPE=Debug || exit 1
 echo "Building project..."
 cmake --build . || exit 1
 
