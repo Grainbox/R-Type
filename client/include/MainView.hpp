@@ -13,7 +13,7 @@
 
 class MainView {
     public:
-        MainView(Registry &r) : r(r) {};
+        MainView(Registry &r) : r(&r) {};
 
         bool pressPlay(script_settings)
         {
@@ -54,7 +54,7 @@ class MainView {
             // std::cout << "MOUSE DETECTED OVER PLAY BUTTON" << std::endl;
 
             // Drawable drawPlay("assets/Play col_Button.png", ButtonWidth, ButtonHeight);
-            // r.addComponent<Drawable>(playButton, drawPlay, mainMenu);
+            // r->addComponent<Drawable>(playButton, drawPlay, mainMenu);
             return true;
         }
 
@@ -67,11 +67,11 @@ class MainView {
         {
             std::string mainMenu = "mainMenu";
 
-            Entity background = r.spawnEntity(mainMenu);
+            Entity background = r->spawnEntity(mainMenu);
 
-            Entity playButton = r.spawnEntity(mainMenu);
-            Entity settingsButton = r.spawnEntity(mainMenu);
-            Entity exitButton = r.spawnEntity(mainMenu);
+            Entity playButton = r->spawnEntity(mainMenu);
+            Entity settingsButton = r->spawnEntity(mainMenu);
+            Entity exitButton = r->spawnEntity(mainMenu);
 
             int ButtonWidth = GetScreenWidth() / 4;
             int ButtonHeight = GetScreenHeight() / 8;
@@ -91,7 +91,7 @@ class MainView {
 
             Hitbox box(ButtonWidth, ButtonHeight, true);
 
-            Clickable clickPlay(r.registerEventScript(std::bind(
+            Clickable clickPlay(r->registerEventScript(std::bind(
                 &MainView::pressPlay, this,
                 std::placeholders::_1,
                 std::placeholders::_2,
@@ -99,7 +99,7 @@ class MainView {
                 std::placeholders::_4))
             );
 
-            Clickable clickSettings(r.registerEventScript(std::bind(
+            Clickable clickSettings(r->registerEventScript(std::bind(
                 &MainView::pressSettings, this,
                 std::placeholders::_1,
                 std::placeholders::_2,
@@ -107,7 +107,7 @@ class MainView {
                 std::placeholders::_4))
             );
 
-            Clickable clickExit(r.registerEventScript(std::bind(
+            Clickable clickExit(r->registerEventScript(std::bind(
                 &MainView::pressExit, this,
                 std::placeholders::_1,
                 std::placeholders::_2,
@@ -115,37 +115,37 @@ class MainView {
                 std::placeholders::_4))
             );
 
-            ReactCursor reactPlay(r.registerEventScript(std::bind(
+            ReactCursor reactPlay(r->registerEventScript(std::bind(
                 &MainView::reactMPlay, this,
                 std::placeholders::_1))
             );
 
-            r.addComponent<Position>(background, backPos, mainMenu);
-            r.addComponent<Position>(playButton, playPos, mainMenu);
-            r.addComponent<Position>(settingsButton, settingsPos, mainMenu);
-            r.addComponent<Position>(exitButton, leavePos, mainMenu);
+            r->addComponent<Position>(background, backPos, mainMenu);
+            r->addComponent<Position>(playButton, playPos, mainMenu);
+            r->addComponent<Position>(settingsButton, settingsPos, mainMenu);
+            r->addComponent<Position>(exitButton, leavePos, mainMenu);
 
-            r.addComponent<ReactCursor>(playButton, reactPlay, mainMenu);
+            r->addComponent<ReactCursor>(playButton, reactPlay, mainMenu);
 
-            r.addComponent<Drawable>(background, drawBackground, mainMenu);
-            r.addComponent<Drawable>(playButton, drawPlay, mainMenu);
-            r.addComponent<Drawable>(settingsButton, drawSettings, mainMenu);
-            r.addComponent<Drawable>(exitButton, drawLeave, mainMenu);
+            r->addComponent<Drawable>(background, drawBackground, mainMenu);
+            r->addComponent<Drawable>(playButton, drawPlay, mainMenu);
+            r->addComponent<Drawable>(settingsButton, drawSettings, mainMenu);
+            r->addComponent<Drawable>(exitButton, drawLeave, mainMenu);
 
-            r.addComponent<Hitbox>(playButton, box, mainMenu);
-            r.addComponent<Hitbox>(settingsButton, box, mainMenu);
-            r.addComponent<Hitbox>(exitButton, box, mainMenu);
+            r->addComponent<Hitbox>(playButton, box, mainMenu);
+            r->addComponent<Hitbox>(settingsButton, box, mainMenu);
+            r->addComponent<Hitbox>(exitButton, box, mainMenu);
 
-            r.addComponent<Clickable>(playButton, clickPlay, mainMenu);
-            r.addComponent<Clickable>(settingsButton, clickSettings, mainMenu);
-            r.addComponent<Clickable>(exitButton, clickExit, mainMenu);
+            r->addComponent<Clickable>(playButton, clickPlay, mainMenu);
+            r->addComponent<Clickable>(settingsButton, clickSettings, mainMenu);
+            r->addComponent<Clickable>(exitButton, clickExit, mainMenu);
 
             // KeyReaction Kreact1(KEY_A, std::bind(&MainView::debugPrint, this, std::placeholders::_1));
-            // r.addComponent<KeyReaction>(background, Kreact1, mainMenu);
+            // r->addComponent<KeyReaction>(background, Kreact1, mainMenu);
         }
     protected:
     private:
-        Registry &r;
+        Registry *r;
 };
 
 #endif /* !MAINVIEW_HPP_ */
