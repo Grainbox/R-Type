@@ -335,7 +335,7 @@ class ClientSystem {
             std::string scene = r.getCurrentScene();
             Sparse_Array<Hitbox> &hitboxs = r.getComponents<Hitbox>(scene);
             Sparse_Array<Position> &positions = r.getComponents<Position>(scene);
-            
+
             for (size_t id = 0; id < hitboxs.size() && id < positions.size(); ++id) {
                 auto &hitbox = hitboxs[id];
                 auto &position = positions[id];
@@ -528,10 +528,8 @@ class ClientSystem {
 
                 auto server_id = findKeyByValue(client_server_entity_id, i);
 
-                if (!server_id) {
-                    std::cerr << "Unable to find server_side entity" << std::endl;
-                    return;
-                }
+                if (!server_id)
+                    continue;
 
                 comps.entity_id = server_id.value();
                 comps.scene = r.getCurrentScene();
