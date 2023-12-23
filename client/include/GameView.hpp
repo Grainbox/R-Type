@@ -40,7 +40,9 @@ class GameView {
                 Resize rsBullet(25, 12);
                 Drawable drawBullet("assets/bullet1.png", rsBullet.rx, rsBullet.ry);
                 Position posBullet(shipPos.x + rsShip.rx, shipPos.y + (rsShip.ry / 2));
-                Velocity velBullet(10, 0);
+                Velocity velBullet(0, 0);
+                MoveBehavior movBullet;
+                movBullet.setConstMovX(20);
                 Hitbox boxBullet(rsBullet.rx, rsBullet.ry, true);
                 boxBullet.setHitTag(hitTagShip);
                 OnCollision bulletHit;
@@ -49,13 +51,13 @@ class GameView {
                     std::placeholders::_2,
                     std::placeholders::_3,
                     std::placeholders::_4)));
-
                 r.addComponent<Position>(bullet, posBullet, gameScene);
                 r.addComponent<Resize>(bullet, rsBullet, gameScene);
                 r.addComponent<Drawable>(bullet, drawBullet, gameScene);
                 r.addComponent<Velocity>(bullet, velBullet, gameScene);
                 r.addComponent<Hitbox>(bullet, boxBullet, gameScene);
                 r.addComponent<OnCollision>(bullet, bulletHit, gameScene);
+                r.addComponent<MoveBehavior>(bullet, movBullet, gameScene);
             }
         }
 
@@ -64,17 +66,12 @@ class GameView {
             Entity player = r->spawnEntity(gameScene);
 
             Position playerPos(100, 400);
-            Velocity playerVelo(10, 10);
+            Velocity playerVelo(0, 0);
             Drawable drawPlay("assets/entity_1.png");
             Hitbox box(100, 50, true);
             HitTag hTagPlayer(HitTag::TAG1);
             box.setHitTag(hTagPlayer);
             Resize resizePlayer(100, 50);
-            Controllable controls;
-            controls.setKeyboardKey(&controls.Up, KEY_UP);
-            controls.setKeyboardKey(&controls.Down, KEY_DOWN);
-            controls.setKeyboardKey(&controls.Left, KEY_LEFT);
-            controls.setKeyboardKey(&controls.Right, KEY_RIGHT);
             AnimatedDraw anim("assets/player1.png", 5, 1, resizePlayer.rx, resizePlayer.ry);
             OnCollision shipHit;
             shipHit.addReaction(HitTag::TAG2, r->registerEventScript(std::bind(&GameView::hitTarget, this,
@@ -84,6 +81,11 @@ class GameView {
                     std::placeholders::_4)));
             MoveBehavior shipMovs;
             shipMovs.setOffScreenMov(false);
+            shipMovs.setControllable(true);
+            shipMovs.setKeyboardKey(&shipMovs.UpInput, KEY_UP);
+            shipMovs.setKeyboardKey(&shipMovs.DownInput, KEY_DOWN);
+            shipMovs.setKeyboardKey(&shipMovs.LeftInput, KEY_LEFT);
+            shipMovs.setKeyboardKey(&shipMovs.RightInput, KEY_RIGHT);
             KeyReaction Kreact1(KEY_SPACE, std::bind(&GameView::shootBullet, this, std::placeholders::_1, std::placeholders::_2));
 
             r->addComponent<Position>(player, playerPos, gameScene);
@@ -91,7 +93,7 @@ class GameView {
             r->addComponent<Resize>(player, resizePlayer, gameScene);
             r->addComponent<Drawable>(player, drawPlay, gameScene);
             r->addComponent<Hitbox>(player, box, gameScene);
-            r->addComponent<Controllable>(player, controls, gameScene);
+            // r->addComponent<Controllable>(player, controls, gameScene);
             r->addComponent<AnimatedDraw>(player, anim, gameScene);
             r->addComponent<OnCollision>(player, shipHit, gameScene);
             r->addComponent<MoveBehavior>(player, shipMovs, gameScene);
@@ -117,7 +119,8 @@ class GameView {
                     std::placeholders::_3,
                     std::placeholders::_4)));
             MoveBehavior ennemyMov;
-            ennemyMov.setConstMov(0, 0);
+            ennemyMov.setMoveSpeed(1);
+            ennemyMov.setConstMov(-1, 1);
 
             r->addComponent<Position>(ennemy, ennemyPos, gameScene);
             r->addComponent<Velocity>(ennemy, ennemyVelo, gameScene);

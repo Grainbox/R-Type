@@ -164,7 +164,10 @@ class ClientSystem {
                 UpdateMusicStream(sound.value().sound);
             }
         }
-
+        /**
+         * @brief Analyse les données du composant MoveBehavior et met à jour la
+         * velocité en conséquence.
+         */
         void Move_system() {
             std::string scene = r.getCurrentScene();
             Sparse_Array<Velocity> &velocity = r.getComponents<Velocity>(scene);
@@ -178,12 +181,34 @@ class ClientSystem {
 
                 if (!vel || !pos || !behavior)
                     continue;
+
+                // Réinitialisation de la vélocité de l'entité.
                 vel.value().vx = 0;
                 vel.value().vy = 0;
+
+                int move_speed = 1;
+                if (behavior.value().getMoveSpeed() != 0)
+                    move_speed = behavior.value().getMoveSpeed();
+
+                // Process d'ajout des mouvements constants enregistrés.
                 if (behavior.value().constMovX)
-                    vel.value().vx += behavior.value().constMovX;
+                    vel.value().vx += behavior.value().constMovX * move_speed;
                 if (behavior.value().constMovY)
-                    vel.value().vy += behavior.value().constMovY;
+                    vel.value().vy += behavior.value().constMovY * move_speed;
+                
+                // Process de mis à jour de la vélocité selon les controls
+                if (behavior.value().isControllable()) {
+                    if (behavior.value().PressUp)
+                        vel.value().vy -= move_speed;
+                    if (behavior.value().PressDown)
+                        vel.value().vy += move_speed;
+                    if (behavior.value().PressLeft)
+                        vel.value().vx -= move_speed;
+                    if (behavior.value().PressRight)
+                        vel.value().vx += move_speed;
+                }
+
+                // process empêchant l'entité de sortir de l'écran.
                 if (behavior.value().getOffScreenMov() == false) {
                     if ((vel.value().vx < 0 && pos.value().x <= 0) ||
                         (vel.value().vx > 0 && pos.value().x >= GetScreenWidth()))
@@ -194,7 +219,41 @@ class ClientSystem {
                 }
             }
         }
+        /**
+         * @brief Détecte les appuies des touches pour le controle des entités
+         * controllables.
+         *
+         * Ce système parcourt toutes les entités disposant de composants
+         * 'MoveBehavior' avec l'option 'Controllable' et vérifie si les touches
+         * paramétrées pour le controle de l'entité son appuyées.
+         */
+        void control_system() { 
+            std::string scene = r.getCurrentScene();
+            Sparse_Array<MoveBehavior> &behaviors = r.getComponents<MoveBehavior>(scene);
 
+            for (size_t i = 0; i < behaviors.size(); ++i) {
+                auto &behavior = behaviors[i];
+
+                if (!behavior)
+                    continue;
+
+                // Réinitialisation des booléen attestant l'appuie des touches.
+                behavior.value().PressUp = false;
+                behavior.value().PressDown = false;
+                behavior.value().PressLeft = false;
+                behavior.value().PressRight = false;
+
+                // Récupération de l'info via la fonction raylib 'isKeyDown'
+                if (behavior.value().UpInput != -1 && IsKeyDown(behavior.value().UpInput))
+                    behavior.value().PressUp = true;
+                if (behavior.value().DownInput != -1 && IsKeyDown(behavior.value().DownInput))
+                    behavior.value().PressDown = true;
+                if (behavior.value().LeftInput != -1 && IsKeyDown(behavior.value().LeftInput))
+                    behavior.value().PressLeft = true;
+                if (behavior.value().RightInput != -1 && IsKeyDown(behavior.value().RightInput))
+                    behavior.value().PressRight = true;
+            }
+        }
         void Text_system() {
             std::string scene = r.getCurrentScene();
             Sparse_Array<Text> &txt = r.getComponents<Text>(scene);
@@ -293,52 +352,6 @@ class ClientSystem {
                 if (mouse.x < position.value().x || mouse.x > (position.value().x + hitbox.value().width)) continue;
                 if (mouse.y < position.value().y || mouse.y > (position.value().y + hitbox.value().height)) continue;
                 r.getEventScript(reactC.value().script_id);
-            }
-        }
-
-        void control_system() {
-            std::string scene = r.getCurrentScene();
-            Sparse_Array<Controllable> &controllables = r.getComponents<Controllable>(scene);
-            Sparse_Array<Velocity> &velocities = r.getComponents<Velocity>(scene);
-            Sparse_Array<Position> &positions = r.getComponents<Position>(scene);
-            Sparse_Array<MoveBehavior> &behaviors = r.getComponents<MoveBehavior>(scene);
-            Sparse_Array<Resize> &resizes = r.getComponents<Resize>(scene);
-
-            for (size_t i = 0; i < controllables.size() && i < velocities.size() && i < behaviors.size(); ++i) {
-                auto &vel = velocities[i];
-                auto &control = controllables[i];
-                auto &pos = positions[i];
-                auto &behavior = behaviors[i];
-                auto &resize = resizes[i];
-
-                if (!vel || !control)
-                    continue;
-
-                // Réinitialiser la vitesse
-                vel.value().vx = 0;
-                vel.value().vy = 0;
-
-                // Vérifier les touches pressées et ajuster la vitesse en conséquence
-                if (control.value().Left != -1 && IsKeyDown(control.value().Left))
-                    vel.value().vx = -1;
-                if (control.value().Right != -1 && IsKeyDown(control.value().Right))
-                    vel.value().vx = 1;
-                if (control.value().Up != -1 && IsKeyDown(control.value().Up))
-                    vel.value().vy = -1;
-                if (control.value().Down != -1 && IsKeyDown(control.value().Down))
-                    vel.value().vy = 1;
-                if (!pos || !behavior || !resize)
-                    continue;
-                if (behavior.value().getOffScreenMov() == false) {
-                    if (vel.value().vx < 0 && pos.value().x <= 0 )
-                        vel.value().vx = 0;
-                    if (vel.value().vx > 0 && pos.value().x + resize.value().rx >= GetScreenWidth() )
-                        vel.value().vx = 0;
-                    if (vel.value().vy < 0 && pos.value().y <= 0 )
-                        vel.value().vy = 0;
-                    if (vel.value().vy > 0 && pos.value().y + resize.value().ry >= GetScreenHeight() )
-                        vel.value().vy = 0;
-                }
             }
         }
         /**

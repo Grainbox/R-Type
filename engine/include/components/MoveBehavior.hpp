@@ -19,27 +19,46 @@ class MoveBehavior {
     public:
         MoveBehavior() = default;
 
-        void setOffScreenMov(bool new_value) { _offScreenMov = new_value; };
-        bool getOffScreenMov(void) { return _offScreenMov; };
+        void setControllable(bool isControllable) { _controllable = isControllable; };
+        bool isControllable(void) const { return _controllable; };
+        void setKeyboardKey(int *moveKey, int newKey) { *moveKey = newKey; };
+        int UpInput = -1;     // Valeur initiale pour indiquer qu'aucune touche n'est assignée
+        int DownInput = -1;   // Utilisez -1 ou une autre valeur pour représenter 'Unknown'
+        int LeftInput = -1;
+        int RightInput = -1;
+        bool PressUp;
+        bool PressDown;
+        bool PressLeft;
+        bool PressRight;
 
         void setConstMov(int vx, int vy) { constMovX = vx; constMovY = vy; };
         void setConstMovX(int vx) { constMovX = vx; };
         void setConstMovY(int vy) { constMovY = vy; };
-
         int constMovX;
         int constMovY;
 
+        unsigned int getMoveSpeed(void) { return _moveSpeed; };
+        void setMoveSpeed(unsigned int new_moveSpeed) { _moveSpeed = new_moveSpeed; };
+    
+        void setOffScreenMov(bool new_value) { _offScreenMov = new_value; };
+        bool getOffScreenMov(void) { return _offScreenMov; };
+
         template<class Archive>
         void serialize(Archive &ar, const unsigned int version) {
+            ar & _controllable;
             ar & _offScreenMov;
             ar & constMovX;
             ar & constMovY;
+            ar & _moveSpeed;
         }
 
         friend class boost::serialization::access;
     protected:
     private:
+        bool _controllable = false;
         bool _offScreenMov = true;
+        // std::pair<int, int> _moveSpeed;
+        unsigned int _moveSpeed;
 };
 
 #endif /* !MOVEBEHAVIOR_HPP_ */
