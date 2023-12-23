@@ -541,45 +541,61 @@ class ClientSystem {
                 auto &pos = positions[i];
                 auto &vel = velocities[i];
 
-                if (!pos || !vel)
+                if (!pos || !vel || (vel.value().vx == 0 && vel.value().vy == 0))
                     continue;
 
                 pos.value().x += vel.value().vx;
                 pos.value().y += vel.value().vy;
 
-                // TransfertECSMessage msg;
-                // msg.header.type = MessageType::ECS_Transfert;
+                TransfertECSMessage msg;
+                msg.header.type = MessageType::ECS_Transfert;
 
-                // EntityComponents comps;
+                EntityComponents comps;
 
-                // comps.entity_id = client_server_entity_id[i];
+                auto server_id = findKeyByValue(client_server_entity_id, i);
 
-                // comps.position = r.get_boost_entity_component<Position>(i);
+                if (!server_id)
+                    continue;
 
-                // msg.entities.push_back(comps);
+                comps.entity_id = server_id.value();
+                comps.scene = r.getCurrentScene();
 
-                // std::ostringstream archive_stream;
-                // boost::archive::text_oarchive archive(archive_stream);
-                // archive << msg;
+                comps.position = r.get_boost_entity_component<Position>(i);
 
-                // std::string serialized_str = archive_stream.str();
+                msg.entities.push_back(comps);
 
-                // _udp_socket.async_send_to(
-                //     asio::buffer(serialized_str), _server_endpoint,
-                //     [](const std::error_code& error, std::size_t bytes_transferred) {
-                //         if (!error) {
-                //             std::cout << "Message sent successfully, bytes transferred: " << bytes_transferred << std::endl;
-                //         } else {
-                //             std::cerr << "Error sending message: " << error.message() << std::endl;
-                //         }
-                //     }
-                // );
+                std::ostringstream archive_stream;
+                boost::archive::text_oarchive archive(archive_stream);
+                archive << msg;
+
+                std::string serialized_str = archive_stream.str();
+
+                _udp_socket.async_send_to(
+                    asio::buffer(serialized_str), _server_endpoint,
+                    [](const std::error_code& error, std::size_t bytes_transferred) {
+                        if (!error) {
+                            std::cout << "Message sent successfully, bytes transferred: " << bytes_transferred << std::endl;
+                        } else {
+                            std::cerr << "Error sending message: " << error.message() << std::endl;
+                        }
+                    }
+                );
             }
         }
 
         asio::io_context io_context;
     protected:
     private:
+        std::optional<size_t> findKeyByValue(const std::unordered_map<size_t, size_t>& map, const size_t &value) {
+            for (const auto& pair : map) {
+                if (pair.second == value) {
+                    return pair.first; // Retourne la clé si la valeur correspond
+                }
+            }
+
+            return {}; // Retourne std::nullopt si aucune correspondance n'est trouvée
+        }
+
         std::unordered_map<std::string, size_t> clients_entity;
         std::unordered_map<size_t, size_t> client_server_entity_id;
 

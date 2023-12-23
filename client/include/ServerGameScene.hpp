@@ -36,24 +36,24 @@ class ServerGameScene {
         {
             std::cout << "Creating entity" << std::endl;
 
-            Entity ent(r.spawnEntity(r.getCurrentScene()));
+            Entity ent(r.spawnEntity(server_ent.scene));
             data.client_server_entity_id[server_ent.entity_id] = ent.getEntityId();
 
             if (server_ent.controllable && server_ent.assigned_endpoint == data.localEndpoint) {
                 Controllable control = server_ent.controllable.value();
-                r.addComponent<Controllable>(ent, control, r.getCurrentScene());
+                r.addComponent<Controllable>(ent, control, server_ent.scene);
             }
             if (server_ent.drawable) {
                 Drawable drawable(server_ent.drawable.value().spritePath);
-                r.addComponent<Drawable>(ent, drawable, r.getCurrentScene());
+                r.addComponent<Drawable>(ent, drawable, server_ent.scene);
             }
             if (server_ent.position) {
                 Position position = server_ent.position.value();
-                r.addComponent<Position>(ent, position, r.getCurrentScene());
+                r.addComponent<Position>(ent, position, server_ent.scene);
             }
             if (server_ent.velocity) {
                 Velocity velocity = server_ent.velocity.value();
-                r.addComponent<Velocity>(ent, velocity, r.getCurrentScene());
+                r.addComponent<Velocity>(ent, velocity, server_ent.scene);
             }
             std::cout << "Entity created at: " << ent.getEntityId() << std::endl;
         }
@@ -62,14 +62,14 @@ class ServerGameScene {
         {
             std::cout << "Updating Entity" << std::endl;
 
-            if (server_ent.controllable && server_ent.assigned_endpoint == data.localEndpoint) {
-                Controllable control = server_ent.controllable.value();
-                r.addComponent<Controllable>(ent, control, r.getCurrentScene());
-            }
-            if (server_ent.drawable) {
-                Drawable drawable(server_ent.drawable.value().spritePath);
-                r.addComponent<Drawable>(ent, drawable, r.getCurrentScene());
-            }
+            // if (server_ent.controllable && server_ent.assigned_endpoint == data.localEndpoint) {
+            //     Controllable control = server_ent.controllable.value();
+            //     r.addComponent<Controllable>(ent, control, r.getCurrentScene());
+            // }
+            // if (server_ent.drawable) {
+            //     Drawable drawable(server_ent.drawable.value().spritePath);
+            //     r.addComponent<Drawable>(ent, drawable, r.getCurrentScene());
+            // }
             if (server_ent.position) {
                 auto comp = r.get_entity_component<Position>(ent);
 
@@ -79,10 +79,10 @@ class ServerGameScene {
                     pos.y = server_ent.position.value().y;
                 }
             }
-            if (server_ent.velocity) {
-                Velocity velocity = server_ent.velocity.value();
-                r.addComponent<Velocity>(ent, velocity, r.getCurrentScene());
-            }
+            // if (server_ent.velocity) {
+            //     Velocity velocity = server_ent.velocity.value();
+            //     r.addComponent<Velocity>(ent, velocity, r.getCurrentScene());
+            // }
         }
 
         void receive_entities(Registry &r, size_t entity_id, MessageHandlerData data)
@@ -95,12 +95,10 @@ class ServerGameScene {
             archive >> msg;
 
             for (auto it : msg.entities) {
-                std::cout << "Server Entity ID: " << it.entity_id << std::endl;
-
-                if (size_t entity_id = (data.client_server_entity_id.find(it.entity_id)) == data.client_server_entity_id.end()) {
-                    create_entity(it, r, data);
+                if (data.client_server_entity_id.find(it.entity_id) != data.client_server_entity_id.end() && r.getCurrentScene() == it.scene) {
+                    update_entity(it, r, data, data.client_server_entity_id[it.entity_id]);
                 } else {
-                    update_entity(it, r, data, entity_id);
+                    create_entity(it, r, data);
                 }
             }
 
@@ -127,6 +125,7 @@ class ServerGameScene {
 
                 if (data.client_server_entity_id.find(msg.disconnected_entity) != data.client_server_entity_id.end()) {
                     r.killEntity(data.client_server_entity_id[msg.disconnected_entity], r.getCurrentScene());
+                    data.client_server_entity_id.erase(msg.disconnected_entity);
                 }
             }
         }

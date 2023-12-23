@@ -15,7 +15,7 @@ int main()
 {
     try
     {
-        Registry r("game");
+        Registry r("gameScene");
 
         SetupRegistry scene(r);
 
