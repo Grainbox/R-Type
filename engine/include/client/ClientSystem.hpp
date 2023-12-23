@@ -195,7 +195,7 @@ class ClientSystem {
                     vel.value().vx += behavior.value().constMovX * move_speed;
                 if (behavior.value().constMovY)
                     vel.value().vy += behavior.value().constMovY * move_speed;
-                
+
                 // Process de mis à jour de la vélocité selon les controls
                 if (behavior.value().isControllable()) {
                     if (behavior.value().PressUp)
@@ -219,6 +219,35 @@ class ClientSystem {
                 }
             }
         }
+
+        void control_system_tmp() {
+            std::string scene = r.getCurrentScene();
+            Sparse_Array<Controllable> &controllables = r.getComponents<Controllable>(scene);
+            Sparse_Array<Velocity> &velocities = r.getComponents<Velocity>(scene);
+
+            for (size_t i = 0; i < controllables.size() && i < velocities.size(); ++i) {
+                auto &vel = velocities[i];
+                auto &controlle = controllables[i];
+
+                if (!vel || !controlle)
+                    continue;
+
+                // Réinitialiser la vitesse
+                vel.value().vx = 0;
+                vel.value().vy = 0;
+
+                // Vérifier les touches pressées et ajuster la vitesse en conséquence
+                if (controlle.value().Left != -1 && IsKeyDown(controlle.value().Left))
+                    vel.value().vx = -1;
+                if (controlle.value().Right != -1 && IsKeyDown(controlle.value().Right))
+                    vel.value().vx = 1;
+                if (controlle.value().Up != -1 && IsKeyDown(controlle.value().Up))
+                    vel.value().vy = -1;
+                if (controlle.value().Down != -1 && IsKeyDown(controlle.value().Down))
+                    vel.value().vy = 1;
+            }
+        }
+
         /**
          * @brief Détecte les appuies des touches pour le controle des entités
          * controllables.
@@ -227,7 +256,9 @@ class ClientSystem {
          * 'MoveBehavior' avec l'option 'Controllable' et vérifie si les touches
          * paramétrées pour le controle de l'entité son appuyées.
          */
-        void control_system() { 
+        void control_system()
+        {
+            control_system_tmp();
             std::string scene = r.getCurrentScene();
             Sparse_Array<MoveBehavior> &behaviors = r.getComponents<MoveBehavior>(scene);
 
@@ -254,6 +285,7 @@ class ClientSystem {
                     behavior.value().PressRight = true;
             }
         }
+
         void Text_system() {
             std::string scene = r.getCurrentScene();
             Sparse_Array<Text> &txt = r.getComponents<Text>(scene);
