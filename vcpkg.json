@@ -1,0 +1,10 @@
+{
+  "name": "r-type",
+  "version": "1.0.0",
+  "dependencies": [
+    "asio",
+    "raylib",
+    "glfw3",
+    "boost-serialization"
+  ]
+}

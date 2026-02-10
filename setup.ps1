@@ -20,15 +20,10 @@ if (-not (Test-Path "$VCPKG_DIR\vcpkg.exe")) {
     Pop-Location
 }
 
-# 3. Install Dependencies
-$libraries = @("asio", "raylib", "boost-serialization")
-Write-Host "`n--- Installing Dependencies ---" -ForegroundColor Cyan
-foreach ($lib in $libraries) {
-    Write-Host "Checking $lib..."
-    & "$VCPKG_DIR\vcpkg.exe" install "$lib`:x64-windows"
-}
+# Note: Dependencies are now managed via vcpkg.json manifest mode
+# vcpkg will automatically install them during CMake configuration
 
-# 4. Configure CMake
+# 3. Configure CMake
 Write-Host "`n--- Configuring project with CMake ---" -ForegroundColor Cyan
 if (Test-Path "build\CMakeCache.txt") {
     Write-Host "Removing old CMake cache..."
@@ -48,7 +43,7 @@ if ($LASTEXITCODE -ne 0) {
     exit 1
 }
 
-# 5. Build Project
+# 4. Build Project
 Write-Host "`n--- Building project ---" -ForegroundColor Cyan
 cmake --build build --config Release
 
@@ -57,7 +52,7 @@ if ($LASTEXITCODE -ne 0) {
     exit 1
 }
 
-# 6. Copy Assets to root for convenience
+# 5. Copy Assets to root for convenience
 Write-Host "`n--- Copying Assets ---" -ForegroundColor Cyan
 if (Test-Path "engine\assets") {
     Copy-Item -Path "engine\assets" -Destination "assets" -Recurse -Force

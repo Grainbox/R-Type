@@ -15,14 +15,8 @@ if [ ! -f "$VCPKG_DIR/vcpkg" ]; then
     "$VCPKG_DIR/bootstrap-vcpkg.sh"
 fi
 
-# Install necessary libraries using vcpkg
-libraries=("asio" "raylib" "boost-serialization")
-for lib in "${libraries[@]}"; do
-    if ! "$VCPKG_DIR/vcpkg" list | grep -q $lib; then
-        echo "Installing $lib..."
-        "$VCPKG_DIR/vcpkg" install $lib
-    fi
-done
+# Note: Dependencies are now managed via vcpkg.json manifest mode
+# vcpkg will automatically install them during CMake configuration
 
 mkdir -p build
 cd build || exit 1
