@@ -13,25 +13,27 @@
 
 class MainView {
     public:
-        MainView(Registry &r) : r(&r) {};
+        MainView(Registry &r, bool isSolo = false) : r(&r), _isSolo(isSolo) {};
 
         bool pressPlay(script_settings)
         {
             std::cout << "Play button pressed." << std::endl;
 
-            CreateGameMessage msg;
-            msg.header.type = MessageType::Create_Game;
+            if (!_isSolo) {
+                CreateGameMessage msg;
+                msg.header.type = MessageType::Create_Game;
 
-            std::ostringstream archive_stream;
-            boost::archive::text_oarchive archive(archive_stream);
+                std::ostringstream archive_stream;
+                boost::archive::text_oarchive archive(archive_stream);
 
-            archive << msg;
+                archive << msg;
 
-            std::string serialized_str = archive_stream.str();
+                std::string serialized_str = archive_stream.str();
 
-            std::cout << "Sending create game" << std::endl;
+                std::cout << "Sending create game" << std::endl;
 
-            _udp_socket.send_to(asio::buffer(serialized_str), _server_endpoint);
+                _udp_socket.send_to(asio::buffer(serialized_str), _server_endpoint);
+            }
 
             r.setCurrentScene("gameScene");
             return true;
@@ -146,6 +148,7 @@ class MainView {
     protected:
     private:
         Registry *r;
+        bool _isSolo;
 };
 
 #endif /* !MAINVIEW_HPP_ */

@@ -74,7 +74,7 @@ class GameView {
                 Position posBullet(shipPos.x + rsShip.rx, shipPos.y + (rsShip.ry / 2));
                 Velocity velBullet(0, 0);
                 MoveBehavior movBullet;
-                movBullet.setConstMovX(20);
+                movBullet.setConstMovX(500);
                 Hitbox boxBullet(rsBullet.rx, rsBullet.ry, true);
                 boxBullet.setHitTag(hitTagShip);
                 OnCollision bulletHit;
@@ -228,7 +228,7 @@ class GameView {
         {
             std::string gameScene = "gameScene";
             spawn_player(gameScene);
-            spawn_ai_enemies(gameScene);
+            // spawn_ai_enemies(gameScene);
             // spawn_boss(gameScene);
         }
 

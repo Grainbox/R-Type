@@ -11,12 +11,18 @@
  \brief Constructor of ClientEngine.
 
  \param r Pointer to a Registry object.
- \param port Port number on which the client is connecting.
+ \param isSolo Boolean to define if the game is in solo mode.
+ \param server_port Port number on which the client is connecting.
 */
-ClientEngine::ClientEngine(Registry &r, short server_port)
-    : r(r), system(r, server_port)
+ClientEngine::ClientEngine(Registry &r, bool isSolo, short server_port)
+    : r(r), system(r, server_port), _isSolo(isSolo)
 {
-    system.send_first_con();
+    system.setSolo(isSolo);
+    if (!isSolo) {
+        system.send_first_con();
+    } else {
+        system.init_solo_waves();
+    }
 
     run();
 }
@@ -63,6 +69,7 @@ void ClientEngine::processEvents()
 */
 void ClientEngine::update()
 {
+    system.update_local();
     system.position_system();
     system.Health_system();
     system.Move_system();

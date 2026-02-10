@@ -11,6 +11,32 @@
 
 ServerSystem::ServerSystem(Registry &r, short port) : _socket(io_service, asio::ip::udp::endpoint(asio::ip::udp::v4(), port)), r(r)
 {
+    // Define Waves
+    // Wave 1: 3 Sinusoidal
+    EnemyWave wave1;
+    wave1.steps.push_back({EnemyType::Sinusoidal, 3, 2.0f, 800, 300, 200});
+    wave1.timeBeforeNextWave = 5.0f;
+    _waves.push_back(wave1);
+
+    // Wave 2: 2 ZigZag
+    EnemyWave wave2;
+    wave2.steps.push_back({EnemyType::ZigZag, 2, 3.0f, 800, 300, 150});
+    wave2.timeBeforeNextWave = 5.0f;
+    _waves.push_back(wave2);
+
+    // Wave 3: Mix
+    EnemyWave wave3;
+    wave3.steps.push_back({EnemyType::Homing, 2, 4.0f, 850, 300, 100});
+    wave3.steps.push_back({EnemyType::Sinusoidal, 2, 2.0f, 800, 100, 0});
+    wave3.timeBeforeNextWave = 10.0f;
+    _waves.push_back(wave3);
+
+    // Wave 4: Boss
+    EnemyWave wave4;
+    wave4.steps.push_back({EnemyType::Boss, 1, 0.0f, 700, 300, 0});
+    wave4.timeBeforeNextWave = 60.0f;
+    _waves.push_back(wave4);
+
     startReceive();
 }
 
@@ -62,116 +88,59 @@ void ServerSystem::handle_client_system(Registry &r,
 
 void ServerSystem::update(Registry &r)
 {
-    std::string scene = r.getCurrentScene();
-    auto &ais = r.getComponents<AI>(scene);
-    auto &positions = r.getComponents<Position>(scene);
-    auto &velocities = r.getComponents<Velocity>(scene);
-    auto &bosses = r.getComponents<Boss>(scene);
-    auto &healths = r.getComponents<Health>(scene);
-    auto &controllables = r.getComponents<Controllable>(scene);
-
     float dt = 1.0f / 60.0f; // Approx DeltaTime for 60 TPS
 
-    // Update Boss phases based on health
-    for (size_t i = 0; i < bosses.dense_size(); ++i) {
-        Entity boss_id = bosses.get_entity_at(i);
-        auto &boss = bosses.dense_at(i);
-        auto health = healths[boss_id];
-        auto ai = ais[boss_id];
+    Logic::update_boss_phases(r, r.getCurrentScene());
+    Logic::update_ai_movement(r, r.getCurrentScene(), dt);
+    Logic::position_system(r, r.getCurrentScene(), dt);
 
-        if (health && ai) {
-            boss.currentHealth = health->currentHealth;
-            int newPhase = boss.calculatePhase();
-            
-            if (newPhase != boss.currentPhase && newPhase < boss.healthSegments) {
-                boss.currentPhase = newPhase;
-                // Phase transition: increase speed and change pattern
-                if (ai->mode == AIMode::Sinusoidal) {
-                    ai->frequency += 0.5f;  // Faster oscillation
-                    ai->amplitude += 10.0f; // Larger movement
-                } else if (ai->mode == AIMode::ZigZag) {
-                    ai->frequency -= 0.2f;  // Faster direction changes
-                    ai->amplitude += 20.0f; // Faster movement
-                }
-            }
-        }
-    }
-
-    for (size_t i = 0; i < ais.dense_size(); ++i) {
-        Entity entity_id = ais.get_entity_at(i);
-        auto &ai = ais.dense_at(i);
-        auto pos = positions[entity_id];
-        auto vel = velocities[entity_id];
-
-        if (!pos) continue;
-
-        if (!ai.initialized) {
-            ai.startY = pos->y;
-            ai.initialized = true;
-        }
-
-        ai.timer += dt;
-
-        switch (ai.mode) {
-            case AIMode::Sinusoidal:
-                pos->y = ai.startY + std::sin(ai.timer * ai.frequency) * ai.amplitude;
-                break;
-            case AIMode::ZigZag:
-                // Change direction every 'frequency' seconds
-                if (std::fmod(ai.timer, ai.frequency * 2.0f) < ai.frequency) {
-                    if (vel) vel->vy = std::abs(ai.amplitude);
-                } else {
-                    if (vel) vel->vy = -std::abs(ai.amplitude);
-                }
-                break;
-            case AIMode::Homing:
-                // Find nearest player (entity with Controllable component)
-                {
-                    float nearestDist = std::numeric_limits<float>::max();
-                    Position* targetPos = nullptr;
-
-                    for (size_t j = 0; j < controllables.dense_size(); ++j) {
-                        Entity player_id = controllables.get_entity_at(j);
-                        auto playerPos = positions[player_id];
-                        
-                        if (playerPos) {
-                            float dx = playerPos->x - pos->x;
-                            float dy = playerPos->y - pos->y;
-                            float dist = std::sqrt(dx * dx + dy * dy);
-                            
-                            if (dist < nearestDist) {
-                                nearestDist = dist;
-                                targetPos = &(*playerPos);
-                                ai.targetEntityId = player_id;
-                            }
-                        }
-                    }
-
-                    // Move toward target
-                    if (targetPos && vel && nearestDist > 0.1f) {
-                        float dx = targetPos->x - pos->x;
-                        float dy = targetPos->y - pos->y;
-                        float dist = std::sqrt(dx * dx + dy * dy);
-                        
-                        // Normalize and apply speed (amplitude = speed)
-                        vel->vx = (dx / dist) * ai.amplitude;
-                        vel->vy = (dy / dist) * ai.amplitude;
-                    }
-                }
-                break;
-            default:
-                break;
-        }
-
-        // Apply basic velocity if present (for X movement)
-        if (vel) {
-            pos->x += vel->vx * dt;
-            pos->y += vel->vy * dt;
-        }
-    }
-
-    // Broadcast changes to all clients
+    update_waves(r, dt);
     broadcast_ecs_transfert(r);
+}
+
+void ServerSystem::spawn_enemy(Registry &r, EnemyType type, float x, float y)
+{
+    Entity e = r.spawnEntity(r.getCurrentScene());
+    r.addComponent<Position>(e, Position(x, y), r.getCurrentScene());
+    r.addComponent<Hitbox>(e, Hitbox(100, 50, true), r.getCurrentScene());
+    r.addComponent<HitTag>(e, HitTag(HitTag::TAG2), r.getCurrentScene());
+
+    switch (type) {
+        case EnemyType::Sinusoidal:
+            r.addComponent<Velocity>(e, Velocity(-100, 0), r.getCurrentScene());
+            r.addComponent<Drawable>(e, Drawable("assets/r-typesheet5.gif", true), r.getCurrentScene());
+            r.addComponent<AnimatedDraw>(e, AnimatedDraw("assets/r-typesheet5.gif", 16, 1, 0.05f), r.getCurrentScene());
+            r.addComponent<AI>(e, AI(AIMode::Sinusoidal, 2.0f, 50.0f), r.getCurrentScene());
+            r.addComponent<Health>(e, Health(50), r.getCurrentScene());
+            break;
+        case EnemyType::ZigZag:
+            r.addComponent<Velocity>(e, Velocity(-150, 50), r.getCurrentScene());
+            r.addComponent<Drawable>(e, Drawable("assets/r-typesheet22.gif", true), r.getCurrentScene());
+            r.addComponent<AnimatedDraw>(e, AnimatedDraw("assets/r-typesheet22.gif", 16, 1, 0.05f), r.getCurrentScene());
+            r.addComponent<AI>(e, AI(AIMode::ZigZag, 1.5f, 100.0f), r.getCurrentScene());
+            r.addComponent<Health>(e, Health(50), r.getCurrentScene());
+            break;
+        case EnemyType::Homing:
+            r.addComponent<Velocity>(e, Velocity(0, 0), r.getCurrentScene());
+            r.addComponent<Drawable>(e, Drawable("assets/r-typesheet26.gif", true), r.getCurrentScene());
+            r.addComponent<AnimatedDraw>(e, AnimatedDraw("assets/r-typesheet26.gif", 16, 1, 0.05f), r.getCurrentScene());
+            r.addComponent<AI>(e, AI(AIMode::Homing, 1.0f, 80.0f), r.getCurrentScene());
+            r.addComponent<Health>(e, Health(75), r.getCurrentScene());
+            break;
+        case EnemyType::Boss:
+            r.addComponent<Velocity>(e, Velocity(-50, 0), r.getCurrentScene());
+            r.addComponent<Drawable>(e, Drawable("assets/r-typesheet30.gif", true), r.getCurrentScene());
+            r.addComponent<AnimatedDraw>(e, AnimatedDraw("assets/r-typesheet30.gif", 16, 1, 0.05f), r.getCurrentScene());
+            r.addComponent<AI>(e, AI(AIMode::Sinusoidal, 1.0f, 30.0f), r.getCurrentScene());
+            r.addComponent<Health>(e, Health(300), r.getCurrentScene());
+            r.addComponent<Boss>(e, Boss(300, 3), r.getCurrentScene());
+            break;
+    }
+}
+
+void ServerSystem::update_waves(Registry &r, float dt)
+{
+    Logic::update_waves(r, r.getCurrentScene(), dt, _waves, _waveState, std::bind(&ServerSystem::spawn_enemy, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4));
 }
 
 void ServerSystem::broadcast_ecs_transfert(Registry &r)

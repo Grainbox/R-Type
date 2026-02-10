@@ -70,6 +70,9 @@ struct EntityComponents {
     boost::optional<Velocity> velocity;
     boost::optional<Boss> boss;
     boost::optional<Health> health;
+    boost::optional<MoveBehavior> moveBehavior;
+    boost::optional<Hitbox> hitbox;
+    boost::optional<AnimatedDraw> animatedDraw;
 
     template<class Archive>
     void serialize(Archive &ar, const unsigned int version) {
@@ -84,6 +87,9 @@ struct EntityComponents {
         ar & velocity;
         ar & boss;
         ar & health;
+        ar & moveBehavior;
+        ar & hitbox;
+        ar & animatedDraw;
     }
 };
 

@@ -14,9 +14,9 @@
 #include "GameView.hpp"
 #include "ServerGameScene.hpp"
 
-void mainMenu(Registry &r)
+void mainMenu(Registry &r, bool isSolo)
 {
-    MainView mainview(r);
+    MainView mainview(r, isSolo);
     mainview.process();
 }
 
@@ -28,7 +28,7 @@ void gameScene(Registry &r)
 
 void setupRegistry(Registry &r, bool multiplayer)
 {
-    mainMenu(r);
+    mainMenu(r, !multiplayer);
 
     if (multiplayer)
         ServerGameScene scene(r);
@@ -53,9 +53,10 @@ int main(int argc, char **argv)
         if (argc == 2)
             arg = argv[1];
 
-        setupRegistry(r, arg == "--multiplayer");
+        bool isSolo = (arg != "--multiplayer");
+        setupRegistry(r, !isSolo);
 
-        ClientEngine engine(r, SERVER_PORT);
+        ClientEngine engine(r, isSolo, SERVER_PORT);
     }
     catch (std::exception &e)
     {

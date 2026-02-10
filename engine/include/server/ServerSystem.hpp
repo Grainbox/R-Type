@@ -15,6 +15,8 @@
 
 #include "Communication_Structures.hpp"
 #include "ECS/Registry.hpp"
+#include "WaveStructures.hpp"
+#include "LogicSystems.hpp"
 
 class ServerSystem {
     public:
@@ -40,6 +42,16 @@ class ServerSystem {
          */
         void broadcast_ecs_transfert(Registry &r);
 
+        /**
+         * @brief Spawns an enemy of a specific type at a given position.
+         */
+        void spawn_enemy(Registry &r, EnemyType type, float x, float y);
+
+        /**
+         * @brief Update the wave system logic.
+         */
+        void update_waves(Registry &r, float dt);
+
         asio::io_service io_service;
     protected:
     private:
@@ -53,6 +65,9 @@ class ServerSystem {
         std::string localEndpoint;
 
         Registry &r;
+
+        std::vector<EnemyWave> _waves;
+        Logic::WaveState _waveState;
 
         // /*!
         // \brief Broadcast a message to every registered clients

@@ -28,6 +28,8 @@
 #include <optional>
 #include "Communication_Structures.hpp"
 #include "ResourceManager.hpp"
+#include "LogicSystems.hpp"
+#include "WaveStructures.hpp"
 
 /**
  * @class ClientSystem
@@ -42,9 +44,14 @@ class ClientSystem {
         ClientSystem(Registry &r, short server_port) : _udp_socket(io_context), r(r),
             _server_endpoint(asio::ip::udp::endpoint(asio::ip::address::from_string("127.0.0.1"), server_port))
         {
-            _udp_socket.open(asio::ip::udp::v4());
-
-            start_receive();
+            if (!_isSolo) {
+                _udp_socket.open(asio::ip::udp::v4());
+                start_receive();
+            }
+            _death_script_id = r.registerEventScript([](Registry &reg, size_t ent, auto&, auto&) {
+                reg.killEntity(ent, reg.getCurrentScene());
+                return false;
+            });
         }
 
         ~ClientSystem()
@@ -54,6 +61,7 @@ class ClientSystem {
 
         void send_disconnect()
         {
+            if (_isSolo) return;
             DisconnectMessage msg;
 
             msg.header.type = MessageType::Disconnect;
@@ -76,6 +84,7 @@ class ClientSystem {
         */
         void send_first_con()
         {
+            if (_isSolo) return;
             FirstConMessage msg;
             msg.header.type = MessageType::First_Con;
 
@@ -141,6 +150,7 @@ class ClientSystem {
                 std::cout << "-------------------------------------" << std::endl;
             } else {
                 std::cout << "Error: " << error << std::endl;
+                return;
             }
             start_receive();
         }
@@ -202,14 +212,15 @@ class ClientSystem {
 
                 // Process de mis à jour de la vélocité selon les controls
                 if (behavior.isControllable()) {
+                    float speed = 300.0f;
                     if (behavior.PressUp)
-                        vel->vy -= move_speed;
+                        vel->vy -= speed;
                     if (behavior.PressDown)
-                        vel->vy += move_speed;
+                        vel->vy += speed;
                     if (behavior.PressLeft)
-                        vel->vx -= move_speed;
+                        vel->vx -= speed;
                     if (behavior.PressRight)
-                        vel->vx += move_speed;
+                        vel->vx += speed;
                 }
 
                 // process empêchant l'entité de sortir de l'écran.
@@ -224,34 +235,6 @@ class ClientSystem {
             }
         }
 
-        void control_system_tmp() {
-            std::string scene = r.getCurrentScene();
-            Sparse_Array<Controllable> &controllables = r.getComponents<Controllable>(scene);
-            Sparse_Array<Velocity> &velocities = r.getComponents<Velocity>(scene);
-
-            for (size_t i = 0; i < controllables.dense_size(); ++i) {
-                size_t entity_id = controllables.get_entity_at(i);
-                auto &control = controllables.dense_at(i);
-                auto vel = velocities[entity_id];
-
-                if (!vel)
-                    continue;
-
-                // Réinitialiser la vitesse
-                vel->vx = 0;
-                vel->vy = 0;
-
-                // Vérifier les touches pressées et ajuster la vitesse en conséquence
-                for (int key : control.Left)
-                    if (IsKeyDown(key)) vel->vx = -1;
-                for (int key : control.Right)
-                    if (IsKeyDown(key)) vel->vx = 1;
-                for (int key : control.Up)
-                    if (IsKeyDown(key)) vel->vy = -1;
-                for (int key : control.Down)
-                    if (IsKeyDown(key)) vel->vy = 1;
-            }
-        }
 
         /**
          * @brief Détecte les appuies des touches pour le controle des entités
@@ -263,7 +246,6 @@ class ClientSystem {
          */
         void control_system()
         {
-            control_system_tmp();
             std::string scene = r.getCurrentScene();
             Sparse_Array<MoveBehavior> &behaviors = r.getComponents<MoveBehavior>(scene);
 
@@ -403,7 +385,7 @@ class ClientSystem {
 
             for (size_t i = 0; i < hitboxs.dense_size(); ++i) {
                 size_t id = hitboxs.get_entity_at(i);
-                auto hitbox = hitboxs.dense_at(i);
+                auto &hitbox = hitboxs.dense_at(i);
                 auto pos = positions[id];
 
                 if (!pos) continue;
@@ -428,10 +410,9 @@ class ClientSystem {
                     int topY2 = pos2->y;
                     int bottomY2 = pos2->y + hitbox2.height;
 
-                    if (((leftX >= leftX2 && leftX <= rightX2) || (rightX >= leftX2 && rightX <= rightX2)) &&
-                        ((topY >= topY2 && topY <= bottomY2) || (bottomY >= topY2 && bottomY <= bottomY2))) {
+                    if (leftX < rightX2 && rightX > leftX2 &&
+                        topY < bottomY2 && bottomY > topY2) {
                         hitbox.enterCollision(id_other, hitbox2.getHitTag().tag);
-                        std::cout << "collision " << id_other << " entered in " << id << std::endl;
                     }
                 }
             }
@@ -582,6 +563,9 @@ class ClientSystem {
             Sparse_Array<Position> &positions = r.getComponents<Position>(scene);
             Sparse_Array<Velocity> &velocities = r.getComponents<Velocity>(scene);
 
+            float dt = GetFrameTime();
+            Logic::position_system(r, scene, dt);
+
             for (size_t i = 0; i < velocities.dense_size(); ++i) {
                 size_t entity_id = velocities.get_entity_at(i);
                 auto &vel = velocities.dense_at(i);
@@ -590,8 +574,8 @@ class ClientSystem {
                 if (!pos || (vel.vx == 0 && vel.vy == 0))
                     continue;
 
-                pos->x += vel.vx;
-                pos->y += vel.vy;
+                // pos->x += vel.vx; // Handled by Logic::position_system
+                // pos->y += vel.vy;
 
                 TransfertECSMessage msg;
                 msg.header.type = MessageType::ECS_Transfert;
@@ -606,7 +590,9 @@ class ClientSystem {
                 comps.entity_id = server_id.value();
                 comps.scene = r.getCurrentScene();
 
-                comps.position = r.get_boost_entity_component<Position>(i);
+                if (!_isSolo) {
+                    comps.position = r.get_boost_entity_component<Position>(i);
+                }
 
                 msg.entities.push_back(comps);
 
@@ -616,17 +602,113 @@ class ClientSystem {
 
                 std::string serialized_str = archive_stream.str();
 
-                _udp_socket.async_send_to(
-                    asio::buffer(serialized_str), _server_endpoint,
-                    [](const std::error_code& error, std::size_t bytes_transferred) {
-                        if (!error) {
-                            std::cout << "Message sent successfully, bytes transferred: " << bytes_transferred << std::endl;
-                        } else {
-                            std::cerr << "Error sending message: " << error.message() << std::endl;
+                if (!_isSolo) {
+                    _udp_socket.async_send_to(
+                        asio::buffer(serialized_str), _server_endpoint,
+                        [](const std::error_code& error, std::size_t bytes_transferred) {
+                            if (!error) {
+                                std::cout << "Message sent successfully, bytes transferred: " << bytes_transferred << std::endl;
+                            } else {
+                                std::cerr << "Error sending message: " << error.message() << std::endl;
+                            }
                         }
-                    }
-                );
+                    );
+                }
             }
+        }
+
+        void setSolo(bool isSolo) {
+            _isSolo = isSolo;
+            if (!_isSolo) {
+                _udp_socket.open(asio::ip::udp::v4());
+                start_receive();
+            }
+        }
+        bool isSolo() const { return _isSolo; }
+
+        void update_local() {
+            if (r.getCurrentScene() != "gameScene") return;
+            if (_isSolo) {
+                float dt = GetFrameTime();
+                Logic::update_ai_movement(r, r.getCurrentScene(), dt);
+                Logic::update_boss_phases(r, r.getCurrentScene());
+                Logic::update_waves(r, r.getCurrentScene(), dt, _waves, _waveState, std::bind(&ClientSystem::spawn_enemy_local, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4));
+            }
+        }
+
+        void spawn_enemy_local(Registry &r, EnemyType type, float x, float y) {
+            std::string gameScene = r.getCurrentScene();
+            Entity e = r.spawnEntity(gameScene);
+            r.addComponent<Position>(e, Position(x, y), gameScene);
+            Hitbox box(100, 100, true);
+            box.setHitTag(HitTag(HitTag::TAG2));
+            r.addComponent<Hitbox>(e, box, gameScene);
+            r.addComponent<Resize>(e, Resize(100, 100), gameScene);
+
+            OnCollision reaction;
+            reaction.addReaction(HitTag::TAG1, _death_script_id);
+            r.addComponent<OnCollision>(e, reaction, gameScene);
+            
+            switch (type) {
+                case EnemyType::Sinusoidal:
+                    r.addComponent<Velocity>(e, Velocity(-100, 0), gameScene);
+                    r.addComponent<Drawable>(e, Drawable("assets/r-typesheet5.gif", true), gameScene);
+                    r.addComponent<AnimatedDraw>(e, AnimatedDraw("assets/r-typesheet5.gif", 16, 1, 100, 100, 0.05f), gameScene);
+                    r.addComponent<AI>(e, AI(AIMode::Sinusoidal, 2.0f, 50.0f), gameScene);
+                    r.addComponent<Health>(e, Health(50), gameScene);
+                    break;
+                case EnemyType::ZigZag:
+                    r.addComponent<Velocity>(e, Velocity(-150, 0), gameScene);
+                    r.addComponent<Drawable>(e, Drawable("assets/r-typesheet22.gif", true), gameScene);
+                    r.addComponent<AnimatedDraw>(e, AnimatedDraw("assets/r-typesheet22.gif", 16, 1, 100, 100, 0.05f), gameScene);
+                    r.addComponent<AI>(e, AI(AIMode::ZigZag, 1.5f, 100.0f), gameScene);
+                    r.addComponent<Health>(e, Health(50), gameScene);
+                    break;
+                case EnemyType::Homing:
+                    r.addComponent<Velocity>(e, Velocity(-80, 0), gameScene);
+                    r.addComponent<Drawable>(e, Drawable("assets/r-typesheet26.gif", true), gameScene);
+                    r.addComponent<AnimatedDraw>(e, AnimatedDraw("assets/r-typesheet26.gif", 16, 1, 100, 100, 0.05f), gameScene);
+                    r.addComponent<AI>(e, AI(AIMode::Homing, 1.0f, 80.0f), gameScene);
+                    r.addComponent<Health>(e, Health(75), gameScene);
+                    break;
+                case EnemyType::Boss:
+                    r.addComponent<Velocity>(e, Velocity(-50, 0), gameScene);
+                    r.addComponent<Drawable>(e, Drawable("assets/r-typesheet30.gif", true), gameScene);
+                    r.addComponent<AnimatedDraw>(e, AnimatedDraw("assets/r-typesheet30.gif", 16, 1, 200, 200, 0.05f), gameScene);
+                    r.addComponent<AI>(e, AI(AIMode::Sinusoidal, 1.0f, 30.0f), gameScene);
+                    r.addComponent<Health>(e, Health(300), gameScene);
+                    r.addComponent<Boss>(e, Boss(300, 3), gameScene);
+                    break;
+            }
+        }
+
+        void init_solo_waves() {
+            // Wave 1: 6 Sinusoidal
+            EnemyWave w1;
+            w1.timeBeforeNextWave = 5.0f;
+            w1.steps.push_back({EnemyType::Sinusoidal, 6, 1.5f, 1300.0f, 300.0f, 200.0f});
+            _waves.push_back(w1);
+
+            // Wave 2: 4 ZigZag
+            EnemyWave w2;
+            w2.timeBeforeNextWave = 7.0f;
+            w2.steps.push_back({EnemyType::ZigZag, 4, 2.0f, 1300.0f, 400.0f, 100.0f});
+            _waves.push_back(w2);
+
+            // Wave 3: Mixed
+            EnemyWave w3;
+            w3.timeBeforeNextWave = 10.0f;
+            w3.steps.push_back({EnemyType::Homing, 4, 3.0f, 1300.0f, 300.0f, 200.0f});
+            w3.steps.push_back({EnemyType::Sinusoidal, 4, 1.5f, 1500.0f, 200.0f, 100.0f});
+            _waves.push_back(w3);
+
+            // Wave 4: Boss
+            EnemyWave w4;
+            w4.timeBeforeNextWave = 0.0f;
+            w4.steps.push_back({EnemyType::Boss, 1, 0.0f, 1000.0f, 300.0f, 0.0f});
+            _waves.push_back(w4);
+            
+            _waveState.waveInProgress = true;
         }
 
         asio::io_context io_context;
@@ -655,6 +737,10 @@ class ClientSystem {
 
         Registry &r;
 
+        bool _isSolo = true;
+        std::vector<EnemyWave> _waves;
+        Logic::WaveState _waveState;
+        size_t _death_script_id;
 };
 
 #endif /* !CLIENTSYSTEM_HPP_ */

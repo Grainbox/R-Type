@@ -9,7 +9,11 @@
 #define HITBOX_HPP_
 
     #include <iostream>
+    #include <list>
+    #include <utility>
     #include <boost/serialization/serialization.hpp>
+    #include <boost/serialization/list.hpp>
+    #include <boost/serialization/utility.hpp>
     #include "HitTag.hpp"
 
 class Hitbox {

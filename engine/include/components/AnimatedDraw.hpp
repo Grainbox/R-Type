@@ -21,8 +21,10 @@
 */
 class AnimatedDraw {
     public:
+        AnimatedDraw() {};
+
         AnimatedDraw(std::string spriteSheetPath, int nbCols, int nbRows, float frameDuration = 0.1f, bool loop = true) : 
-            _nbCols(nbCols), _nbRows(nbRows), _frameDuration(frameDuration), _loop(loop) {
+            spritePath(spriteSheetPath), _nbCols(nbCols), _nbRows(nbRows), _frameDuration(frameDuration), _loop(loop) {
             textureList = ResourceManager::getInstance().getAnimatedTexture(spriteSheetPath, nbCols, nbRows);
             
             if (textureList.empty())
@@ -45,6 +47,18 @@ class AnimatedDraw {
         float _frameDuration = 0.1f;
         float timeAccumulator = 0.0f;
         bool _loop = true;
+        std::string spritePath = "";
+
+        template<class Archive>
+        void serialize(Archive &ar, const unsigned int version) {
+            ar & spritePath;
+            ar & _nbCols;
+            ar & _nbRows;
+            ar & _frameDuration;
+            ar & _loop;
+        }
+
+        friend class boost::serialization::access;
     protected:
     private:
 };

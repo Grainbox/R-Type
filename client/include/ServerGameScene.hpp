@@ -39,9 +39,16 @@ class ServerGameScene {
             Entity ent(r.spawnEntity(server_ent.scene));
             data.client_server_entity_id[server_ent.entity_id] = ent.getEntityId();
 
-            if (server_ent.controllable && server_ent.assigned_endpoint == data.localEndpoint) {
-                Controllable control = server_ent.controllable.value();
-                r.addComponent<Controllable>(ent, control, server_ent.scene);
+            if (server_ent.moveBehavior && server_ent.assigned_endpoint == data.localEndpoint) {
+                MoveBehavior behavior = server_ent.moveBehavior.value();
+                behavior.setControllable(true);
+                r.addComponent<MoveBehavior>(ent, behavior, server_ent.scene);
+            }
+
+            if (server_ent.animatedDraw) {
+                AnimatedDraw anim = server_ent.animatedDraw.value();
+                AnimatedDraw localAnim(anim.spritePath, anim._nbCols, anim._nbRows, anim._frameDuration, anim._loop);
+                r.addComponent<AnimatedDraw>(ent, localAnim, server_ent.scene);
             }
             if (server_ent.drawable) {
                 Drawable drawable(server_ent.drawable.value().spritePath);
@@ -55,34 +62,56 @@ class ServerGameScene {
                 Velocity velocity = server_ent.velocity.value();
                 r.addComponent<Velocity>(ent, velocity, server_ent.scene);
             }
+            if (server_ent.hitbox) {
+                Hitbox hitbox = server_ent.hitbox.value();
+                r.addComponent<Hitbox>(ent, hitbox, server_ent.scene);
+            }
+            if (server_ent.hitTag) {
+                HitTag hitTag = server_ent.hitTag.value();
+                r.addComponent<HitTag>(ent, hitTag, server_ent.scene);
+            }
             std::cout << "Entity created at: " << ent.getEntityId() << std::endl;
         }
 
-        void update_entity(EntityComponents server_ent, Registry &r, MessageHandlerData &data, size_t ent)
+        void update_entity(EntityComponents server_ent, Registry &r, MessageHandlerData &data, size_t ent_id)
         {
-            std::cout << "Updating Entity" << std::endl;
+            // std::cout << "Updating Entity" << std::endl;
+            Entity ent(ent_id);
 
-            // if (server_ent.controllable && server_ent.assigned_endpoint == data.localEndpoint) {
-            //     Controllable control = server_ent.controllable.value();
-            //     r.addComponent<Controllable>(ent, control, r.getCurrentScene());
-            // }
-            // if (server_ent.drawable) {
-            //     Drawable drawable(server_ent.drawable.value().spritePath);
-            //     r.addComponent<Drawable>(ent, drawable, r.getCurrentScene());
-            // }
-            if (server_ent.position) {
-                auto comp = r.get_entity_component<Position>(ent);
+            if (server_ent.moveBehavior && server_ent.assigned_endpoint == data.localEndpoint) {
+                MoveBehavior behavior = server_ent.moveBehavior.value();
+                behavior.setControllable(true);
+                r.addComponent<MoveBehavior>(ent, behavior, server_ent.scene);
+            }
 
-                if (comp) {
-                    auto &pos = comp->get();
-                    pos.x = server_ent.position.value().x;
-                    pos.y = server_ent.position.value().y;
+            if (server_ent.animatedDraw) {
+                AnimatedDraw anim = server_ent.animatedDraw.value();
+                Sparse_Array<AnimatedDraw> &animations = r.getComponents<AnimatedDraw>(server_ent.scene);
+                if (!animations[ent_id]) {
+                    AnimatedDraw localAnim(anim.spritePath, anim._nbCols, anim._nbRows, anim._frameDuration, anim._loop);
+                    r.addComponent<AnimatedDraw>(ent, localAnim, server_ent.scene);
                 }
             }
-            // if (server_ent.velocity) {
-            //     Velocity velocity = server_ent.velocity.value();
-            //     r.addComponent<Velocity>(ent, velocity, r.getCurrentScene());
-            // }
+            if (server_ent.drawable) {
+                Drawable drawable(server_ent.drawable.value().spritePath);
+                r.addComponent<Drawable>(ent, drawable, server_ent.scene);
+            }
+            if (server_ent.position) {
+                Position position = server_ent.position.value();
+                r.addComponent<Position>(ent, position, server_ent.scene);
+            }
+            if (server_ent.velocity) {
+                Velocity velocity = server_ent.velocity.value();
+                r.addComponent<Velocity>(ent, velocity, server_ent.scene);
+            }
+            if (server_ent.hitbox) {
+                Hitbox hitbox = server_ent.hitbox.value();
+                r.addComponent<Hitbox>(ent, hitbox, server_ent.scene);
+            }
+            if (server_ent.hitTag) {
+                HitTag hitTag = server_ent.hitTag.value();
+                r.addComponent<HitTag>(ent, hitTag, server_ent.scene);
+            }
         }
 
         void receive_entities(Registry &r, size_t entity_id, MessageHandlerData data)

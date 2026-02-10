@@ -63,22 +63,26 @@ void SetupRegistry::client_connect_handler(Registry &r,
     Entity client = r.spawnEntity(r.getCurrentScene());
 
     Position pos(client.getEntityId() * 150, 0);
-    Controllable controls;
-    controls.addKeyboardKey(controls.Up, KEY_UP);
-    controls.addKeyboardKey(controls.Down, KEY_DOWN);
-    controls.addKeyboardKey(controls.Left, KEY_LEFT);
-    controls.addKeyboardKey(controls.Right, KEY_RIGHT);
-    controls.addKeyboardKey(controls.Up, KEY_W);
-    controls.addKeyboardKey(controls.Down, KEY_S);
-    controls.addKeyboardKey(controls.Left, KEY_A);
-    controls.addKeyboardKey(controls.Right, KEY_D);
+    MoveBehavior behavior;
+    behavior.setControllable(true);
+    behavior.addKeyboardKey(behavior.UpInput, KEY_UP);
+    behavior.addKeyboardKey(behavior.DownInput, KEY_DOWN);
+    behavior.addKeyboardKey(behavior.LeftInput, KEY_LEFT);
+    behavior.addKeyboardKey(behavior.RightInput, KEY_RIGHT);
+    behavior.addKeyboardKey(behavior.UpInput, KEY_W);
+    behavior.addKeyboardKey(behavior.DownInput, KEY_S);
+    behavior.addKeyboardKey(behavior.LeftInput, KEY_A);
+    behavior.addKeyboardKey(behavior.RightInput, KEY_D);
+    behavior.setMoveSpeed(4);
     Velocity vel(0, 0);
     Drawable draw("assets/entity_1.png", true);
 
     r.addComponent<Drawable>(client, draw, r.getCurrentScene());
     r.addComponent<Position>(client, pos, r.getCurrentScene());
-    r.addComponent<Controllable>(client, controls, r.getCurrentScene());
+    r.addComponent<MoveBehavior>(client, behavior, r.getCurrentScene());
     r.addComponent<Velocity>(client, vel, r.getCurrentScene());
+    r.addComponent<Hitbox>(client, Hitbox(100, 50, true), r.getCurrentScene());
+    r.addComponent<HitTag>(client, HitTag(HitTag::TAG1), r.getCurrentScene());
 
     std::string endpoint = data._remoteEndpoint.address().to_string() + ":" +
                            std::to_string(data._remoteEndpoint.port());
@@ -164,44 +168,8 @@ void SetupRegistry::create_game_handler(Registry &r, MessageHandlerData data)
 
     std::list<size_t> deadEntities = r.getDeadEntities();
 
-    // Spawn some AI enemies for testing if it's the first time
-    static bool enemiesSpawned = false;
-    if (!enemiesSpawned) {
-        // Sinusoidal Enemy
-        Entity e1 = r.spawnEntity(r.getCurrentScene());
-        r.addComponent<Position>(e1, Position(700, 200), r.getCurrentScene());
-        r.addComponent<Velocity>(e1, Velocity(-100, 0), r.getCurrentScene());
-        r.addComponent<Drawable>(e1, Drawable("assets/entity_2.png"), r.getCurrentScene());
-        r.addComponent<AI>(e1, AI(AIMode::Sinusoidal, 2.0f, 50.0f), r.getCurrentScene());
-        r.addComponent<Health>(e1, Health(50), r.getCurrentScene());
-
-        // ZigZag Enemy
-        Entity e2 = r.spawnEntity(r.getCurrentScene());
-        r.addComponent<Position>(e2, Position(800, 400), r.getCurrentScene());
-        r.addComponent<Velocity>(e2, Velocity(-150, 50), r.getCurrentScene());
-        r.addComponent<Drawable>(e2, Drawable("assets/entity_2.png"), r.getCurrentScene());
-        r.addComponent<AI>(e2, AI(AIMode::ZigZag, 1.5f, 100.0f), r.getCurrentScene());
-        r.addComponent<Health>(e2, Health(50), r.getCurrentScene());
-
-        // Homing Enemy
-        Entity e3 = r.spawnEntity(r.getCurrentScene());
-        r.addComponent<Position>(e3, Position(750, 300), r.getCurrentScene());
-        r.addComponent<Velocity>(e3, Velocity(0, 0), r.getCurrentScene());
-        r.addComponent<Drawable>(e3, Drawable("assets/entity_2.png"), r.getCurrentScene());
-        r.addComponent<AI>(e3, AI(AIMode::Homing, 1.0f, 80.0f), r.getCurrentScene());
-        r.addComponent<Health>(e3, Health(75), r.getCurrentScene());
-
-        // Boss Entity
-        Entity boss = r.spawnEntity(r.getCurrentScene());
-        r.addComponent<Position>(boss, Position(700, 300), r.getCurrentScene());
-        r.addComponent<Velocity>(boss, Velocity(-50, 0), r.getCurrentScene());
-        r.addComponent<Drawable>(boss, Drawable("assets/entity_2.png"), r.getCurrentScene());
-        r.addComponent<AI>(boss, AI(AIMode::Sinusoidal, 1.0f, 30.0f), r.getCurrentScene());
-        r.addComponent<Health>(boss, Health(300), r.getCurrentScene());
-        r.addComponent<Boss>(boss, Boss(300, 3), r.getCurrentScene());
-        
-        enemiesSpawned = true;
-    }
+    // The Wave System in ServerSystem will handle dynamic enemy spawning.
+    std::cout << "Game handler called" << std::endl;
 
     for (size_t i = 0; i < r.getNextEntityId(); i++)
     {
@@ -226,12 +194,15 @@ void SetupRegistry::create_game_handler(Registry &r, MessageHandlerData data)
             comps.assigned_endpoint = "none";
         }
 
-        comps.controllable = r.get_boost_entity_component<Controllable>(i);
+        comps.controllable = {}; // Controllable is no longer used
+        comps.moveBehavior = r.get_boost_entity_component<MoveBehavior>(i);
         comps.drawable = r.get_boost_entity_component<Drawable>(i);
         comps.position = r.get_boost_entity_component<Position>(i);
         comps.velocity = r.get_boost_entity_component<Velocity>(i);
         comps.boss = r.get_boost_entity_component<Boss>(i);
         comps.health = r.get_boost_entity_component<Health>(i);
+        comps.hitbox = r.get_boost_entity_component<Hitbox>(i);
+        comps.hitTag = r.get_boost_entity_component<HitTag>(i);
 
         msg.entities.push_back(comps);
     }
@@ -272,10 +243,10 @@ void SetupRegistry::update_entity(Registry &r, MessageHandlerData data)
     {
         std::cout << "Updating Entity" << std::endl;
 
-        if (it.controllable)
+        if (it.moveBehavior)
         {
-            Controllable control = it.controllable.value();
-            r.addComponent<Controllable>(it.entity_id, control, r.getCurrentScene());
+            MoveBehavior control = it.moveBehavior.value();
+            r.addComponent<MoveBehavior>(it.entity_id, control, r.getCurrentScene());
         }
         if (it.drawable)
         {
@@ -291,6 +262,16 @@ void SetupRegistry::update_entity(Registry &r, MessageHandlerData data)
         {
             Velocity velocity = it.velocity.value();
             r.addComponent<Velocity>(it.entity_id, velocity, r.getCurrentScene());
+        }
+        if (it.hitbox)
+        {
+            Hitbox hitbox = it.hitbox.value();
+            r.addComponent<Hitbox>(it.entity_id, hitbox, r.getCurrentScene());
+        }
+        if (it.hitTag)
+        {
+            HitTag hitTag = it.hitTag.value();
+            r.addComponent<HitTag>(it.entity_id, hitTag, r.getCurrentScene());
         }
     }
 
