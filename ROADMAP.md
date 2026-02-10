@@ -33,16 +33,6 @@ This roadmap outlines the planned enhancements and community goals for the R-Typ
   - Implement a background parallax scrolling system.
   - Add a level-loading mechanism from configuration files.
 
-## Phase 4: Online & Social
-*Goal: Expand the multiplayer experience.*
-- [ ] **Issue: Lobby System**
-  - Implement a basic pre-game lobby to wait for players.
-  - Add support for basic chat in the lobby.
-- [ ] **Issue: Leaderboards**
-  - Implement a global high-score system (requires a database/backend).
-- [ ] **Issue: Latency Compensation**
-  - Research and implement client-side prediction and server reconciliation.
-
 ---
 
 *Want to contribute? Check our [Contribution Guidelines](CONTRIBUTING.md) (Coming Soon!)*
