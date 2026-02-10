@@ -74,13 +74,16 @@ jobs:
       shell: bash
 
     - name: Install Dependencies (vcpkg)
-      run: |
-        if [ "$RUNNER_OS" == "Windows" ]; then
-          ./vcpkg/vcpkg install asio:x64-windows raylib:x64-windows boost-serialization:x64-windows
-        else
-          ./vcpkg/vcpkg install asio raylib boost-serialization
-        fi
       shell: bash
+      run: |
+        # Set environment variable to help vcpkg find the right tools
+        export VCPKG_ROOT="${{ github.workspace }}/vcpkg"
+        
+        if [ "$RUNNER_OS" == "Windows" ]; then
+          ./vcpkg/vcpkg install asio:x64-windows raylib:x64-windows boost-serialization:x64-windows --clean-after-build
+        else
+          ./vcpkg/vcpkg install asio raylib boost-serialization --clean-after-build
+        fi
 
     - name: Configure CMake
       # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.
