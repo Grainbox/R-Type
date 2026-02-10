@@ -161,7 +161,7 @@ class ClientSystem {
             Sparse_Array<SoundWrapper> &soundbox = r.getComponents<SoundWrapper>(scene);
 
             for (size_t i = 0; i < soundbox.size(); ++i) {
-                auto &sound = soundbox[i];
+                auto sound = soundbox[i];
 
                 if (!sound && sound.value().status) continue;
                 UpdateMusicStream(sound.value().sound);
@@ -316,7 +316,7 @@ class ClientSystem {
             Sparse_Array<KeyReaction> &KReactions = r.getComponents<KeyReaction>(scene);
 
             for (size_t i = 0; i < KReactions.size(); ++i) {
-                auto &KReact = KReactions[i];
+                auto KReact = KReactions[i];
 
                 if (!KReact)
                     continue;
@@ -343,9 +343,9 @@ class ClientSystem {
             Sparse_Array<Position> &positions = r.getComponents<Position>(scene);
 
             for (size_t i = 0; i < clickables.size() && i < hitboxs.size() && i < positions.size(); ++i) {
-                auto &click = clickables[i];
-                auto &hitbox = hitboxs[i];
-                auto &position = positions[i];
+                auto click = clickables[i];
+                auto hitbox = hitboxs[i];
+                auto position = positions[i];
 
                 if (!hitbox || !click || !position)
                     continue;
@@ -376,9 +376,9 @@ class ClientSystem {
             Sparse_Array<Position> &positions = r.getComponents<Position>(scene);
 
             for (size_t i = 0; i < reactCursors.size() && i < hitboxs.size() && i < positions.size(); ++i) {
-                auto &reactC = reactCursors[i];
-                auto &hitbox = hitboxs[i];
-                auto &position = positions[i];
+                auto reactC = reactCursors[i];
+                auto hitbox = hitboxs[i];
+                auto position = positions[i];
 
                 if (!hitbox || !reactC || !position)
                     continue;
@@ -403,7 +403,7 @@ class ClientSystem {
 
             for (size_t i = 0; i < hitboxs.dense_size(); ++i) {
                 size_t id = hitboxs.get_entity_at(i);
-                auto &hitbox = hitboxs.dense_at(i);
+                auto hitbox = hitboxs.dense_at(i);
                 auto pos = positions[id];
 
                 if (!pos) continue;
@@ -422,7 +422,7 @@ class ClientSystem {
                     auto pos2 = positions[id_other];
 
                     if (!pos2) continue;
-                    
+
                     int leftX2 = pos2->x;
                     int rightX2 = pos2->x + hitbox2.width;
                     int topY2 = pos2->y;
