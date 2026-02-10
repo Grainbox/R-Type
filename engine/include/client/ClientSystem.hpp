@@ -484,8 +484,8 @@ class ClientSystem {
             Sparse_Array<Position> &positions = r.getComponents<Position>(scene);
 
             for (size_t i = 0; i < positions.size() && i < hitboxs.size(); ++i) {
-                auto &position = positions[i];
-                auto &hitbox = hitboxs[i];
+                auto position = positions[i];
+                auto hitbox = hitboxs[i];
 
                 if (!hitbox || !position || !hitbox.value().debug)
                     continue;
