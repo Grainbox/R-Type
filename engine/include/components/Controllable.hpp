@@ -8,7 +8,10 @@
 #ifndef CONTROLLABLE_HPP_
 #define CONTROLLABLE_HPP_
 
+#include <vector>
+#include <algorithm>
 #include <boost/serialization/serialization.hpp>
+#include <boost/serialization/vector.hpp>
 
 /*!
  \class Controllable
@@ -16,13 +19,18 @@
 */
 class Controllable {
     public:
-        void setKeyboardKey(int *moveKey, int newKey) {
-            *moveKey = newKey;
+        void setKeyboardKey(std::vector<int> &moveKeys, int newKey) {
+            moveKeys.clear();
+            moveKeys.push_back(newKey);
         }
-        int Up = -1;     // Valeur initiale pour indiquer qu'aucune touche n'est assignée
-        int Down = -1;   // Utilisez -1 ou une autre valeur pour représenter 'Unknown'
-        int Left = -1;
-        int Right = -1;
+        void addKeyboardKey(std::vector<int> &moveKeys, int newKey) {
+            if (std::find(moveKeys.begin(), moveKeys.end(), newKey) == moveKeys.end())
+                moveKeys.push_back(newKey);
+        }
+        std::vector<int> Up;
+        std::vector<int> Down;
+        std::vector<int> Left;
+        std::vector<int> Right;
 
         template<class Archive>
         void serialize(Archive &ar, const unsigned int version) {

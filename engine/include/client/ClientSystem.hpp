@@ -237,14 +237,14 @@ class ClientSystem {
                 vel.value().vy = 0;
 
                 // Vérifier les touches pressées et ajuster la vitesse en conséquence
-                if (controlle.value().Left != -1 && IsKeyDown(controlle.value().Left))
-                    vel.value().vx = -1;
-                if (controlle.value().Right != -1 && IsKeyDown(controlle.value().Right))
-                    vel.value().vx = 1;
-                if (controlle.value().Up != -1 && IsKeyDown(controlle.value().Up))
-                    vel.value().vy = -1;
-                if (controlle.value().Down != -1 && IsKeyDown(controlle.value().Down))
-                    vel.value().vy = 1;
+                for (int key : controlle.value().Left)
+                    if (IsKeyDown(key)) vel.value().vx = -1;
+                for (int key : controlle.value().Right)
+                    if (IsKeyDown(key)) vel.value().vx = 1;
+                for (int key : controlle.value().Up)
+                    if (IsKeyDown(key)) vel.value().vy = -1;
+                for (int key : controlle.value().Down)
+                    if (IsKeyDown(key)) vel.value().vy = 1;
             }
         }
 
@@ -515,6 +515,7 @@ class ClientSystem {
             std::string scene = r.getCurrentScene();
             auto &drawables = r.getComponents<Drawable>(scene);
             auto &animations = r.getComponents<AnimatedDraw>(scene);
+            float dt = GetFrameTime();
 
             for (size_t i = 0; i < drawables.size() && i < animations.size(); ++i) {
                 auto &draw = drawables[i];
@@ -522,12 +523,19 @@ class ClientSystem {
 
                 if (!draw || !anim)
                     continue;
-                // Texture2D currFrame = anim.value().textureList.at(0).at(0);
-                // Image image = GetImageData(currFrame);
-                // ImageResize(&image, draw.value().resizeW, draw.value().resizeH);
-                // // draw.value().texture = currFrame;
-                draw.value().texture = anim.value().textureList.at(0).at(1);
-                // à compléter (pour l'instant: image fixe)
+                
+                anim.value().timeAccumulator += dt;
+                if (anim.value().timeAccumulator >= anim.value()._frameDuration) {
+                    anim.value().timeAccumulator -= anim.value()._frameDuration;
+                    anim.value().currentFrame++;
+                    if (anim.value().currentFrame >= anim.value()._nbCols) {
+                        if (anim.value()._loop)
+                            anim.value().currentFrame = 0;
+                        else
+                            anim.value().currentFrame = anim.value()._nbCols - 1;
+                    }
+                    draw.value().texture = anim.value().textureList.at(anim.value().currentRow).at(anim.value().currentFrame);
+                }
             }
         }
 

@@ -75,7 +75,7 @@ class GameView {
             HitTag hTagPlayer(HitTag::TAG1);
             box.setHitTag(hTagPlayer);
             Resize resizePlayer(100, 50);
-            AnimatedDraw anim("assets/player1.png", 5, 1, resizePlayer.rx, resizePlayer.ry);
+            AnimatedDraw anim("assets/player1.png", 5, 1, resizePlayer.rx, resizePlayer.ry, 0.1f);
             OnCollision shipHit;
             shipHit.addReaction(HitTag::TAG2, r.registerEventScript(std::bind(&GameView::hitTarget, this,
                     std::placeholders::_1,
@@ -116,7 +116,7 @@ class GameView {
             Velocity ennemyVelo(0, 0);
             Drawable drawEnnemy("assets/entity_2.png");
             Resize resizeEnnemy(100, 100);
-            AnimatedDraw anim2("assets/r-typesheet5.gif", 16, 1, resizeEnnemy.rx, resizeEnnemy.ry);
+            AnimatedDraw anim2("assets/r-typesheet5.gif", 16, 1, resizeEnnemy.rx, resizeEnnemy.ry, 0.05f);
 
             Hitbox boxEnnemy(100, 50, true);
             HitTag hTagEnnemy(HitTag::TAG2);

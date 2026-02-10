@@ -20,10 +20,11 @@
 */
 class AnimatedDraw {
     public:
-        AnimatedDraw(std::string spriteSheetPath, int nbCols, int nbRows) {
+        AnimatedDraw(std::string spriteSheetPath, int nbCols, int nbRows, float frameDuration = 0.1f, bool loop = true) : 
+            _nbCols(nbCols), _nbRows(nbRows), _frameDuration(frameDuration), _loop(loop) {
             Image spritesheet = LoadImage(spriteSheetPath.c_str());
-            float frameWidth = spritesheet.width / nbCols;
-            float frameHeight = spritesheet.height / nbRows;
+            float frameWidth = (float)spritesheet.width / nbCols;
+            float frameHeight = (float)spritesheet.height / nbRows;
             std::vector<Texture2D> list;
 
             for (int row = 0; row < nbRows; row++) {
@@ -43,10 +44,11 @@ class AnimatedDraw {
                         throw LoadAssetException("Failed to load asset: " + spriteSheetPath);
         }
 
-        AnimatedDraw(std::string spriteSheetPath, int nbCols, int nbRows, int resizeWidth, int resizeHeight) {
+        AnimatedDraw(std::string spriteSheetPath, int nbCols, int nbRows, int resizeWidth, int resizeHeight, float frameDuration = 0.1f, bool loop = true) :
+            _nbCols(nbCols), _nbRows(nbRows), _frameDuration(frameDuration), _loop(loop) {
             Image spritesheet = LoadImage(spriteSheetPath.c_str());
-            float frameWidth = spritesheet.width / nbCols;
-            float frameHeight = spritesheet.height / nbRows;
+            float frameWidth = (float)spritesheet.width / nbCols;
+            float frameHeight = (float)spritesheet.height / nbRows;
             std::vector<Texture2D> list;
 
             for (int row = 0; row < nbRows; row++) {
@@ -68,6 +70,13 @@ class AnimatedDraw {
         }
 
         std::vector<std::vector<Texture2D>> textureList;
+        int _nbCols = 0;
+        int _nbRows = 0;
+        int currentFrame = 0;
+        int currentRow = 0;
+        float _frameDuration = 0.1f;
+        float timeAccumulator = 0.0f;
+        bool _loop = true;
     protected:
     private:
 };

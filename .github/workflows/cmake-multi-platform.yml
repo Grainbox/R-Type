@@ -53,13 +53,27 @@ jobs:
       shell: bash
       run: |
         echo "build-output-dir=${{ github.workspace }}/build" >> "$GITHUB_OUTPUT"
-    - name: Install CMake
+    - name: Initialize Submodules
+      run: git submodule update --init --recursive
+
+    - name: Bootstrap vcpkg
       run: |
-        if [[ "$RUNNER_OS" == "Windows" ]]; then
-          choco install cmake --installargs 'ADD_CMAKE_TO_PATH=System'
+        if [ "$RUNNER_OS" == "Windows" ]; then
+          ./vcpkg/bootstrap-vcpkg.bat
         else
-          sudo apt-get install cmake
+          ./vcpkg/bootstrap-vcpkg.sh
         fi
+      shell: bash
+
+    - name: Install Dependencies (vcpkg)
+      run: |
+        if [ "$RUNNER_OS" == "Windows" ]; then
+          ./vcpkg/vcpkg install asio:x64-windows raylib:x64-windows boost-serialization:x64-windows
+        else
+          ./vcpkg/vcpkg install asio raylib boost-serialization
+        fi
+      shell: bash
+
     - name: Configure CMake
       # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.
       # See https://cmake.org/cmake/help/latest/variable/CMAKE_BUILD_TYPE.html?highlight=cmake_build_type
@@ -68,6 +82,7 @@ jobs:
         -DCMAKE_CXX_COMPILER=${{ matrix.cpp_compiler }}
         -DCMAKE_C_COMPILER=${{ matrix.c_compiler }}
         -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
+        -DCMAKE_TOOLCHAIN_FILE=${{ github.workspace }}/vcpkg/scripts/buildsystems/vcpkg.cmake
         -S ${{ github.workspace }}
 
     - name: Build

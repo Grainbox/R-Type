@@ -63,10 +63,14 @@ void SetupRegistry::client_connect_handler(Registry &r,
 
     Position pos(client.getEntityId() * 150, 0);
     Controllable controls;
-    controls.setKeyboardKey(&controls.Up, KEY_UP);
-    controls.setKeyboardKey(&controls.Down, KEY_DOWN);
-    controls.setKeyboardKey(&controls.Left, KEY_LEFT);
-    controls.setKeyboardKey(&controls.Right, KEY_RIGHT);
+    controls.addKeyboardKey(controls.Up, KEY_UP);
+    controls.addKeyboardKey(controls.Down, KEY_DOWN);
+    controls.addKeyboardKey(controls.Left, KEY_LEFT);
+    controls.addKeyboardKey(controls.Right, KEY_RIGHT);
+    controls.addKeyboardKey(controls.Up, KEY_W);
+    controls.addKeyboardKey(controls.Down, KEY_S);
+    controls.addKeyboardKey(controls.Left, KEY_A);
+    controls.addKeyboardKey(controls.Right, KEY_D);
     Velocity vel(0, 0);
     Drawable draw("assets/entity_1.png", true);
 

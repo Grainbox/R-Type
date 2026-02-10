@@ -7,14 +7,14 @@ This roadmap outlines the planned enhancements and community goals for the R-Typ
 - [x] Create automated setup scripts (`setup.ps1`, `build.sh`).
 - [x] Revamp `README.md` with clear instructions.
 - [x] Fix documentation typos and dead links.
-- [ ] Stabilize CI/CD pipelines for Windows/Linux builds.
+- [x] Stabilize CI/CD pipelines for Windows/Linux builds.
 
 ## Phase 2: Game Engine Enhancements
 *Goal: Refine the core systems and add essential game loops.*
 - [ ] **Issue: Entity Component System (ECS) Refactoring**
   - Implement a more performant component storage.
   - Add support for dynamic component addition/removal at runtime.
-- [ ] **Issue: Animation System**
+- [x] **Issue: Animation System**
   - Integrate sprite-sheet animation support in the client.
   - Implement basic state-machine for player/enemy animations.
 - [ ] **Issue: Resource Manager**
