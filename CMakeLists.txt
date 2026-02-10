@@ -1,6 +1,13 @@
 cmake_minimum_required(VERSION 3.27.2)
 project(R-Type)
 
+if(WIN32)
+    add_definitions(-D_WIN32_WINNT=0x0A00) # Target Windows 10+
+    add_definitions(-DWIN32_LEAN_AND_MEAN)
+    add_definitions(-DNOGDI)
+    add_definitions(-DNOUSER)
+endif()
+
 set(CMAKE_TOOLCHAIN_FILE "vcpkg/scripts/buildsystems/vcpkg.cmake" CACHE STRING "Vcpkg toolchain file")
 
 if(APPLE)

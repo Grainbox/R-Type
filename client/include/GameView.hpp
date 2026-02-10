@@ -85,10 +85,14 @@ class GameView {
             MoveBehavior shipMovs;
             shipMovs.setOffScreenMov(false);
             shipMovs.setControllable(true);
-            shipMovs.setKeyboardKey(&shipMovs.UpInput, KEY_UP);
-            shipMovs.setKeyboardKey(&shipMovs.DownInput, KEY_DOWN);
-            shipMovs.setKeyboardKey(&shipMovs.LeftInput, KEY_LEFT);
-            shipMovs.setKeyboardKey(&shipMovs.RightInput, KEY_RIGHT);
+            shipMovs.addKeyboardKey(shipMovs.UpInput, KEY_UP);
+            shipMovs.addKeyboardKey(shipMovs.DownInput, KEY_DOWN);
+            shipMovs.addKeyboardKey(shipMovs.LeftInput, KEY_LEFT);
+            shipMovs.addKeyboardKey(shipMovs.RightInput, KEY_RIGHT);
+            shipMovs.addKeyboardKey(shipMovs.UpInput, KEY_W);
+            shipMovs.addKeyboardKey(shipMovs.DownInput, KEY_S);
+            shipMovs.addKeyboardKey(shipMovs.LeftInput, KEY_A);
+            shipMovs.addKeyboardKey(shipMovs.RightInput, KEY_D);
             KeyReaction Kreact1(KEY_SPACE, std::bind(&GameView::shootBullet, this, std::placeholders::_1, std::placeholders::_2));
 
             r.addComponent<Position>(player, playerPos, gameScene);

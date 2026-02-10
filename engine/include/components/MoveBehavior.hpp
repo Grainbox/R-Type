@@ -8,8 +8,11 @@
 #ifndef MOVEBEHAVIOR_HPP_
 #define MOVEBEHAVIOR_HPP_
 
+#include <vector>
+#include <algorithm>
 #include "ECS/Registry.hpp"
 #include <boost/serialization/serialization.hpp>
+#include <boost/serialization/vector.hpp>
 
 /*!
  \class MoveBehavior
@@ -21,12 +24,19 @@ class MoveBehavior {
 
         void setControllable(bool isControllable) { _controllable = isControllable; };
         bool isControllable(void) const { return _controllable; };
-        void setKeyboardKey(int *moveKey, int newKey) { *moveKey = newKey; };
+        void setKeyboardKey(std::vector<int> &moveKeys, int newKey) {
+            moveKeys.clear();
+            moveKeys.push_back(newKey);
+        };
+        void addKeyboardKey(std::vector<int> &moveKeys, int newKey) {
+            if (std::find(moveKeys.begin(), moveKeys.end(), newKey) == moveKeys.end())
+                moveKeys.push_back(newKey);
+        };
 
-        int UpInput = -1;     // Valeur initiale pour indiquer qu'aucune touche n'est assignée
-        int DownInput = -1;   // Utilisez -1 ou une autre valeur pour représenter 'Unknown'
-        int LeftInput = -1;
-        int RightInput = -1;
+        std::vector<int> UpInput;
+        std::vector<int> DownInput;
+        std::vector<int> LeftInput;
+        std::vector<int> RightInput;
         bool PressUp = false;
         bool PressDown = false;
         bool PressLeft = false;
@@ -52,6 +62,10 @@ class MoveBehavior {
             ar & constMovX;
             ar & constMovY;
             ar & _moveSpeed;
+            ar & UpInput;
+            ar & DownInput;
+            ar & LeftInput;
+            ar & RightInput;
         }
 
         friend class boost::serialization::access;

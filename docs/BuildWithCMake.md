@@ -13,14 +13,11 @@ Run the `build.sh` script at the root of the repository.
    mkdir build && cd build
    ```
 2. Configure the project with CMake by specifying the vcpkg configuration file:
-   linux:
-   ```bash
-   cmake ..
-   ```
-   windows: (put you actual repo url)
-   ```bash
-   cmake .. -DCMAKE_PREFIX_PATH="repo_url\vcpkg\installed\x64-windows\share\sfml"
-   ```
+    windows:
+    On Windows, it is highly recommended to use `.\setup.ps1` which handles the vcpkg toolchain integration automatically. If doing it manually:
+    ```bash
+    cmake .. -DCMAKE_TOOLCHAIN_FILE="..\vcpkg\scripts\buildsystems\vcpkg.cmake"
+    ```
 3. Build the project:
    ```bash
    cmake --build .  --config Release

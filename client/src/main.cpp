@@ -9,6 +9,7 @@
 #include <ostream>
 
 #include "client/ClientEngine.hpp"
+#include "RaylibWrapper.hpp"
 #include "MainView.hpp"
 #include "GameView.hpp"
 #include "ServerGameScene.hpp"
@@ -46,6 +47,7 @@ int main(int argc, char **argv)
         int winHeigth = 600;
         InitAudioDevice();
         InitWindow(winWidth, winHeigth, "My Engine");
+        ChangeDirectory(GetApplicationDirectory());
         SetTargetFPS(60);
 
         if (argc == 2)

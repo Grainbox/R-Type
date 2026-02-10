@@ -9,7 +9,7 @@
 #define DRAWABLE_HPP_
 
 #include <string>
-#include <raylib.h>
+#include "RaylibWrapper.hpp"
 
 #include "Exceptions.hpp"
 

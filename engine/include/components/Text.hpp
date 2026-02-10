@@ -9,7 +9,7 @@
 #define TEXT_HPP_
 
     #include <iostream>
-    #include <raylib.h>
+    #include "RaylibWrapper.hpp"
 
 class Text {
     public:

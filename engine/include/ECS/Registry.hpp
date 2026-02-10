@@ -18,10 +18,9 @@
 #include <algorithm>
 #include <iostream>
 #include <functional>
-#include <raylib.h>
-#include <boost/optional.hpp>
-
+#include "RaylibWrapper.hpp"
 #include <asio.hpp>
+#include <boost/optional.hpp>
 
 #include "Entity.hpp"
 

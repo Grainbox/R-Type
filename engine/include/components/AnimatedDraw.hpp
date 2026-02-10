@@ -10,7 +10,7 @@
 
 #include <string>
 #include <vector>
-#include <raylib.h>
+#include "RaylibWrapper.hpp"
 
 #include "Exceptions.hpp"
 
@@ -31,11 +31,12 @@ class AnimatedDraw {
                 for (int col = 0; col < nbCols; col++) {
                     Rectangle sourceRect = { col * frameWidth, row * frameHeight, frameWidth, frameHeight };
                     Image frameImage = ImageFromImage(spritesheet, sourceRect);
-                    UnloadImage(frameImage);
                     list.push_back(LoadTextureFromImage(frameImage));
+                    UnloadImage(frameImage);
                 }
                 textureList.push_back(list);
             }
+            UnloadImage(spritesheet);
             for (auto list : textureList)
                 for (auto texture : list)
                     if (!texture.id)
@@ -54,11 +55,12 @@ class AnimatedDraw {
                     Rectangle sourceRect = { col * frameWidth, row * frameHeight, frameWidth, frameHeight };
                     Image frameImage = ImageFromImage(spritesheet, sourceRect);
                     ImageResizeNN(&frameImage, resizeWidth, resizeHeight);
-                    UnloadImage(frameImage);
                     list.push_back(LoadTextureFromImage(frameImage));
+                    UnloadImage(frameImage);
                 }
                 textureList.push_back(list);
             }
+            UnloadImage(spritesheet);
             for (auto list : textureList)
                 for (auto texture : list)
                     if (!texture.id)

@@ -16,12 +16,12 @@
 #ifndef CLIENTSYSTEM_HPP_
 #define CLIENTSYSTEM_HPP_
 
+#include "RaylibWrapper.hpp"
+#include <asio.hpp>
+
 #include "ECS/Registry.hpp"
 #include "ECS/Sparse_Array.hpp"
 #include "Communication_Structures.hpp"
-
-#include <asio.hpp>
-#include <raylib.h>
 
 /**
  * @class ClientSystem
@@ -275,14 +275,14 @@ class ClientSystem {
                 behavior.value().PressRight = false;
 
                 // Récupération de l'info via la fonction raylib 'isKeyDown'
-                if (behavior.value().UpInput != -1 && IsKeyDown(behavior.value().UpInput))
-                    behavior.value().PressUp = true;
-                if (behavior.value().DownInput != -1 && IsKeyDown(behavior.value().DownInput))
-                    behavior.value().PressDown = true;
-                if (behavior.value().LeftInput != -1 && IsKeyDown(behavior.value().LeftInput))
-                    behavior.value().PressLeft = true;
-                if (behavior.value().RightInput != -1 && IsKeyDown(behavior.value().RightInput))
-                    behavior.value().PressRight = true;
+                for (int key : behavior.value().UpInput)
+                    if (IsKeyDown(key)) behavior.value().PressUp = true;
+                for (int key : behavior.value().DownInput)
+                    if (IsKeyDown(key)) behavior.value().PressDown = true;
+                for (int key : behavior.value().LeftInput)
+                    if (IsKeyDown(key)) behavior.value().PressLeft = true;
+                for (int key : behavior.value().RightInput)
+                    if (IsKeyDown(key)) behavior.value().PressRight = true;
             }
         }
 

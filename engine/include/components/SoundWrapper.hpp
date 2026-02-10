@@ -9,7 +9,7 @@
 #define SOUND_HPP_
 
     #include <iostream>
-    #include <raylib.h>
+    #include "RaylibWrapper.hpp"
 
 class SoundWrapper {
     public:

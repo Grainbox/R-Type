@@ -8,9 +8,10 @@
 #ifndef SERVERSYSTEM_HPP_
 #define SERVERSYSTEM_HPP_
 
-#include <memory>
+#include "RaylibWrapper.hpp"
 #include <asio.hpp>
 #include <map>
+#include <memory>
 
 #include "Communication_Structures.hpp"
 #include "ECS/Registry.hpp"
