@@ -9,7 +9,7 @@ set(ENGINE_SOURCES
 add_library(engine SHARED ${ENGINE_SOURCES})
 
 target_include_directories(engine PUBLIC include)
-target_link_libraries(engine PRIVATE raylib Boost::boost Boost::serialization)
+target_link_libraries(engine PUBLIC raylib Boost::boost Boost::serialization)
 
 add_custom_command(TARGET engine POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_directory
