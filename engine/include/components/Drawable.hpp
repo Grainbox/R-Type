@@ -10,6 +10,7 @@
 
 #include <string>
 #include "RaylibWrapper.hpp"
+#include "ResourceManager.hpp"
 
 #include "Exceptions.hpp"
 
@@ -22,7 +23,7 @@ class Drawable {
         Drawable() {};
 
         Drawable(std::string spritePath) : spritePath(spritePath) {
-            this->texture = LoadTexture(spritePath.c_str());
+            this->texture = ResourceManager::getInstance().getTexture(spritePath);
             if (!this->texture.id) {
                 throw LoadAssetException("Failed to load asset: " + spritePath);
             }
@@ -32,10 +33,7 @@ class Drawable {
             spritePath(spritePath), resizeWidth(resizeWidth),
             resizeHeight(resizeHeight)
         {
-            Image image = LoadImage(spritePath.c_str());
-            ImageResizeNN(&image, resizeWidth, resizeHeight);
-            this->texture = LoadTextureFromImage(image);
-            UnloadImage(image);
+            this->texture = ResourceManager::getInstance().getTexture(spritePath, resizeWidth, resizeHeight);
             if (!this->texture.id) {
                 throw LoadAssetException("Failed to load asset: " + spritePath);
             }

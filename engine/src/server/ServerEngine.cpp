@@ -6,6 +6,8 @@
 */
 
 #include "server/ServerEngine.hpp"
+#include <chrono>
+#include <thread>
 
 /*!
  \brief Constructor of ServerEngine.
@@ -29,7 +31,32 @@ ServerEngine::~ServerEngine()
 
 void ServerEngine::run()
 {
-    system.io_service.run();
+    // Start ASIO processing in a separate thread to not block the game loop
+    std::thread asio_thread([this]() {
+        this->system.io_service.run();
+    });
 
-    while (1);
+    const int TPS = 60;
+    const std::chrono::nanoseconds tick_duration(1000000000LL / TPS);
+    auto next_tick = std::chrono::steady_clock::now();
+
+    while (true) {
+        auto now = std::chrono::steady_clock::now();
+        
+        if (now >= next_tick) {
+            // Update systems
+            system.update(r);
+            
+            next_tick += tick_duration;
+        }
+
+        // Avoid pegged CPU if ahead of schedule
+        auto sleep_time = next_tick - std::chrono::steady_clock::now();
+        if (sleep_time > std::chrono::milliseconds(1)) {
+            std::this_thread::sleep_for(std::chrono::milliseconds(1));
+        }
+    }
+
+    if (asio_thread.joinable())
+        asio_thread.join();
 }

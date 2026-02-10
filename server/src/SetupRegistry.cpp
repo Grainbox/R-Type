@@ -6,6 +6,7 @@
 */
 
 #include "SetupRegistry.hpp"
+#include "components/AI.hpp"
 
 SetupRegistry::SetupRegistry(Registry &r) : r(r)
 {
@@ -163,6 +164,45 @@ void SetupRegistry::create_game_handler(Registry &r, MessageHandlerData data)
 
     std::list<size_t> deadEntities = r.getDeadEntities();
 
+    // Spawn some AI enemies for testing if it's the first time
+    static bool enemiesSpawned = false;
+    if (!enemiesSpawned) {
+        // Sinusoidal Enemy
+        Entity e1 = r.spawnEntity(r.getCurrentScene());
+        r.addComponent<Position>(e1, Position(700, 200), r.getCurrentScene());
+        r.addComponent<Velocity>(e1, Velocity(-100, 0), r.getCurrentScene());
+        r.addComponent<Drawable>(e1, Drawable("assets/entity_2.png"), r.getCurrentScene());
+        r.addComponent<AI>(e1, AI(AIMode::Sinusoidal, 2.0f, 50.0f), r.getCurrentScene());
+        r.addComponent<Health>(e1, Health(50), r.getCurrentScene());
+
+        // ZigZag Enemy
+        Entity e2 = r.spawnEntity(r.getCurrentScene());
+        r.addComponent<Position>(e2, Position(800, 400), r.getCurrentScene());
+        r.addComponent<Velocity>(e2, Velocity(-150, 50), r.getCurrentScene());
+        r.addComponent<Drawable>(e2, Drawable("assets/entity_2.png"), r.getCurrentScene());
+        r.addComponent<AI>(e2, AI(AIMode::ZigZag, 1.5f, 100.0f), r.getCurrentScene());
+        r.addComponent<Health>(e2, Health(50), r.getCurrentScene());
+
+        // Homing Enemy
+        Entity e3 = r.spawnEntity(r.getCurrentScene());
+        r.addComponent<Position>(e3, Position(750, 300), r.getCurrentScene());
+        r.addComponent<Velocity>(e3, Velocity(0, 0), r.getCurrentScene());
+        r.addComponent<Drawable>(e3, Drawable("assets/entity_2.png"), r.getCurrentScene());
+        r.addComponent<AI>(e3, AI(AIMode::Homing, 1.0f, 80.0f), r.getCurrentScene());
+        r.addComponent<Health>(e3, Health(75), r.getCurrentScene());
+
+        // Boss Entity
+        Entity boss = r.spawnEntity(r.getCurrentScene());
+        r.addComponent<Position>(boss, Position(700, 300), r.getCurrentScene());
+        r.addComponent<Velocity>(boss, Velocity(-50, 0), r.getCurrentScene());
+        r.addComponent<Drawable>(boss, Drawable("assets/entity_2.png"), r.getCurrentScene());
+        r.addComponent<AI>(boss, AI(AIMode::Sinusoidal, 1.0f, 30.0f), r.getCurrentScene());
+        r.addComponent<Health>(boss, Health(300), r.getCurrentScene());
+        r.addComponent<Boss>(boss, Boss(300, 3), r.getCurrentScene());
+        
+        enemiesSpawned = true;
+    }
+
     for (size_t i = 0; i < r.getNextEntityId(); i++)
     {
         auto it = std::find(deadEntities.begin(), deadEntities.end(), i);
@@ -190,6 +230,8 @@ void SetupRegistry::create_game_handler(Registry &r, MessageHandlerData data)
         comps.drawable = r.get_boost_entity_component<Drawable>(i);
         comps.position = r.get_boost_entity_component<Position>(i);
         comps.velocity = r.get_boost_entity_component<Velocity>(i);
+        comps.boss = r.get_boost_entity_component<Boss>(i);
+        comps.health = r.get_boost_entity_component<Health>(i);
 
         msg.entities.push_back(comps);
     }

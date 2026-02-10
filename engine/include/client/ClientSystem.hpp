@@ -18,10 +18,16 @@
 
 #include "RaylibWrapper.hpp"
 #include <asio.hpp>
+#include <string>
+#include <sstream>
+#include <unordered_map>
+#include <vector>
 
 #include "ECS/Registry.hpp"
 #include "ECS/Sparse_Array.hpp"
+#include <optional>
 #include "Communication_Structures.hpp"
+#include "ResourceManager.hpp"
 
 /**
  * @class ClientSystem
@@ -43,6 +49,7 @@ class ClientSystem {
 
         ~ClientSystem()
         {
+            ResourceManager::getInstance().clear();
         }
 
         void send_disconnect()
@@ -123,14 +130,12 @@ class ClientSystem {
                 std::string scene = r.getCurrentScene();
                 Sparse_Array<ReceiveUDP> &udpComp = r.getComponents<ReceiveUDP>(scene);
 
-                for (size_t i = 0; i < udpComp.size(); i++) {
-                    auto &udp = udpComp[i];
-
-                    if (!udp)
-                        continue;
+                for (size_t i = 0; i < udpComp.dense_size(); i++) {
+                    size_t entity_id = udpComp.get_entity_at(i);
+                    auto &udp = udpComp.dense_at(i);
 
                     MessageHandlerData data = {received_message, msg.header.type, _udp_socket, _server_endpoint, clients_entity, client_server_entity_id, localEndpoint};
-                    r.getComScript(udp.value().script_id)(r, i, data);
+                    r.getComScript(udp.script_id)(r, entity_id, data);
                 }
 
                 std::cout << "-------------------------------------" << std::endl;
@@ -144,12 +149,10 @@ class ClientSystem {
             std::string scene = r.getCurrentScene();
             Sparse_Array<Health> &life = r.getComponents<Health>(scene);
 
-            for (size_t i = 0; i < life.size(); ++i) {
-                auto &pv = life[i];
-
-                if (!pv) continue;
-                if (!pv.value().health)
-                    r.remove_component<Health>(i, scene);
+            for (size_t i = 0; i < life.dense_size(); ++i) {
+                auto &pv = life.dense_at(i);
+                if (!pv.currentHealth)
+                    r.remove_component<Health>(life.get_entity_at(i), scene);
             }
         }
 
@@ -174,48 +177,49 @@ class ClientSystem {
             Sparse_Array<Position> &position = r.getComponents<Position>(scene);
             Sparse_Array<MoveBehavior> &behaviors = r.getComponents<MoveBehavior>(scene);
 
-            for (size_t i = 0; i < velocity.size() && i < position.size() && i < behaviors.size(); ++i) {
-                auto &vel = velocity[i];
-                auto &pos = position[i];
-                auto &behavior = behaviors[i];
+            for (size_t i = 0; i < behaviors.dense_size(); ++i) {
+                size_t entity_id = behaviors.get_entity_at(i);
+                auto &behavior = behaviors.dense_at(i);
+                auto vel = velocity[entity_id];
+                auto pos = position[entity_id];
 
-                if (!vel || !pos || !behavior)
+                if (!vel || !pos)
                     continue;
 
                 // Réinitialisation de la vélocité de l'entité.
-                vel.value().vx = 0;
-                vel.value().vy = 0;
+                vel->vx = 0;
+                vel->vy = 0;
 
                 int move_speed = 1;
-                if (behavior.value().getMoveSpeed() != 0)
-                    move_speed = behavior.value().getMoveSpeed();
+                if (behavior.getMoveSpeed() != 0)
+                    move_speed = behavior.getMoveSpeed();
 
                 // Process d'ajout des mouvements constants enregistrés.
-                if (behavior.value().constMovX)
-                    vel.value().vx += behavior.value().constMovX * move_speed;
-                if (behavior.value().constMovY)
-                    vel.value().vy += behavior.value().constMovY * move_speed;
+                if (behavior.constMovX)
+                    vel->vx += behavior.constMovX * move_speed;
+                if (behavior.constMovY)
+                    vel->vy += behavior.constMovY * move_speed;
 
                 // Process de mis à jour de la vélocité selon les controls
-                if (behavior.value().isControllable()) {
-                    if (behavior.value().PressUp)
-                        vel.value().vy -= move_speed;
-                    if (behavior.value().PressDown)
-                        vel.value().vy += move_speed;
-                    if (behavior.value().PressLeft)
-                        vel.value().vx -= move_speed;
-                    if (behavior.value().PressRight)
-                        vel.value().vx += move_speed;
+                if (behavior.isControllable()) {
+                    if (behavior.PressUp)
+                        vel->vy -= move_speed;
+                    if (behavior.PressDown)
+                        vel->vy += move_speed;
+                    if (behavior.PressLeft)
+                        vel->vx -= move_speed;
+                    if (behavior.PressRight)
+                        vel->vx += move_speed;
                 }
 
                 // process empêchant l'entité de sortir de l'écran.
-                if (behavior.value().getOffScreenMov() == false) {
-                    if ((vel.value().vx < 0 && pos.value().x <= 0) ||
-                        (vel.value().vx > 0 && pos.value().x >= GetScreenWidth()))
-                        vel.value().vx = 0;
-                    if ((vel.value().vy < 0 && pos.value().y <= 0) ||
-                        (vel.value().vy > 0 && pos.value().y >= GetScreenHeight()))
-                        vel.value().vy = 0;
+                if (behavior.getOffScreenMov() == false) {
+                    if ((vel->vx < 0 && pos->x <= 0) ||
+                        (vel->vx > 0 && pos->x >= GetScreenWidth()))
+                        vel->vx = 0;
+                    if ((vel->vy < 0 && pos->y <= 0) ||
+                        (vel->vy > 0 && pos->y >= GetScreenHeight()))
+                        vel->vy = 0;
                 }
             }
         }
@@ -225,26 +229,27 @@ class ClientSystem {
             Sparse_Array<Controllable> &controllables = r.getComponents<Controllable>(scene);
             Sparse_Array<Velocity> &velocities = r.getComponents<Velocity>(scene);
 
-            for (size_t i = 0; i < controllables.size() && i < velocities.size(); ++i) {
-                auto &vel = velocities[i];
-                auto &controlle = controllables[i];
+            for (size_t i = 0; i < controllables.dense_size(); ++i) {
+                size_t entity_id = controllables.get_entity_at(i);
+                auto &control = controllables.dense_at(i);
+                auto vel = velocities[entity_id];
 
-                if (!vel || !controlle)
+                if (!vel)
                     continue;
 
                 // Réinitialiser la vitesse
-                vel.value().vx = 0;
-                vel.value().vy = 0;
+                vel->vx = 0;
+                vel->vy = 0;
 
                 // Vérifier les touches pressées et ajuster la vitesse en conséquence
-                for (int key : controlle.value().Left)
-                    if (IsKeyDown(key)) vel.value().vx = -1;
-                for (int key : controlle.value().Right)
-                    if (IsKeyDown(key)) vel.value().vx = 1;
-                for (int key : controlle.value().Up)
-                    if (IsKeyDown(key)) vel.value().vy = -1;
-                for (int key : controlle.value().Down)
-                    if (IsKeyDown(key)) vel.value().vy = 1;
+                for (int key : control.Left)
+                    if (IsKeyDown(key)) vel->vx = -1;
+                for (int key : control.Right)
+                    if (IsKeyDown(key)) vel->vx = 1;
+                for (int key : control.Up)
+                    if (IsKeyDown(key)) vel->vy = -1;
+                for (int key : control.Down)
+                    if (IsKeyDown(key)) vel->vy = 1;
             }
         }
 
@@ -262,27 +267,24 @@ class ClientSystem {
             std::string scene = r.getCurrentScene();
             Sparse_Array<MoveBehavior> &behaviors = r.getComponents<MoveBehavior>(scene);
 
-            for (size_t i = 0; i < behaviors.size(); ++i) {
-                auto &behavior = behaviors[i];
-
-                if (!behavior)
-                    continue;
+            for (size_t i = 0; i < behaviors.dense_size(); ++i) {
+                auto &behavior = behaviors.dense_at(i);
 
                 // Réinitialisation des booléen attestant l'appuie des touches.
-                behavior.value().PressUp = false;
-                behavior.value().PressDown = false;
-                behavior.value().PressLeft = false;
-                behavior.value().PressRight = false;
+                behavior.PressUp = false;
+                behavior.PressDown = false;
+                behavior.PressLeft = false;
+                behavior.PressRight = false;
 
                 // Récupération de l'info via la fonction raylib 'isKeyDown'
-                for (int key : behavior.value().UpInput)
-                    if (IsKeyDown(key)) behavior.value().PressUp = true;
-                for (int key : behavior.value().DownInput)
-                    if (IsKeyDown(key)) behavior.value().PressDown = true;
-                for (int key : behavior.value().LeftInput)
-                    if (IsKeyDown(key)) behavior.value().PressLeft = true;
-                for (int key : behavior.value().RightInput)
-                    if (IsKeyDown(key)) behavior.value().PressRight = true;
+                for (int key : behavior.UpInput)
+                    if (IsKeyDown(key)) behavior.PressUp = true;
+                for (int key : behavior.DownInput)
+                    if (IsKeyDown(key)) behavior.PressDown = true;
+                for (int key : behavior.LeftInput)
+                    if (IsKeyDown(key)) behavior.PressLeft = true;
+                for (int key : behavior.RightInput)
+                    if (IsKeyDown(key)) behavior.PressRight = true;
             }
         }
 
@@ -291,13 +293,14 @@ class ClientSystem {
             Sparse_Array<Text> &txt = r.getComponents<Text>(scene);
             Sparse_Array<Position> &position = r.getComponents<Position>(scene);
 
-            for (size_t i = 0; i < txt.size() && i < position.size(); ++i) {
-                auto &text = txt[i];
-                auto &pos = position[i];
+            for (size_t i = 0; i < txt.dense_size(); ++i) {
+                size_t entity_id = txt.get_entity_at(i);
+                auto &text = txt.dense_at(i);
+                auto pos = position[entity_id];
 
-                if (!text || !pos) continue;
+                if (!pos) continue;
 
-                DrawText(TextFormat(text.value().text.c_str()), pos.value().x, pos.value().y, text.value().font_size, text.value().rgb);
+                DrawText(TextFormat(text.text.c_str()), pos->x, pos->y, text.font_size, text.rgb);
             }
         }
 
@@ -398,34 +401,36 @@ class ClientSystem {
             Sparse_Array<Hitbox> &hitboxs = r.getComponents<Hitbox>(scene);
             Sparse_Array<Position> &positions = r.getComponents<Position>(scene);
 
-            for (size_t id = 0; id < hitboxs.size() && id < positions.size(); ++id) {
-                auto &hitbox = hitboxs[id];
-                auto &position = positions[id];
+            for (size_t i = 0; i < hitboxs.dense_size(); ++i) {
+                size_t id = hitboxs.get_entity_at(i);
+                auto &hitbox = hitboxs.dense_at(i);
+                auto pos = positions[id];
 
-                if (!hitbox || !position)
-                    continue;
+                if (!pos) continue;
 
-                hitbox.value().clearCollisionList();
+                hitbox.clearCollisionList();
 
-                int leftX = position.value().x;
-                int rightX = position.value().x + hitbox.value().width;
-                int topY = position.value().y;
-                int bottomY = position.value().y + hitbox.value().height;
+                int leftX = pos->x;
+                int rightX = pos->x + hitbox.width;
+                int topY = pos->y;
+                int bottomY = pos->y + hitbox.height;
 
-                for (size_t id_other = 0; id_other < hitboxs.size() && id_other < positions.size(); ++id_other) {
-                    auto &hitbox2 = hitboxs[id_other];
-                    auto &position2 = positions[id_other];
+                for (size_t j = 0; j < hitboxs.dense_size(); ++j) {
+                    if (i == j) continue;
+                    size_t id_other = hitboxs.get_entity_at(j);
+                    auto &hitbox2 = hitboxs.dense_at(j);
+                    auto pos2 = positions[id_other];
 
-                    if (id == id_other || !hitbox2 || !position2)
-                        continue;
-                    int leftX2 = position2.value().x;
-                    int rightX2 = position2.value().x + hitbox2.value().width;
-                    int topY2 = position2.value().y;
-                    int bottomY2 = position2.value().y + hitbox2.value().height;
+                    if (!pos2) continue;
+                    
+                    int leftX2 = pos2->x;
+                    int rightX2 = pos2->x + hitbox2.width;
+                    int topY2 = pos2->y;
+                    int bottomY2 = pos2->y + hitbox2.height;
 
                     if (((leftX >= leftX2 && leftX <= rightX2) || (rightX >= leftX2 && rightX <= rightX2)) &&
                         ((topY >= topY2 && topY <= bottomY2) || (bottomY >= topY2 && bottomY <= bottomY2))) {
-                        hitbox.value().enterCollision(id_other, hitbox2.value().getHitTag().tag);
+                        hitbox.enterCollision(id_other, hitbox2.getHitTag().tag);
                         std::cout << "collision " << id_other << " entered in " << id << std::endl;
                     }
                 }
@@ -445,18 +450,19 @@ class ClientSystem {
             Sparse_Array<Hitbox> &hitboxs = r.getComponents<Hitbox>(scene);
             bool entityAlive = true;
 
-            for (size_t i = 0; i < onCols.size() && i < hitboxs.size(); ++i) {
-                auto &collision = onCols[i];
-                auto &hitbox = hitboxs[i];
+            for (size_t i = 0; i < onCols.dense_size(); ++i) {
+                size_t entity_id = onCols.get_entity_at(i);
+                auto &collision = onCols.dense_at(i);
+                auto hitbox = hitboxs[entity_id];
 
-                if (!collision || !hitbox || hitbox.value().getCollisionList().empty())
+                if (!hitbox || hitbox->getCollisionList().empty())
                     continue;
-                for (auto reaction : collision.value().reactionsList) {
+                for (auto reaction : collision.reactionsList) {
                     HitTag::hitTag tag = reaction.first;
                     size_t script_id = reaction.second;
-                    for (auto collisionInfo : hitbox.value().getCollisionList()) {
+                    for (auto collisionInfo : hitbox->getCollisionList()) {
                         if (collisionInfo.second == tag) {
-                            entityAlive = r.getEventScript(script_id)(r, i, _udp_socket, _server_endpoint);
+                            entityAlive = r.getEventScript(script_id)(r, entity_id, _udp_socket, _server_endpoint);
                             if (!entityAlive)
                                 break;
                         }
@@ -517,24 +523,24 @@ class ClientSystem {
             auto &animations = r.getComponents<AnimatedDraw>(scene);
             float dt = GetFrameTime();
 
-            for (size_t i = 0; i < drawables.size() && i < animations.size(); ++i) {
-                auto &draw = drawables[i];
-                auto &anim = animations[i];
+            for (size_t i = 0; i < animations.dense_size(); ++i) {
+                size_t entity_id = animations.get_entity_at(i);
+                auto &anim = animations.dense_at(i);
+                auto draw = drawables[entity_id];
 
-                if (!draw || !anim)
-                    continue;
-                
-                anim.value().timeAccumulator += dt;
-                if (anim.value().timeAccumulator >= anim.value()._frameDuration) {
-                    anim.value().timeAccumulator -= anim.value()._frameDuration;
-                    anim.value().currentFrame++;
-                    if (anim.value().currentFrame >= anim.value()._nbCols) {
-                        if (anim.value()._loop)
-                            anim.value().currentFrame = 0;
-                        else
-                            anim.value().currentFrame = anim.value()._nbCols - 1;
+                if (draw) {
+                    anim.timeAccumulator += dt;
+                    if (anim.timeAccumulator >= anim._frameDuration) {
+                        anim.timeAccumulator -= anim._frameDuration;
+                        anim.currentFrame++;
+                        if (anim.currentFrame >= anim._nbCols) {
+                            if (anim._loop)
+                                anim.currentFrame = 0;
+                            else
+                                anim.currentFrame = anim._nbCols - 1;
+                        }
+                        draw->texture = anim.textureList.at(anim.currentRow).at(anim.currentFrame);
                     }
-                    draw.value().texture = anim.value().textureList.at(anim.value().currentRow).at(anim.value().currentFrame);
                 }
             }
         }
@@ -553,16 +559,15 @@ class ClientSystem {
             auto &positions = r.getComponents<Position>(scene);
             auto &drawables = r.getComponents<Drawable>(scene);
 
-            for (size_t i = 0; i < positions.size() && i < drawables.size(); ++i) {
-                auto &pos = positions[i];
-                auto &draw = drawables[i];
+            for (size_t i = 0; i < drawables.dense_size(); ++i) {
+                size_t entity_id = drawables.get_entity_at(i);
+                auto &draw = drawables.dense_at(i);
+                auto pos = positions[entity_id];
 
-                if (!pos || !draw)
-                    continue;
-
-                Vector2 position = { pos.value().x, pos.value().y };
-
-                DrawTextureV(draw.value().texture, position, WHITE);
+                if (pos) {
+                    Vector2 position = { pos->x, pos->y };
+                    DrawTextureV(draw.texture, position, WHITE);
+                }
             }
         }
 
@@ -577,15 +582,16 @@ class ClientSystem {
             Sparse_Array<Position> &positions = r.getComponents<Position>(scene);
             Sparse_Array<Velocity> &velocities = r.getComponents<Velocity>(scene);
 
-            for (size_t i = 0; i < positions.size() && i < velocities.size(); ++i) {
-                auto &pos = positions[i];
-                auto &vel = velocities[i];
+            for (size_t i = 0; i < velocities.dense_size(); ++i) {
+                size_t entity_id = velocities.get_entity_at(i);
+                auto &vel = velocities.dense_at(i);
+                auto pos = positions[entity_id];
 
-                if (!pos || !vel || (vel.value().vx == 0 && vel.value().vy == 0))
+                if (!pos || (vel.vx == 0 && vel.vy == 0))
                     continue;
 
-                pos.value().x += vel.value().vx;
-                pos.value().y += vel.value().vy;
+                pos->x += vel.vx;
+                pos->y += vel.vy;
 
                 TransfertECSMessage msg;
                 msg.header.type = MessageType::ECS_Transfert;
@@ -626,8 +632,10 @@ class ClientSystem {
         asio::io_context io_context;
     protected:
     private:
-        std::optional<size_t> findKeyByValue(const std::unordered_map<size_t, size_t>& map, const size_t &value) {
-            for (const auto& pair : map) {
+        std::optional<size_t> findKeyByValue(
+            const std::unordered_map<size_t, size_t> &client_server_entity_id,
+            size_t value) {
+            for (const auto &pair : client_server_entity_id) {
                 if (pair.second == value) {
                     return pair.first; // Retourne la clé si la valeur correspond
                 }

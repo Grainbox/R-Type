@@ -17,14 +17,14 @@ This roadmap outlines the planned enhancements and community goals for the R-Typ
 - [x] **Issue: Animation System**
   - Integrate sprite-sheet animation support in the client.
   - Implement basic state-machine for player/enemy animations.
-- [ ] **Issue: Resource Manager**
-  - Create a centralized asset loader (Textures, Sounds, Fonts).
-  - Implement basic caching to avoid redundant disk I/O.
+- [x] **Issue: Resource Manager**
+  - [x] Create a centralized asset loader (Textures, Sounds, Fonts).
+  - [x] Implement basic caching to avoid redundant disk I/O.
 
 ## Phase 3: Gameplay & Content
 *Goal: Make the game fun and replayable.*
-- [ ] **Issue: Enemy AI Variety**
-  - Implement different movement patterns (Sinusoidal, Zig-zag, Homming).
+- [x] **Issue: Enemy AI Variety**
+  - Implement different movement patterns (Sinusoidal, Zig-zag, Homing).
   - Add "Boss" entities with multiple health segments and phases.
 - [ ] **Issue: Power-up System**
   - Create drops for weapon upgrades, shields, and speed boosts.

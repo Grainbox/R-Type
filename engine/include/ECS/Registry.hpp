@@ -21,6 +21,7 @@
 #include "RaylibWrapper.hpp"
 #include <asio.hpp>
 #include <boost/optional.hpp>
+#include <optional>
 
 #include "Entity.hpp"
 
@@ -284,8 +285,9 @@ public:
 
         if (entity_id >= comps.size())
             return boost::none;
-        if (comps[entity_id].has_value()) {
-            return boost::optional<Component>(*comps[entity_id]);
+        auto handle = comps[entity_id];
+        if (handle.has_value()) {
+            return boost::optional<Component>(handle.value());
         } else {
             return boost::none;
         }

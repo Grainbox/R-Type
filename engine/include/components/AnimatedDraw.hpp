@@ -11,6 +11,7 @@
 #include <string>
 #include <vector>
 #include "RaylibWrapper.hpp"
+#include "ResourceManager.hpp"
 
 #include "Exceptions.hpp"
 
@@ -22,51 +23,18 @@ class AnimatedDraw {
     public:
         AnimatedDraw(std::string spriteSheetPath, int nbCols, int nbRows, float frameDuration = 0.1f, bool loop = true) : 
             _nbCols(nbCols), _nbRows(nbRows), _frameDuration(frameDuration), _loop(loop) {
-            Image spritesheet = LoadImage(spriteSheetPath.c_str());
-            float frameWidth = (float)spritesheet.width / nbCols;
-            float frameHeight = (float)spritesheet.height / nbRows;
-            std::vector<Texture2D> list;
-
-            for (int row = 0; row < nbRows; row++) {
-                list.clear();
-                for (int col = 0; col < nbCols; col++) {
-                    Rectangle sourceRect = { col * frameWidth, row * frameHeight, frameWidth, frameHeight };
-                    Image frameImage = ImageFromImage(spritesheet, sourceRect);
-                    list.push_back(LoadTextureFromImage(frameImage));
-                    UnloadImage(frameImage);
-                }
-                textureList.push_back(list);
-            }
-            UnloadImage(spritesheet);
-            for (auto list : textureList)
-                for (auto texture : list)
-                    if (!texture.id)
-                        throw LoadAssetException("Failed to load asset: " + spriteSheetPath);
+            textureList = ResourceManager::getInstance().getAnimatedTexture(spriteSheetPath, nbCols, nbRows);
+            
+            if (textureList.empty())
+                throw LoadAssetException("Failed to load asset: " + spriteSheetPath);
         }
 
         AnimatedDraw(std::string spriteSheetPath, int nbCols, int nbRows, int resizeWidth, int resizeHeight, float frameDuration = 0.1f, bool loop = true) :
             _nbCols(nbCols), _nbRows(nbRows), _frameDuration(frameDuration), _loop(loop) {
-            Image spritesheet = LoadImage(spriteSheetPath.c_str());
-            float frameWidth = (float)spritesheet.width / nbCols;
-            float frameHeight = (float)spritesheet.height / nbRows;
-            std::vector<Texture2D> list;
-
-            for (int row = 0; row < nbRows; row++) {
-                list.clear();
-                for (int col = 0; col < nbCols; col++) {
-                    Rectangle sourceRect = { col * frameWidth, row * frameHeight, frameWidth, frameHeight };
-                    Image frameImage = ImageFromImage(spritesheet, sourceRect);
-                    ImageResizeNN(&frameImage, resizeWidth, resizeHeight);
-                    list.push_back(LoadTextureFromImage(frameImage));
-                    UnloadImage(frameImage);
-                }
-                textureList.push_back(list);
-            }
-            UnloadImage(spritesheet);
-            for (auto list : textureList)
-                for (auto texture : list)
-                    if (!texture.id)
-                        throw LoadAssetException("Failed to load asset: " + spriteSheetPath);
+            textureList = ResourceManager::getInstance().getAnimatedTexture(spriteSheetPath, nbCols, nbRows, resizeWidth, resizeHeight);
+            
+            if (textureList.empty())
+                throw LoadAssetException("Failed to load asset: " + spriteSheetPath);
         }
 
         std::vector<std::vector<Texture2D>> textureList;

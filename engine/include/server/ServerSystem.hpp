@@ -28,6 +28,18 @@ class ServerSystem {
         */
         void handle_client_system(Registry &r, const std::array<char, 1024>& message, std::size_t length);
 
+        /**
+         * @brief Main update loop for server-side systems.
+         * @param r The registry containing entities and components.
+         */
+        void update(Registry &r);
+
+        /**
+         * @brief Broadcast the current state of entities to all connected clients.
+         * @param r The registry.
+         */
+        void broadcast_ecs_transfert(Registry &r);
+
         asio::io_service io_service;
     protected:
     private:

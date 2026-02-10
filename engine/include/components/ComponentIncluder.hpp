@@ -9,6 +9,8 @@
 #define COMPONENTINCLUDER_HPP_
 
 #include "AnimatedDraw.hpp"
+#include "AI.hpp"
+#include "Boss.hpp"
 #include "Clickable.hpp"
 #include "Controllable.hpp"
 #include "Drawable.hpp"

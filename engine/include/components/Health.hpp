@@ -8,15 +8,26 @@
 #ifndef HEALTH_HPP_
 #define HEALTH_HPP_
 
-    #include <iostream>
+#include <boost/serialization/serialization.hpp>
 
-class Health {
-    public:
-        Health() {};
-        Health(size_t hp) : health(hp) {};
-        size_t health = 100;
-    protected:
-    private:
+/**
+ * @struct Health
+ * @brief Component for entities with health points.
+ */
+struct Health {
+    Health() = default;
+    Health(int hp) : currentHealth(hp), maxHealth(hp) {};
+
+    int currentHealth = 100;
+    int maxHealth = 100;
+
+    template<class Archive>
+    void serialize(Archive &ar, const unsigned int version) {
+        ar & currentHealth;
+        ar & maxHealth;
+    }
+
+    friend class boost::serialization::access;
 };
 
 #endif /* !HEALTH_HPP_ */

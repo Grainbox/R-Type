@@ -12,8 +12,8 @@
 #include <algorithm>
 #include <vector>
 #include <iterator>
-#include <optional>
 #include <memory>
+#include <limits>
 
 #include "Exceptions.hpp"
 
@@ -28,193 +28,118 @@ template <typename Component>
 class Sparse_Array {
     public:
         using value_type = Component;
-        using reference_type = std::optional<value_type> &;
-        using const_reference_type = std::optional<value_type> const &;
-        using container_t = std::vector<std::optional<value_type>>;
+        using reference_type = value_type &;
+        using const_reference_type = value_type const &;
+        using container_t = std::vector<value_type>;
         using size_type = typename container_t::size_type;
 
         using iterator = typename container_t::iterator;
         using const_iterator = typename container_t::const_iterator;
 
-        /*!
-         \brief Default constructor.
-        */
+        // A simple wrapper to mimic std::optional for backward compatibility
+        class ComponentHandle {
+            public:
+                ComponentHandle(value_type* ptr = nullptr) : _ptr(ptr) {}
+                bool has_value() const { return _ptr != nullptr; }
+                explicit operator bool() const { return has_value(); }
+                value_type& value() { 
+                    if (!_ptr) throw ComponentNotFoundException("Sparse_Array: Accessing empty component");
+                    return *_ptr; 
+                }
+                value_type& operator*() { return value(); }
+                value_type* operator->() { return _ptr; }
+            private:
+                value_type* _ptr;
+        };
+
         Sparse_Array() = default;
-
-        /*!
-         \brief Copy constructor.
-         \param other Another Sparse_Array object to copy from.
-        */
-        Sparse_Array(Sparse_Array const &other) {
-            this->_data = other._data;
-        }
-
-        /*!
-         \brief Move constructor.
-         \param other Another Sparse_Array object to move from.
-        */
-        Sparse_Array(Sparse_Array &&other) noexcept {
-            this->_data = std::move(other._data);
-        }
-
-        /*!
-         \brief Destructor.
-        */
+        Sparse_Array(Sparse_Array const &) = default;
+        Sparse_Array(Sparse_Array &&) noexcept = default;
         ~Sparse_Array() = default;
+        Sparse_Array &operator=(Sparse_Array const &) = default;
+        Sparse_Array &operator=(Sparse_Array &&) noexcept = default;
 
-        /*!
-         \brief Copy assignment operator.
-         \param other Another Sparse_Array object to assign from.
-         \return Reference to the assigned Sparse_Array object.
-        */
-        Sparse_Array &operator=(Sparse_Array const &other) {
-            this->_data = other._data;
-            return *this;
+        ComponentHandle operator[](size_t idx) {
+            if (idx >= _sparse.size() || _sparse[idx] == NOT_FOUND) return ComponentHandle(nullptr);
+            return ComponentHandle(&_dense[_sparse[idx]]);
         }
 
-        /*!
-         \brief Move assignment operator.
-         \param other Another Sparse_Array object to move assign from.
-         \return Reference to the assigned Sparse_Array object.
-        */
-        Sparse_Array &operator=(Sparse_Array &&other) noexcept {
-            this->_data = std::move(other._data);
-            return *this;
+        const ComponentHandle operator[](size_t idx) const {
+            if (idx >= _sparse.size() || _sparse[idx] == NOT_FOUND) return ComponentHandle(nullptr);
+            return ComponentHandle(const_cast<value_type*>(&_dense[_sparse[idx]]));
         }
 
-        /*!
-         \brief Subscript operator to access or modify elements.
-         \param idx Index of the element to access.
-         \return Reference to the element at the specified index.
-        */
-        reference_type operator[](size_t idx) {
-            return this->_data[idx];
-        }
+        iterator begin() { return _dense.begin(); }
+        const_iterator begin() const { return _dense.begin(); }
+        const_iterator cbegin() const { return _dense.cbegin(); }
+        iterator end() { return _dense.end(); }
+        const_iterator end() const { return _dense.end(); }
+        const_iterator cend() const { return _dense.cend(); }
 
-        /*!
-         \brief Subscript operator to access elements (const version).
-         \param idx Index of the element to access.
-         \return Const reference to the element at the specified index.
-        */
-        const_reference_type operator[](size_t idx) const {
-            return this->_data[idx];
-        }
+        size_type size() const { return _sparse.size(); }
+        size_type dense_size() const { return _dense.size(); }
 
-        /*!
-         \brief begin method
-         \return begin method of the encapsulated vector.
-        */
-        iterator begin() {
-            return this->_data.begin();
-        }
+        value_type& dense_at(size_type idx) { return _dense[idx]; }
+        const value_type& dense_at(size_type idx) const { return _dense[idx]; }
+        size_type get_entity_at(size_type idx) const { return _entities[idx]; }
 
-        /*!
-         \brief begin method (const version)
-         \return begin method of the encapsulated vector.
-        */
-        const_iterator begin() const {
-            return this->_data.begin();
-        }
-
-        /*!
-         \brief cbegin method
-         \return cbegin method of the encapsulated vector.
-        */
-        const_iterator cbegin() const {
-            return this->_data.cbegin();
-        }
-
-        /*!
-         \brief end method
-         \return end method of the encapsulated vector.
-        */
-        iterator end() {
-            return this->_data.end();
-        }
-
-        /*!
-         \brief end method (const version)
-         \return end method of the encapsulated vector.
-        */
-        const_iterator end() const {
-            return this->_data.end();
-        }
-
-        /*!
-         \brief cend method
-         \return cend method of the encapsulated vector.
-        */
-        const_iterator cend() const {
-            return this->_data.cend();
-        }
-
-        /*!
-         \brief size method
-         \return size method of the encapsulated vector.
-        */
-        size_type size() const {
-            return this->_data.size();
-        }
-
-        /*!
-         \brief insert_at method
-         \param pos Position to insert the component.
-         \param comp Component to insert
-         \return A reference to the inserted component.
-        */
-        reference_type insert_at(size_type pos, Component const &comp) {
-            if (pos >= _data.size()) {
-                _data.resize(pos + 1);
-            }
-            _data[pos] = comp;
-            return _data[pos];
-        }
-
-        /*!
-         \brief insert_at method
-         \param pos Position to insert the component.
-         \param comp Component to insert
-         \return A reference to the inserted component.
-        */
-        reference_type insert_at(size_type pos, Component &&other) {
-            if (pos >= _data.size()) {
-                _data.resize(pos + 1);
-            }
-            _data[pos] = std::move(other);
-            return _data[pos];
-        }
-
-        /*!
-         \brief erase method
-         \param pos Position to erase the component.
-        */
-        void erase(size_type pos) {
-            if (pos < _data.size()) {
-                _data[pos] = std::nullopt;
-            }
-        }
-
-        /*!
-         \brief get_index method
-         \param comp The component to get the index.
-         \return The index of the given component if found.
-        */
-        size_type get_index(value_type const &comp) const {
-            auto it = std::find_if(_data.begin(), _data.end(),
-                [&comp](const value_type& element) {
-                    return std::addressof(comp) == std::addressof(element);
-                });
-
-            if (it != _data.end()) {
-                return static_cast<size_type>(std::distance(_data.begin(), it));
+        ComponentHandle insert_at(size_type pos, Component const &comp) {
+            if (pos >= _sparse.size()) _sparse.resize(pos + 1, NOT_FOUND);
+            
+            if (_sparse[pos] != NOT_FOUND) {
+                _dense[_sparse[pos]] = comp;
             } else {
-                throw ComponentNotFoundException("Error: Sparse_Array - get_index -> Cannot find component");
+                _sparse[pos] = _dense.size();
+                _dense.push_back(comp);
+                _entities.push_back(pos);
             }
+            return ComponentHandle(&_dense[_sparse[pos]]);
         }
 
-    protected:
+        ComponentHandle insert_at(size_type pos, Component &&other) {
+            if (pos >= _sparse.size()) _sparse.resize(pos + 1, NOT_FOUND);
+
+            if (_sparse[pos] != NOT_FOUND) {
+                _dense[_sparse[pos]] = std::move(other);
+            } else {
+                _sparse[pos] = _dense.size();
+                _dense.push_back(std::move(other));
+                _entities.push_back(pos);
+            }
+            return ComponentHandle(&_dense[_sparse[pos]]);
+        }
+
+        void erase(size_type pos) {
+            if (pos >= _sparse.size() || _sparse[pos] == NOT_FOUND) return;
+
+            size_type dense_idx = _sparse[pos];
+            size_type last_dense_idx = _dense.size() - 1;
+            size_type last_entity = _entities[last_dense_idx];
+
+            // Swap and pop
+            _dense[dense_idx] = std::move(_dense[last_dense_idx]);
+            _entities[dense_idx] = last_entity;
+            _sparse[last_entity] = dense_idx;
+
+            _dense.pop_back();
+            _entities.pop_back();
+            _sparse[pos] = NOT_FOUND;
+        }
+
+        size_type get_index(value_type const &comp) const {
+            const value_type* ptr = std::addressof(comp);
+            if (ptr < _dense.data() || ptr >= _dense.data() + _dense.size())
+                throw ComponentNotFoundException("Error: Sparse_Array - get_index -> Component not in dense array");
+            
+            size_type dense_idx = static_cast<size_type>(ptr - _dense.data());
+            return _entities[dense_idx];
+        }
+
     private:
-        container_t _data;  ///< The underlying container for the sparse array.
+        static constexpr size_t NOT_FOUND = std::numeric_limits<size_t>::max();
+        std::vector<value_type> _dense;      ///< Contiguous component data
+        std::vector<size_type> _sparse;      ///< Mapping: Entity ID -> Dense Index
+        std::vector<size_type> _entities;    ///< Mapping: Dense Index -> Entity ID
 };
 
 #endif /* !SPARSE_ARRAY_HPP_ */
