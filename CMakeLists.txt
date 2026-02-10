@@ -26,6 +26,7 @@ endif()
 find_package(Boost COMPONENTS serialization REQUIRED)
 find_package(asio CONFIG REQUIRED)
 find_package(raylib CONFIG REQUIRED)
+find_package(glfw3 CONFIG REQUIRED)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)

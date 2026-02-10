@@ -80,9 +80,9 @@ jobs:
         export VCPKG_ROOT="${{ github.workspace }}/vcpkg"
         
         if [ "$RUNNER_OS" == "Windows" ]; then
-          ./vcpkg/vcpkg install asio:x64-windows raylib:x64-windows boost-serialization:x64-windows --clean-after-build
+          ./vcpkg/vcpkg install asio:x64-windows raylib:x64-windows glfw3:x64-windows boost-serialization:x64-windows --clean-after-build
         else
-          ./vcpkg/vcpkg install asio raylib boost-serialization --clean-after-build
+          ./vcpkg/vcpkg install asio raylib glfw3 boost-serialization --clean-after-build
         fi
 
     - name: Configure CMake
